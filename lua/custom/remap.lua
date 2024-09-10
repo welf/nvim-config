@@ -19,10 +19,10 @@ map("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]ui
 map("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
 -- TIP: Disable arrow keys in normal mode
-map("n", "<left>", '<cmd>echo "Use h to move!!"<CR>')
-map("n", "<right>", '<cmd>echo "Use l to move!!"<CR>')
-map("n", "<up>", '<cmd>echo "Use k to move!!"<CR>')
-map("n", "<down>", '<cmd>echo "Use j to move!!"<CR>')
+map("n", "<left>", "<cmd>echo \"Use h to move!!\"<CR>")
+map("n", "<right>", "<cmd>echo \"Use l to move!!\"<CR>")
+map("n", "<up>", "<cmd>echo \"Use k to move!!\"<CR>")
+map("n", "<down>", "<cmd>echo \"Use j to move!!\"<CR>")
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
@@ -48,20 +48,56 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 })
 
 -- Start the LSP server for bash files
-vim.api.nvim_create_autocmd('FileType', {
-  pattern = 'sh',
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "sh",
   callback = function()
     vim.lsp.start({
-      name = 'bash-language-server',
-      cmd = { 'bash-language-server', 'start' },
+      name = "bash-language-server",
+      cmd = { "bash-language-server", "start" },
     })
+  end,
+})
+
+local noice_hl = vim.api.nvim_create_augroup("NoiceHighlights", {})
+local noice_cmd_types = {
+  CmdLine = "Constant",
+  Input = "Constant",
+  Calculator = "Constant",
+  Lua = "Constant",
+  Filter = "Constant",
+  Rename = "Constant",
+  Substitute = "NoiceCmdlinePopupBorderSearch",
+  Help = "Todo",
+}
+vim.api.nvim_clear_autocmds({ group = noice_hl })
+vim.api.nvim_create_autocmd("BufEnter", {
+  group = noice_hl,
+  desc = "redefinition of noice highlight groups",
+  callback = function()
+    for type, hl in pairs(noice_cmd_types) do
+      vim.api.nvim_set_hl(0, "NoiceCmdlinePopupBorder" .. type, {})
+      vim.api.nvim_set_hl(0, "NoiceCmdlinePopupBorder" .. type, { link = hl })
+    end
+    vim.api.nvim_set_hl(0, "NoiceConfirmBorder", {})
+    vim.api.nvim_set_hl(0, "NoiceConfirmBorder", { link = "Constant" })
+  end,
+})
+
+local notify_hl = vim.api.nvim_create_augroup("NotifyHighlights", {})
+vim.api.nvim_clear_autocmds({ group = notify_hl })
+vim.api.nvim_create_autocmd("BufEnter", {
+  group = notify_hl,
+  desc = "redefinition of notify icon colours",
+  callback = function()
+    vim.api.nvim_set_hl(0, "NotifyINFOIcon", {})
+    vim.api.nvim_set_hl(0, "NotifyINFOIcon", { link = "Character" })
   end,
 })
 
 map("i", "jj", "<ESC>", { desc = "Exit insert mode" })
 map("n", "<leader>te", ":NvimTreeToggle<CR>", { desc = "[T]oggle [E]xplorer" })
 map("n", "<leader>ol", function()
-  vim.ui.open(vim.fn.expand "%:p:h")
+  vim.ui.open(vim.fn.expand("%:p:h"))
 end, { desc = "[O]pen file [L]ocation in file explorer" })
 map("n", "<C-a>", "gg0vG$", { desc = "Select [A]ll" })
 
@@ -95,3 +131,15 @@ map("n", "<A-o>", ":FTermOpen<CR>", { desc = "Open Terminal" })
 map("v", "<A-o>", ":FTermOpen<CR>", { desc = "Open Terminal" })
 map("t", "<A-w>", "<C-\\><C-n>:FTermClose<CR>", { desc = "Close Terminal but preserve terminal session" })
 map("t", "<A-e>", "<C-\\><C-n>:FTermExit<CR>", { desc = "Exit Terminal and remove terminal session" })
+
+vim.keymap.set({ "n", "i", "s" }, "<c-j>", function()
+  if not require("noice.lsp").scroll(4) then
+    return "<c-j>"
+  end
+end, { silent = true, expr = true })
+
+vim.keymap.set({ "n", "i", "s" }, "<c-k>", function()
+  if not require("noice.lsp").scroll(-4) then
+    return "<c-k>"
+  end
+end, { silent = true, expr = true })

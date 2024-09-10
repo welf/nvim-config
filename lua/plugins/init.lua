@@ -10,6 +10,7 @@ return {
   { import = "plugins.spec.lsp-zero" },
   { import = "plugins.spec.mason" },
   { import = "plugins.spec.mini" },
+  { import = "plugins.spec.noice" },
   { import = "plugins.spec.neo-tree" },
   { import = "plugins.spec.nvim-cmp" },
   { import = "plugins.spec.nvim-lspconfig" },
