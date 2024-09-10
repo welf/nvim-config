@@ -1,4 +1,5 @@
 return {
+  { import = 'plugins.spec.autopairs' },
   { import = 'plugins.spec.copilot' },
   { import = 'plugins.spec.copilot-cmp' },
   { import = 'plugins.spec.fterm' },
