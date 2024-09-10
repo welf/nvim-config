@@ -48,7 +48,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 })
 
 map("i", "jj", "<ESC>", { desc = "Exit insert mode" })
-map("n", "<leader>te", ":NvimTreeToggle<CR>", { desc = "Toggle explorer" })
+map("n", "<leader>te", ":NvimTreeToggle<CR>", { desc = "[T]oggle [E]xplorer" })
 map("n", "<leader>ol", function()
   vim.ui.open(vim.fn.expand "%:p:h")
 end, { desc = "[O]pen file [L]ocation in file explorer" })

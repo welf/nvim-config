@@ -5,7 +5,7 @@ return {
     -- your configuration comes here
     -- or leave it empty to use the default settings
     -- refer to the configuration section below
-    preset = "helix",
+    preset = "modern", -- false | "classic" | "modern" | "helix"
     spec = {
       { "<leader>s", group = "Search" },
       { "<leader>g", group = "Git" },

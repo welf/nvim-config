@@ -2,6 +2,7 @@ return {
   { import = 'plugins.spec.copilot' },
   { import = 'plugins.spec.copilot-cmp' },
   { import = 'plugins.spec.fterm' },
+  { import = 'plugins.spec.gitsigns' },
   { import = 'plugins.spec.lspkind' },
   { import = 'plugins.spec.lsp-zero' },
   { import = 'plugins.spec.mason' },
