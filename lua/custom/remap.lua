@@ -58,6 +58,7 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
+-- `noice` settings (nvim floating command line)
 local noice_hl = vim.api.nvim_create_augroup("NoiceHighlights", {})
 local noice_cmd_types = {
   CmdLine = "Constant",
@@ -83,6 +84,20 @@ vim.api.nvim_create_autocmd("BufEnter", {
   end,
 })
 
+-- -- Scroll in command line suggestions with Ctrl-j and Ctrl-k
+-- vim.keymap.set({ "n", "i", "s" }, "<c-j>", function()
+--   if not require("noice.lsp").scroll(4) then
+--     return "<c-j>"
+--   end
+-- end, { silent = true, expr = true })
+--
+-- vim.keymap.set({ "n", "i", "s" }, "<c-k>", function()
+--   if not require("noice.lsp").scroll(-4) then
+--     return "<c-k>"
+--   end
+-- end, { silent = true, expr = true })
+
+-- Notification settings
 local notify_hl = vim.api.nvim_create_augroup("NotifyHighlights", {})
 vim.api.nvim_clear_autocmds({ group = notify_hl })
 vim.api.nvim_create_autocmd("BufEnter", {
@@ -94,11 +109,18 @@ vim.api.nvim_create_autocmd("BufEnter", {
   end,
 })
 
+-- Better escape to normal mode
 map("i", "jj", "<ESC>", { desc = "Exit insert mode" })
-map("n", "<leader>te", ":NvimTreeToggle<CR>", { desc = "[T]oggle [E]xplorer" })
+
+-- -- `nvim-tree` toggle keybinding
+-- map("n", "<leader>te", ":NvimTreeToggle<CR>", { desc = "[T]oggle [E]xplorer" })
+
+-- Open file's folder in file explorer
 map("n", "<leader>ol", function()
   vim.ui.open(vim.fn.expand("%:p:h"))
 end, { desc = "[O]pen file [L]ocation in file explorer" })
+
+-- Select all content of the file (Ctrl-a)
 map("n", "<C-a>", "gg0vG$", { desc = "Select [A]ll" })
 
 -- Move lines up/down
@@ -132,14 +154,6 @@ map("v", "<A-o>", ":FTermOpen<CR>", { desc = "Open Terminal" })
 map("t", "<A-w>", "<C-\\><C-n>:FTermClose<CR>", { desc = "Close Terminal but preserve terminal session" })
 map("t", "<A-e>", "<C-\\><C-n>:FTermExit<CR>", { desc = "Exit Terminal and remove terminal session" })
 
-vim.keymap.set({ "n", "i", "s" }, "<c-j>", function()
-  if not require("noice.lsp").scroll(4) then
-    return "<c-j>"
-  end
-end, { silent = true, expr = true })
-
-vim.keymap.set({ "n", "i", "s" }, "<c-k>", function()
-  if not require("noice.lsp").scroll(-4) then
-    return "<c-k>"
-  end
-end, { silent = true, expr = true })
+-- Toggle LSP inline end hints on and off
+map("n", "<leader>th", require("lsp-endhints").toggle, { desc = "[T]oggle inlay [H]ints" })
+map("v", "<leader>th", require("lsp-endhints").toggle, { desc = "[T]oggle inlay [H]ints" })

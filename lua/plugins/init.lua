@@ -7,6 +7,7 @@ return {
   { import = "plugins.spec.gitsigns" },
   { import = "plugins.spec.lazydev" },
   { import = "plugins.spec.lspkind" },
+  { import = "plugins.spec.lsp-endhints" },
   { import = "plugins.spec.lsp-zero" },
   { import = "plugins.spec.mason" },
   { import = "plugins.spec.mini" },
