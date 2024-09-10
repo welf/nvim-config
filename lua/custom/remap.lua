@@ -47,6 +47,17 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   end,
 })
 
+-- Start the LSP server for bash files
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'sh',
+  callback = function()
+    vim.lsp.start({
+      name = 'bash-language-server',
+      cmd = { 'bash-language-server', 'start' },
+    })
+  end,
+})
+
 map("i", "jj", "<ESC>", { desc = "Exit insert mode" })
 map("n", "<leader>te", ":NvimTreeToggle<CR>", { desc = "[T]oggle [E]xplorer" })
 map("n", "<leader>ol", function()
