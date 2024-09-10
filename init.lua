@@ -89,8 +89,8 @@ vim.opt.termguicolors = true
 
 -- ============================================================================
 
-require("config.lazy")
-require("custom")
+require("aw.lazy")
+require("aw.core")
 
 -- tresitter folding options
 vim.opt.foldcolumn = "1"

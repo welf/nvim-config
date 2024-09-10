@@ -112,9 +112,6 @@ vim.api.nvim_create_autocmd("BufEnter", {
 -- Better escape to normal mode
 map("i", "jj", "<ESC>", { desc = "Exit insert mode" })
 
--- -- `nvim-tree` toggle keybinding
--- map("n", "<leader>te", ":NvimTreeToggle<CR>", { desc = "[T]oggle [E]xplorer" })
-
 -- Open file's folder in file explorer
 map("n", "<leader>ol", function()
   vim.ui.open(vim.fn.expand("%:p:h"))

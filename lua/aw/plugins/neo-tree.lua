@@ -20,7 +20,7 @@ local config = {
   enable_git_status = true,
   enable_modified_markers = true, -- Show markers for files with unsaved changes.
   enable_opened_markers = true, -- Enable tracking of opened files. Required for `components.name.highlight_opened_files`
-  enable_refresh_on_write = true, -- Refresh the tree when a file is written. Only used if `use_libuv_file_watcher` is false.
+  enable_refresh_on_write = false, -- Refresh the tree when a file is written. Only used if `use_libuv_file_watcher` is false.
   enable_cursor_hijack = false, -- If enabled neotree will keep the cursor on the first letter of the filename when moving in the tree.
   git_status_async = true,
   -- These options are for people with VERY large git repos
@@ -352,7 +352,7 @@ local config = {
     position = "left", -- left, right, top, bottom, float, current
     width = 40, -- applies to left and right positions
     height = 15, -- applies to top and bottom positions
-    auto_expand_width = true, -- expand the window when file exceeds the window width. does not work with position = "float"
+    auto_expand_width = false, -- expand the window when file exceeds the window width. does not work with position = "float"
     popup = { -- settings that apply to float position only
       size = {
         height = "70%",
@@ -478,7 +478,7 @@ local config = {
       force_visible_in_empty_folder = false, -- when true, hidden files will be shown if the root folder is otherwise empty
       show_hidden_count = true, -- when true, the number of hidden items in each folder will be shown as the last entry
       hide_dotfiles = true,
-      hide_gitignored = true,
+      hide_gitignored = false,
       hide_hidden = true, -- only works on Windows for hidden files/directories
       hide_by_name = {
         -- ".DS_Store",
@@ -544,13 +544,13 @@ local config = {
       --               -- the current file is changed while the tree is open.
       leave_dirs_open = false, -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
     },
-    hijack_netrw_behavior = "open default",
+    hijack_netrw_behavior = "open_default",
     -- "open_default", -- netrw disabled, opening a directory opens neo-tree
     -- in whatever position is specified in window.position
     -- "open_current",-- netrw disabled, opening a directory opens within the
     -- window like netrw would, regardless of window.position
     -- "disabled",    -- netrw left alone, neo-tree does not handle opening dirs
-    use_libuv_file_watcher = false, -- This will use the OS level file watchers to detect changes
+    use_libuv_file_watcher = true, -- This will use the OS level file watchers to detect changes
     -- instead of relying on nvim autocmd events.
   },
   buffers = {
@@ -707,6 +707,25 @@ return {
     "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
     "MunifTanjim/nui.nvim",
     "3rd/image.nvim", -- Optional image support in preview window
+    {
+      "s1n7ax/nvim-window-picker",
+      version = "2.*",
+      config = function()
+        require("window-picker").setup({
+          filter_rules = {
+            include_current_win = false,
+            autoselect_one = true,
+            -- filter using buffer options
+            bo = {
+              -- if the file type is one of following, the window will be ignored
+              filetype = { "neo-tree", "neo-tree-popup", "notify" },
+              -- if the buffer type is one of following, the window will be ignored
+              buftype = { "terminal", "quickfix" },
+            },
+          },
+        })
+      end,
+    },
   },
   cmd = "Neotree",
   keys = {

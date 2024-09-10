@@ -29,4 +29,4 @@ vim.api.nvim_set_hl(0, "LspInlayHint", { fg = "#70758c", italic = true })
 -- -- Enable inlay hints from LSPs
 -- vim.lsp.inlay_hint.enable(true)
 
-require("custom.remap")
+require("aw.core.mappings")
