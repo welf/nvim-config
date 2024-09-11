@@ -87,13 +87,5 @@ vim.opt.softtabstop = 2
 -- enable 24-bit color
 vim.opt.termguicolors = true
 
--- ============================================================================
-
 require("aw.lazy")
 require("aw.core")
-
--- tresitter folding options
-vim.opt.foldcolumn = "1"
-vim.opt.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
-vim.opt.foldlevelstart = 99
-vim.opt.foldenable = true
