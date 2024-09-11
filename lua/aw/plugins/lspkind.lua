@@ -2,7 +2,7 @@ return {
   "onsails/lspkind.nvim",
   config = function()
     -- setup() is also available as an alias
-    require('lspkind').init({
+    require("lspkind").init({
       -- DEPRECATED (use mode instead): enables text annotations
       --
       -- default: true
@@ -11,14 +11,14 @@ return {
       -- defines how annotations are shown
       -- default: symbol
       -- options: 'text', 'text_symbol', 'symbol_text', 'symbol'
-      mode = 'symbol_text',
+      mode = "symbol",
 
       -- default symbol map
       -- can be either 'default' (requires nerd-fonts font) or
       -- 'codicons' for codicon preset (requires vscode-codicons font)
       --
       -- default: 'default'
-      preset = 'default',
+      preset = "default",
 
       -- override preset symbols
       --
