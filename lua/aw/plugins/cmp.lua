@@ -65,18 +65,18 @@ return {
     require("luasnip.loaders.from_vscode").lazy_load()
 
     cmp.setup({
-      -- Make the first item in completion menu always be selected
-      preselect = "item",
-      completion = {
-        completeopt = "menu,menuone,noinsert",
-      },
+      -- -- Make the first item in completion menu always be selected
+      -- preselect = "item",
+      -- completion = {
+      --   completeopt = "menu,menuone,noinsert",
+      -- },
       -- Add sources for completion
       sources = {
-        { name = "copilot" },
-        { name = "path" },
-        { name = "nvim_lsp" },
-        { name = "luasnip", keyword_length = 2 },
-        { name = "buffer", keyword_length = 3 },
+        { name = "copilot", group_index = 2 },
+        { name = "nvim_lsp", group_index = 2 },
+        { name = "buffer", keyword_length = 3, group_index = 2 },
+        { name = "path", group_index = 2 },
+        { name = "luasnip", keyword_length = 2, group_index = 2 },
       },
       window = {
         completion = cmp.config.window.bordered(),
@@ -90,10 +90,10 @@ return {
           local menu_icon = {
             copilot = "",
             nvim_lsp = "",
+            buffer = "",
+            path = "",
+            nvim_lua = "",
             luasnip = "⋗",
-            buffer = "Ω",
-            path = "🖫",
-            nvim_lua = "Π",
           }
 
           item.menu = menu_icon[entry.source.name]

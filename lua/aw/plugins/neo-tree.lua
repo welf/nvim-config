@@ -10,18 +10,18 @@ local config = {
     "filesystem",
     "buffers",
     "git_status",
-    -- "document_symbols",
+    "document_symbols",
   },
   add_blank_line_at_top = false, -- Add a blank line at the top of the tree.
-  auto_clean_after_session_restore = false, -- Automatically clean up broken neo-tree buffers saved in sessions
+  auto_clean_after_session_restore = true, -- Automatically clean up broken neo-tree buffers saved in sessions
   close_if_last_window = false, -- Close Neo-tree if it is the last window left in the tab
   default_source = "filesystem", -- you can choose a specific source `last` here which indicates the last used source
   enable_diagnostics = true,
   enable_git_status = true,
   enable_modified_markers = true, -- Show markers for files with unsaved changes.
   enable_opened_markers = true, -- Enable tracking of opened files. Required for `components.name.highlight_opened_files`
-  enable_refresh_on_write = false, -- Refresh the tree when a file is written. Only used if `use_libuv_file_watcher` is false.
-  enable_cursor_hijack = false, -- If enabled neotree will keep the cursor on the first letter of the filename when moving in the tree.
+  enable_refresh_on_write = true, -- Refresh the tree when a file is written. Only used if `use_libuv_file_watcher` is false.
+  enable_cursor_hijack = true, -- If enabled neotree will keep the cursor on the first letter of the filename when moving in the tree.
   git_status_async = true,
   -- These options are for people with VERY large git repos
   git_status_async_options = {
@@ -225,7 +225,7 @@ local config = {
     },
     name = {
       trailing_slash = false,
-      highlight_opened_files = false, -- Requires `enable_opened_markers = true`.
+      highlight_opened_files = true, -- Requires `enable_opened_markers = true`.
       -- Take values in { false (no highlight), true (only loaded),
       -- "all" (both loaded and unloaded)}. For more information,
       -- see the `show_unloaded` config of the `buffers` source.
@@ -550,7 +550,7 @@ local config = {
     -- "open_current",-- netrw disabled, opening a directory opens within the
     -- window like netrw would, regardless of window.position
     -- "disabled",    -- netrw left alone, neo-tree does not handle opening dirs
-    use_libuv_file_watcher = true, -- This will use the OS level file watchers to detect changes
+    use_libuv_file_watcher = false, -- This will use the OS level file watchers to detect changes
     -- instead of relying on nvim autocmd events.
   },
   buffers = {
