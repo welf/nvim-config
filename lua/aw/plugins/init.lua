@@ -1,5 +1,6 @@
 return {
   { import = "aw.plugins.autopairs" },
+  { import = "aw.plugins.claude" },
   { import = "aw.plugins.cmp" },
   { import = "aw.plugins.conform" },
   { import = "aw.plugins.copilot" },

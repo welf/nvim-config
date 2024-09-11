@@ -46,9 +46,10 @@ return {
       { name = "luasnip", keyword_length = 2 },
       { name = "buffer", keyword_length = 3 },
     },
-    -- experimental = {
-    --   ghost_text = false,
-    -- },
+    experimental = {
+      native_menu = false,
+      -- ghost_text = false,
+    },
   },
   config = function()
     local lsp_zero = require("lsp-zero")
@@ -106,11 +107,44 @@ return {
       -- No, but seriously. Please read `:help ins-completion`, it is really good!
       mapping = cmp.mapping.preset.insert({
         -- confirm completion item
-        ["<CR>"] = cmp.mapping.confirm({ select = true }),
+        ["<CR>"] = cmp.mapping.confirm({
+          -- If you didn't select any item and the option table contains `select = true`,
+          -- `nvim-cmp` will automatically select the first item.
+          select = false,
+        }),
+
         -- Select next item
-        ["<Tab>"] = cmp_action.tab_complete(),
+        ["<Tab>"] = cmp.mapping(function(fallback)
+          if cmp.visible() then
+            cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert })
+          else
+            fallback()
+          end
+        end, { "i", "s" }),
+        ["<C-n>"] = cmp.mapping(function(fallback)
+          if cmp.visible() then
+            cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert })
+          else
+            fallback()
+          end
+        end, { "i", "s" }),
+
         -- Select previous item
-        ["<S-Tab>"] = cmp.mapping.select_prev_item({ behavior = "select" }),
+        ["<S-Tab>"] = cmp.mapping(function(fallback)
+          if cmp.visible() then
+            cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert })
+          else
+            fallback()
+          end
+        end, { "i", "s" }),
+
+        ["<C-p>"] = cmp.mapping(function(fallback)
+          if cmp.visible() then
+            cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert })
+          else
+            fallback()
+          end
+        end, { "i", "s" }),
 
         -- Manually trigger a completion from nvim-cmp.
         ["<C-Space>"] = cmp.mapping.complete(),

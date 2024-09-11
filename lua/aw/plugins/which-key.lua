@@ -15,6 +15,7 @@ return {
       { "<leader>t", group = "[T]oggle" },
       { "<leader>d", group = "[D]ocument" },
       { "<leader>d", group = "[W]orkspace" },
+      { "<leader>C", group = "[C]laude AI" },
     },
   },
   keys = {
