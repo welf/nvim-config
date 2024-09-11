@@ -8,7 +8,7 @@ local map = vim.keymap.set
 map("n", "<ESC>", ":nohlsearch<CR>", { desc = "Clear search highlights" })
 
 -- Diagnostic keymaps
-map("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
+map("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [q]uickfix list" })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -38,7 +38,7 @@ map("i", "jj", "<ESC>", { desc = "Exit insert mode" })
 -- Open file's folder in file explorer
 map("n", "<leader>ol", function()
   vim.ui.open(vim.fn.expand("%:p:h"))
-end, { desc = "[O]pen file [L]ocation in file explorer" })
+end, { desc = "[o]pen file [l]ocation in file explorer" })
 
 -- Select all content of the file (Ctrl-a)
 map("n", "<C-a>", "gg0vG$", { desc = "Select [A]ll" })
@@ -58,7 +58,7 @@ map("v", "<A-Up>", ":m '<-2<CR>gv=gv", { desc = "Move line up" })
 map("v", "<A-k>", ":m '<-2<CR>gv=gv", { desc = "Move line up" })
 
 -- treesitter inspect
-map("n", "<leader>it", ":InspectTree<CR>", { desc = "Show the highlight groups under the cursor (tresitter)" })
+map("n", "<leader>it", ":InspectTree<CR>", { desc = "Show the highlight groups under the cursor (treesitter)" })
 map("n", "<leader>ii", ":Inspect<CR>", { desc = "Show the parsed syntax tree (treesitter)" })
 
 -- folds
@@ -75,8 +75,8 @@ map("t", "<A-w>", "<C-\\><C-n>:FTermClose<CR>", { desc = "Close Terminal but pre
 map("t", "<A-e>", "<C-\\><C-n>:FTermExit<CR>", { desc = "Exit Terminal and remove terminal session" })
 
 -- Toggle LSP inline end hints on and off
-map("n", "<leader>th", require("lsp-endhints").toggle, { desc = "[T]oggle inlay [H]ints" })
-map("v", "<leader>th", require("lsp-endhints").toggle, { desc = "[T]oggle inlay [H]ints" })
+map("n", "<leader>th", require("lsp-endhints").toggle, { desc = "[t]oggle inlay [h]ints" })
+map("v", "<leader>th", require("lsp-endhints").toggle, { desc = "[t]oggle inlay [h]ints" })
 
 -- -- Scroll in command line suggestions with Ctrl-j and Ctrl-k
 -- vim.keymap.set({ "n", "i", "s" }, "<c-j>", function()

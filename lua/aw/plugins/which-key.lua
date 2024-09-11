@@ -8,7 +8,7 @@ return {
     preset = "modern", -- false | "classic" | "modern" | "helix"
     spec = {
       { "<leader>s", group = "Search" },
-      { "<leader>g", group = "Git" },
+      { "<leader>h", group = "Git [H]unk", mode = { "n", "v" } },
       { "<leader>i", group = "Inspect AST" },
       { "<leader>m", group = "Marks" },
       { "<leader>o", group = "Open" },
