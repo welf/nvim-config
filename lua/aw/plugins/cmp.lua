@@ -37,16 +37,19 @@ return {
       },
     },
   },
-  opts = function(_, opts)
-    opts.sources = opts.sources or {}
-    table.insert(opts.sources, {
-      name = "lazydev",
-      group_index = 0, -- set group index to 0 to skip loading LuaLS completions
-    })
-    table.insert(opts.sources, { name = "nvim_lsp" })
-    table.insert(opts.sources, { name = "luasnip" })
-    table.insert(opts.sources, { name = "path" })
-  end,
+  opts = {
+    sources = {
+      -- set group index to 0 to skip loading LuaLS completions
+      { name = "lazydev", group_index = 0 },
+      { name = "path" },
+      { name = "nvim_lsp" },
+      { name = "luasnip", keyword_length = 2 },
+      { name = "buffer", keyword_length = 3 },
+    },
+    -- experimental = {
+    --   ghost_text = false,
+    -- },
+  },
   config = function()
     local lsp_zero = require("lsp-zero")
     -- See `:help cmp`

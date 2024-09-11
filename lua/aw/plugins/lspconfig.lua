@@ -99,6 +99,23 @@ return {
     -- Allows extra capabilities provided by nvim-cmp
     "hrsh7th/cmp-nvim-lsp",
   },
+  opts = {
+    inlay_hints = { nabled = true },
+    servers = {
+      lua_ls = {
+        settings = {
+          Lua = {
+            completion = {
+              callSnippet = "Replace",
+            },
+            workspace = { checkThirdParty = false },
+            telemetry = { enable = false },
+            hint = { enable = true },
+          },
+        },
+      },
+    },
+  },
   config = function()
     local lsp_zero = require("lsp-zero")
 
@@ -249,6 +266,9 @@ return {
             completion = {
               callSnippet = "Replace",
             },
+            workspace = { checkThirdParty = false },
+            telemetry = { enable = false },
+            hint = { enable = true },
             -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
             -- diagnostics = { disable = { 'missing-fields' } },
           },
@@ -283,14 +303,21 @@ return {
         end,
         lua_ls = function()
           require("lspconfig").lua_ls.setup({
-            on_init = function(client)
+            on_init = function(client, bufnr)
               lsp_zero.nvim_lua_settings(client, {})
+              lsp_zero.default_keymaps({ buffer = bufnr })
             end,
           })
         end,
+        -- this is the "custom handler" for `rust_analyzer`
+        -- noop is an empty function that doesn't do anything
         rust_analyzer = lsp_zero.noop, -- NOTE: we don't activate rust-analyzer here!
       },
     })
+
+    lsp_zero.on_attach(function(client, bufnr)
+      lsp_zero.default_keymaps({ buffer = bufnr })
+    end)
 
     -- -- These are just examples. Replace them with the language
     -- -- servers you have installed in your system
