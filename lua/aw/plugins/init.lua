@@ -1,5 +1,5 @@
 return {
-  { import = "aw.plugins.autopairs" },
+  -- { import = "aw.plugins.autopairs" },
   { import = "aw.plugins.claude" },
   { import = "aw.plugins.cmp" },
   { import = "aw.plugins.conform" },
@@ -9,6 +9,7 @@ return {
   { import = "aw.plugins.gitsigns" },
   { import = "aw.plugins.indent-line" },
   { import = "aw.plugins.lazydev" },
+  { import = "aw.plugins.lexima" },
   { import = "aw.plugins.lspconfig" },
   { import = "aw.plugins.lspkind" },
   { import = "aw.plugins.lsp-endhints" },
