@@ -78,6 +78,7 @@ return {
         { name = "buffer", keyword_length = 3, group_index = 2 },
         { name = "path", group_index = 2 },
         { name = "luasnip", keyword_length = 2, group_index = 2 },
+        { name = "nvim_lsp_signature_help" },
       },
       window = {
         completion = cmp.config.window.bordered(),
@@ -89,12 +90,12 @@ return {
         -- Customize menu
         format = function(entry, item)
           local menu_icon = {
-            copilot = "",
-            nvim_lsp = "",
-            buffer = "",
-            path = "",
-            nvim_lua = "",
-            luasnip = "⋗",
+            copilot = "🤖",
+            nvim_lsp = "✨",
+            luasnip = "🚀",
+            buffer = "📝",
+            path = "📁",
+            cmdline = "💻",
           }
 
           item.menu = menu_icon[entry.source.name]

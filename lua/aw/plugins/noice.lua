@@ -166,7 +166,7 @@ return {
     {
       "rcarriga/nvim-notify",
       opts = {
-        timeout = 5000,
+        timeout = 7500,
         render = "minimal",
         stages = "fade_in_slide_out",
         on_open = function(win)

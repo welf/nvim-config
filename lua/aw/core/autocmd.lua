@@ -60,3 +60,23 @@ vim.api.nvim_create_autocmd("BufEnter", {
     vim.api.nvim_set_hl(0, "NotifyINFOIcon", { link = "Character" })
   end,
 })
+
+-- GitSigns highlight settings
+local gs_hl = vim.api.nvim_create_augroup("GitSignsHighlight", {})
+vim.api.nvim_clear_autocmds({ group = gs_hl })
+vim.api.nvim_create_autocmd("BufEnter", {
+  group = gs_hl,
+  desc = "redefinition of gitsigns highlight groups",
+  callback = function()
+    vim.api.nvim_set_hl(0, "GitSignsCurrentLineBlame", { link = "Comment" })
+    vim.api.nvim_set_hl(0, "GitSignsChangedelete", { link = "GitSignsChange" })
+    vim.api.nvim_set_hl(0, "GitSignsChangedeleteLn", { link = "GitSignsChangeLn" })
+    vim.api.nvim_set_hl(0, "GitSignsChangedeleteNr", { link = "GitSignsChangeNr" })
+    vim.api.nvim_set_hl(0, "GitSignsTopdelete", { link = "GitSignsDelete" })
+    vim.api.nvim_set_hl(0, "GitSignsTopdeleteLn", { link = "GitSignsDeleteLn" })
+    vim.api.nvim_set_hl(0, "GitSignsTopdeleteNr", { link = "GitSignsDeleteNr" })
+    vim.api.nvim_set_hl(0, "GitSignsUntracked", { link = "GitSignsAdd" })
+    vim.api.nvim_set_hl(0, "GitSignsUntrackedLn", { link = "GitSignsAddLn" })
+    vim.api.nvim_set_hl(0, "GitSignsUntrackedNr", { link = "GitSignsAddNr" })
+  end,
+})
