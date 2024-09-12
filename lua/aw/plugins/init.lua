@@ -19,6 +19,7 @@ return {
   { import = "aw.plugins.mini" },
   { import = "aw.plugins.noice" },
   { import = "aw.plugins.neo-tree" },
+  { import = "aw.plugins.nvim-highlight-colors" },
   { import = "aw.plugins.outline" },
   { import = "aw.plugins.plenary" },
   { import = "aw.plugins.rustaceanvim" },

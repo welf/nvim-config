@@ -7,6 +7,11 @@ local map = vim.keymap.set
 --  See `:help hlsearch`
 map("n", "<ESC>", ":nohlsearch<CR>", { desc = "Clear search highlights" })
 
+-- Toggle colorizer
+map("n", "<leader>tc", function()
+  require("nvim-highlight-colors").toggle()
+end, { desc = "[t]oggle [c]olorizer" })
+
 -- Diagnostic keymaps
 map("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [q]uickfix list" })
 
@@ -93,8 +98,13 @@ map("n", "<leader>th", require("lsp-endhints").toggle, { desc = "[t]oggle inlay 
 map("v", "<leader>th", require("lsp-endhints").toggle, { desc = "[t]oggle inlay [h]ints" })
 
 -- Add keymaps to the Claude AI
-vim.keymap.set("v", "<leader>Ci", ":'<,'>ClaudeImplement ", { noremap = true, desc = "Claude Implement" })
-vim.keymap.set("n", "<leader>Cc", ":ClaudeChat<CR>", { noremap = true, silent = true, desc = "Claude Chat" })
+vim.keymap.set("v", "<leader>Ci", ":'<,'>ClaudeImplement ", { desc = "Claude Implement" })
+vim.keymap.set("n", "<leader>Cx", ":ClaudeCancel<CR>", { silent = true, desc = "Claude Cancel" })
+vim.keymap.set("n", "<leader>Cc", ":ClaudeChat<CR>", { silent = true, desc = "Claude Chat" })
+-- Delete default Claude keymaps
+vim.keymap.del("n", "<leader>cc")
+vim.keymap.del("v", "<leader>ci")
+vim.keymap.del("n", "<leader>cx")
 
 local gitsigns = require("gitsigns")
 
@@ -137,7 +147,7 @@ map("n", "<leader>hS", gitsigns.stage_buffer, { desc = "git [S]tage buffer (git 
 map("n", "<leader>hu", gitsigns.undo_stage_hunk, { desc = "git [u]ndo stage hunk" })
 -- Toggles
 map("n", "<leader>tb", gitsigns.toggle_current_line_blame, { desc = "[t]oggle git show [b]lame line" })
-map("n", "<leader>tD", gitsigns.toggle_deleted, { desc = "[t]oggle git show [D]eleted" })
+map("n", "<leader>td", gitsigns.toggle_deleted, { desc = "[t]oggle git show [d]eleted" })
 
 -- -- Scroll in command line suggestions with Ctrl-j and Ctrl-k
 -- vim.keymap.set({ "n", "i", "s" }, "<c-j>", function()

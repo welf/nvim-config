@@ -122,50 +122,40 @@ return {
         }),
 
         -- Select next item
-        ["<Tab>"] = function(fallback)
+        ["<Tab>"] = cmp.mapping(function(fallback)
           if cmp.visible() then
-            cmp.select_next_item()
-          elseif require("luasnip").expand_or_jumpable() then
-            vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-expand-or-jump", true, true, true), "")
+            cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert })
           else
             fallback()
           end
-        end,
-        ["<C-n>"] = function(fallback)
+        end, { "i", "s" }),
+        ["<C-n>"] = cmp.mapping(function(fallback)
           if cmp.visible() then
-            cmp.select_next_item()
-          elseif require("luasnip").expand_or_jumpable() then
-            vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-expand-or-jump", true, true, true), "")
+            cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert })
           else
             fallback()
           end
-        end,
+        end, { "i", "s" }),
 
         -- Select previous item
         ["<S-Tab>"] = cmp.mapping(function(fallback)
           if cmp.visible() then
-            cmp.select_prev_item()
-          elseif require("luasnip").jumpable(-1) then
-            vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-jump-prev", true, true, true), "")
+            cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert })
           else
             fallback()
           end
-        end, { "i", "s" })
+        end, { "i", "s" }),
 
         ["<C-p>"] = cmp.mapping(function(fallback)
           if cmp.visible() then
-            cmp.select_prev_item()
-          elseif require("luasnip").jumpable(-1) then
-            vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-jump-prev", true, true, true), "")
+            cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert })
           else
             fallback()
           end
-        end, { "i", "s" })
+        end, { "i", "s" }),
 
         -- Manually trigger a completion from nvim-cmp.
         ["<C-Space>"] = cmp.mapping.complete(),
-        -- Manually close the completion menu
-        ["<C-e>"] = cmp.mapping.close(),
 
         -- Scroll the documentation window [b]ack / [f]orward
         ["<C-b>"] = cmp.mapping.scroll_docs(-4),
@@ -184,7 +174,6 @@ return {
             luasnip.expand_or_jump()
           end
         end, { "i", "s" }),
-
         ["<C-h>"] = cmp.mapping(function()
           if luasnip.locally_jumpable(-1) then
             luasnip.jump(-1)
