@@ -7,6 +7,7 @@ return {
   { import = "aw.plugins.copilot-cmp" },
   { import = "aw.plugins.fterm" },
   { import = "aw.plugins.gitsigns" },
+  { import = "aw.plugins.indent-line" },
   { import = "aw.plugins.lazydev" },
   { import = "aw.plugins.lspconfig" },
   { import = "aw.plugins.lspkind" },
