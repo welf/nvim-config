@@ -16,7 +16,6 @@ return {
   { import = "aw.plugins.lsp-zero" },
   { import = "aw.plugins.lualine" },
   { import = "aw.plugins.mason" },
-  { import = "aw.plugins.mini" },
   { import = "aw.plugins.noice" },
   { import = "aw.plugins.neo-tree" },
   { import = "aw.plugins.nvim-highlight-colors" },
