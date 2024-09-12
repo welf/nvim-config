@@ -4,6 +4,7 @@ return {
   { import = "aw.plugins.conform" },
   { import = "aw.plugins.copilot" },
   { import = "aw.plugins.copilot-cmp" },
+  { import = "aw.plugins.dadbod" },
   { import = "aw.plugins.vim-dadbod-ui" },
   { import = "aw.plugins.fterm" },
   { import = "aw.plugins.gitsigns" },

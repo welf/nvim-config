@@ -71,26 +71,6 @@ return {
     -- from rafamadriz/friendly-snippets
     require("luasnip.loaders.from_vscode").lazy_load()
 
-    -- Helper functions for navigating the completion menu
-    local cmp_next = function(fallback)
-      if cmp.visible() then
-        cmp.select_next_item()
-      elseif require("luasnip").expand_or_jumpable() then
-        vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-expand-or-jump", true, true, true), "")
-      else
-        fallback()
-      end
-    end
-    local cmp_prev = function(fallback)
-      if cmp.visible() then
-        cmp.select_prev_item()
-      elseif require("luasnip").jumpable(-1) then
-        vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-jump-prev", true, true, true), "")
-      else
-        fallback()
-      end
-    end
-
     cmp.setup({
       enabled = true,
       preselect = cmp.PreselectMode.None,
@@ -142,12 +122,45 @@ return {
         }),
 
         -- Select next item
-        ["<Tab>"] = cmp.next,
-        ["<C-n>"] = cmp.next,
+        ["<Tab>"] = function(fallback)
+          if cmp.visible() then
+            cmp.select_next_item()
+          elseif require("luasnip").expand_or_jumpable() then
+            vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-expand-or-jump", true, true, true), "")
+          else
+            fallback()
+          end
+        end,
+        ["<C-n>"] = function(fallback)
+          if cmp.visible() then
+            cmp.select_next_item()
+          elseif require("luasnip").expand_or_jumpable() then
+            vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-expand-or-jump", true, true, true), "")
+          else
+            fallback()
+          end
+        end,
 
         -- Select previous item
-        ["<S-Tab>"] = cmp.prev,
-        ["<C-p>"] = cmp.prev,
+        ["<S-Tab>"] = cmp.mapping(function(fallback)
+          if cmp.visible() then
+            cmp.select_prev_item()
+          elseif require("luasnip").jumpable(-1) then
+            vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-jump-prev", true, true, true), "")
+          else
+            fallback()
+          end
+        end, { "i", "s" })
+
+        ["<C-p>"] = cmp.mapping(function(fallback)
+          if cmp.visible() then
+            cmp.select_prev_item()
+          elseif require("luasnip").jumpable(-1) then
+            vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-jump-prev", true, true, true), "")
+          else
+            fallback()
+          end
+        end, { "i", "s" })
 
         -- Manually trigger a completion from nvim-cmp.
         ["<C-Space>"] = cmp.mapping.complete(),
@@ -171,6 +184,7 @@ return {
             luasnip.expand_or_jump()
           end
         end, { "i", "s" }),
+
         ["<C-h>"] = cmp.mapping(function()
           if luasnip.locally_jumpable(-1) then
             luasnip.jump(-1)
