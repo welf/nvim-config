@@ -6,6 +6,7 @@ return {
   dependencies = {
     "hrsh7th/cmp-buffer",
     "saadparwaiz1/cmp_luasnip",
+    "hrsh7th/cmp-nvim-lsp-signature-help",
     -- Adds other completion capabilities.
     --  nvim-cmp does not ship with all sources by default. They are split
     --  into multiple repos for maintenance purposes.
@@ -13,6 +14,7 @@ return {
     "hrsh7th/cmp-path",
     "rafamadriz/friendly-snippets",
     "onsails/lspkind.nvim",
+    "windwp/nvim-autopairs",
     {
       "L3MON4D3/LuaSnip",
       build = (function()
@@ -53,19 +55,45 @@ return {
   },
   config = function()
     local lsp_zero = require("lsp-zero")
+    local cmp_action = lsp_zero.cmp_action()
+
     -- See `:help cmp`
     local cmp = require("cmp")
     -- local cmp_format = require("lsp-zero").cmp_format({ details = false })
-    local luasnip = require("luasnip")
 
-    local cmp_action = lsp_zero.cmp_action()
+    local luasnip = require("luasnip")
     luasnip.config.setup({})
+
+    local lsp_kind = require("lspkind")
+    lsp_kind.init()
 
     -- this is the function that loads the extra snippets
     -- from rafamadriz/friendly-snippets
     require("luasnip.loaders.from_vscode").lazy_load()
 
+    -- Helper functions for navigating the completion menu
+    local cmp_next = function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      elseif require("luasnip").expand_or_jumpable() then
+        vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-expand-or-jump", true, true, true), "")
+      else
+        fallback()
+      end
+    end
+    local cmp_prev = function(fallback)
+      if cmp.visible() then
+        cmp.select_prev_item()
+      elseif require("luasnip").jumpable(-1) then
+        vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>luasnip-jump-prev", true, true, true), "")
+      else
+        fallback()
+      end
+    end
+
     cmp.setup({
+      enabled = true,
+      preselect = cmp.PreselectMode.None,
       -- -- Make the first item in completion menu always be selected
       -- preselect = "item",
       -- completion = {
@@ -73,16 +101,14 @@ return {
       -- },
       -- Add sources for completion
       sources = {
-        { name = "copilot", group_index = 2 },
-        { name = "nvim_lsp", group_index = 2 },
-        { name = "buffer", keyword_length = 3, group_index = 2 },
+        -- { name = "copilot", group_index = 2 },
+        { name = "nvim_lsp_signature_help", group_index = 1 },
+        { name = "luasnip", max_item_count = 5, group_index = 1 },
+        { name = "nvim_lsp", max_item_count = 20, group_index = 1 },
+        { name = "nvim_lua", group_index = 1 },
+        { name = "vim-dadbod-completion", group_index = 1 },
         { name = "path", group_index = 2 },
-        { name = "luasnip", keyword_length = 2, group_index = 2 },
-        { name = "nvim_lsp_signature_help" },
-      },
-      window = {
-        completion = cmp.config.window.bordered(),
-        documentation = cmp.config.window.bordered(),
+        { name = "buffer", keyword_length = 3, group_index = 2, max_item_count = 5 },
       },
       formatting = {
         -- changing the order of fields so the icon is the first
@@ -109,46 +135,24 @@ return {
       mapping = cmp.mapping.preset.insert({
         -- confirm completion item
         ["<CR>"] = cmp.mapping.confirm({
+          behavior = cmp.ConfirmBehavior.Replace,
           -- If you didn't select any item and the option table contains `select = true`,
           -- `nvim-cmp` will automatically select the first item.
           select = false,
         }),
 
         -- Select next item
-        ["<Tab>"] = cmp.mapping(function(fallback)
-          if cmp.visible() then
-            cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert })
-          else
-            fallback()
-          end
-        end, { "i", "s" }),
-        ["<C-n>"] = cmp.mapping(function(fallback)
-          if cmp.visible() then
-            cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert })
-          else
-            fallback()
-          end
-        end, { "i", "s" }),
+        ["<Tab>"] = cmp.next,
+        ["<C-n>"] = cmp.next,
 
         -- Select previous item
-        ["<S-Tab>"] = cmp.mapping(function(fallback)
-          if cmp.visible() then
-            cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert })
-          else
-            fallback()
-          end
-        end, { "i", "s" }),
-
-        ["<C-p>"] = cmp.mapping(function(fallback)
-          if cmp.visible() then
-            cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert })
-          else
-            fallback()
-          end
-        end, { "i", "s" }),
+        ["<S-Tab>"] = cmp.prev,
+        ["<C-p>"] = cmp.prev,
 
         -- Manually trigger a completion from nvim-cmp.
         ["<C-Space>"] = cmp.mapping.complete(),
+        -- Manually close the completion menu
+        ["<C-e>"] = cmp.mapping.close(),
 
         -- Scroll the documentation window [b]ack / [f]orward
         ["<C-b>"] = cmp.mapping.scroll_docs(-4),
@@ -181,6 +185,24 @@ return {
           luasnip.lsp_expand(args.body)
         end,
       },
+      view = {
+        entries = "bordered",
+      },
+      window = {
+        completion = cmp.config.window.bordered({
+          winhighlight = "Normal:Normal,FloatBorder:LspBorderBG,CursorLine:PmenuSel,Search:None",
+        }),
+        documentation = cmp.config.window.bordered({
+          winhighlight = "Normal:Normal,FloatBorder:LspBorderBG,CursorLine:PmenuSel,Search:None",
+        }),
+      },
     })
+
+    -- Integraite nvim-autopairs with cmp
+    local presentAutopairs, cmp_autopairs = pcall(require, "nvim-autopairs.completion.cmp")
+    if not presentAutopairs then
+      return
+    end
+    cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done({ map_char = { tex = "" } }))
   end,
 }
