@@ -125,7 +125,7 @@ map("n", "[c", function()
   end
 end, { desc = "Jump to previous git [c]hange" })
 
--- Actions
+-- Git actions
 -- visual mode
 map("v", "<leader>hs", function()
   gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
@@ -148,6 +148,11 @@ map("n", "<leader>hu", gitsigns.undo_stage_hunk, { desc = "git [u]ndo stage hunk
 -- Toggles
 map("n", "<leader>tb", gitsigns.toggle_current_line_blame, { desc = "[t]oggle git show [b]lame line" })
 map("n", "<leader>td", gitsigns.toggle_deleted, { desc = "[t]oggle git show [d]eleted" })
+
+-- LSP diagnostics
+local diaglist = require("diaglist")
+map("n", "<leader>cb", diaglist.open_buffer_diagnostics, { desc = "Open [b]uffer [c]ode diagnostics" })
+map("n", "<leader>cw", diaglist.open_all_diagnostics, { desc = "Open [w]orkspace [c]ode diagnostics" })
 
 -- -- Scroll in command line suggestions with Ctrl-j and Ctrl-k
 -- vim.keymap.set({ "n", "i", "s" }, "<c-j>", function()

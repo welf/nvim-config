@@ -5,7 +5,7 @@ return {
   { import = "aw.plugins.copilot" },
   { import = "aw.plugins.copilot-cmp" },
   { import = "aw.plugins.dadbod" },
-  { import = "aw.plugins.vim-dadbod-ui" },
+  { import = "aw.plugins.diaglist" },
   { import = "aw.plugins.fterm" },
   { import = "aw.plugins.gitsigns" },
   { import = "aw.plugins.indent-line" },

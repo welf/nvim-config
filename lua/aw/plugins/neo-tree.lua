@@ -12,6 +12,9 @@ local config = {
     "git_status",
     "document_symbols",
   },
+  update_focused_file = {
+    enable = true,
+  },
   add_blank_line_at_top = false, -- Add a blank line at the top of the tree.
   auto_clean_after_session_restore = true, -- Automatically clean up broken neo-tree buffers saved in sessions
   close_if_last_window = false, -- Close Neo-tree if it is the last window left in the tab
@@ -91,99 +94,104 @@ local config = {
     highlight_separator = "NeoTreeTabSeparatorInactive",
     highlight_separator_active = "NeoTreeTabSeparatorActive",
   },
-  --
-  --event_handlers = {
-  --  {
-  --    event = "before_render",
-  --    handler = function (state)
-  --      -- add something to the state that can be used by custom components
-  --    end
-  --  },
-  --  {
-  --    event = "file_opened",
-  --    handler = function(file_path)
-  --      --auto close
-  --      require("neo-tree.command").execute({ action = "close" })
-  --    end
-  --  },
-  --  {
-  --    event = "file_opened",
-  --    handler = function(file_path)
-  --      --clear search after opening a file
-  --      require("neo-tree.sources.filesystem").reset_search()
-  --    end
-  --  },
-  --  {
-  --    event = "file_renamed",
-  --    handler = function(args)
-  --      -- fix references to file
-  --      print(args.source, " renamed to ", args.destination)
-  --    end
-  --  },
-  --  {
-  --    event = "file_moved",
-  --    handler = function(args)
-  --      -- fix references to file
-  --      print(args.source, " moved to ", args.destination)
-  --    end
-  --  },
-  --  {
-  --    event = "neo_tree_buffer_enter",
-  --    handler = function()
-  --      vim.cmd 'highlight! Cursor blend=100'
-  --    end
-  --  },
-  --  {
-  --    event = "neo_tree_buffer_leave",
-  --    handler = function()
-  --      vim.cmd 'highlight! Cursor guibg=#5f87af blend=0'
-  --    end
-  --  },
-  -- {
-  --   event = "neo_tree_window_before_open",
-  --   handler = function(args)
-  --     print("neo_tree_window_before_open", vim.inspect(args))
-  --   end
-  -- },
-  -- {
-  --   event = "neo_tree_window_after_open",
-  --   handler = function(args)
-  --     vim.cmd("wincmd =")
-  --   end
-  -- },
-  -- {
-  --   event = "neo_tree_window_before_close",
-  --   handler = function(args)
-  --     print("neo_tree_window_before_close", vim.inspect(args))
-  --   end
-  -- },
-  -- {
-  --   event = "neo_tree_window_after_close",
-  --   handler = function(args)
-  --     vim.cmd("wincmd =")
-  --   end
-  -- }
-  --},
+
+  event_handlers = {
+    -- {
+    --   event = "before_render",
+    --   handler = function(state)
+    --     -- add something to the state that can be used by custom components
+    --   end,
+    -- },
+    -- {
+    --   event = "file_opened",
+    --   handler = function(file_path)
+    --     --auto close
+    --     require("neo-tree.command").execute({ action = "close" })
+    --   end,
+    -- },
+    -- {
+    --   event = "file_opened",
+    --   handler = function(file_path)
+    --     --clear search after opening a file
+    --     require("neo-tree.sources.filesystem").reset_search()
+    --   end,
+    -- },
+    -- {
+    --   event = "file_renamed",
+    --   handler = function(args)
+    --     -- fix references to file
+    --     print(args.source, " renamed to ", args.destination)
+    --   end,
+    -- },
+    -- {
+    --   event = "file_moved",
+    --   handler = function(args)
+    --     -- fix references to file
+    --     print(args.source, " moved to ", args.destination)
+    --   end,
+    -- },
+    {
+      event = "neo_tree_buffer_enter",
+      handler = function()
+        -- highlight the cursor line
+        vim.cmd("highlight! Cursor blend=100")
+        -- set relative numbers
+        vim.cmd([[
+              setlocal relativenumber
+            ]])
+      end,
+    },
+    {
+      event = "neo_tree_buffer_leave",
+      handler = function()
+        vim.cmd("highlight! Cursor guibg=#5f87af blend=0")
+      end,
+    },
+    -- {
+    --   event = "neo_tree_window_before_open",
+    --   handler = function(args)
+    --     print("neo_tree_window_before_open", vim.inspect(args))
+    --   end,
+    -- },
+    -- {
+    --   event = "neo_tree_window_after_open",
+    --   handler = function(args)
+    --     vim.cmd("wincmd =")
+    --   end,
+    -- },
+    -- {
+    --   event = "neo_tree_window_before_close",
+    --   handler = function(args)
+    --     print("neo_tree_window_before_close", vim.inspect(args))
+    --   end,
+    -- },
+    -- {
+    --   event = "neo_tree_window_after_close",
+    --   handler = function(args)
+    --     vim.cmd("wincmd =")
+    --   end,
+    -- },
+  },
   default_component_configs = {
     container = {
       enable_character_fade = true,
       width = "100%",
       right_padding = 0,
     },
-    --diagnostics = {
-    --  symbols = {
-    --    hint = "H",
-    --    info = "I",
-    --    warn = "!",
-    --    error = "X",
-    --  },
-    --  highlights = {
-    --    hint = "DiagnosticSignHint",
-    --    info = "DiagnosticSignInfo",
-    --    warn = "DiagnosticSignWarn",
-    --    error = "DiagnosticSignError",
-    --  },
-    --},
+    diagnostics = {
+      symbols = {
+        hint = "💡",
+        info = "📘",
+        warn = "❗",
+        error = "💥",
+      },
+      highlights = {
+        hint = "DiagnosticSignHint",
+        info = "DiagnosticSignInfo",
+        warn = "DiagnosticSignWarn",
+        error = "DiagnosticSignError",
+      },
+    },
     indent = {
       indent_size = 2,
       padding = 1,
@@ -207,7 +215,7 @@ local config = {
       -- then these will never be used.
       default = "*",
       highlight = "NeoTreeFileIcon",
-      provider = function(icon, node, state) -- default icon provider utilizes nvim-web-devicons if available
+      provider = function(icon, node, _) -- default icon provider utilizes nvim-web-devicons if available
         if node.type == "file" or node.type == "terminal" then
           local success, web_devicons = pcall(require, "nvim-web-devicons")
           local name = node.type == "terminal" and "terminal" or node.name
@@ -491,7 +499,7 @@ local config = {
       },
       always_show = { -- remains visible even if other settings would normally hide it
         ".DS_Store",
-        ".gitignored",
+        ".gitignore",
       },
       always_show_by_pattern = { -- uses glob style patterns
         ".env*",
@@ -540,7 +548,7 @@ local config = {
     group_empty_dirs = false, -- when true, empty folders will be grouped together
     search_limit = 50, -- max number of search results when using filters
     follow_current_file = {
-      enabled = false, -- This will find and focus the file in the active buffer every time
+      enabled = true, -- This will find and focus the file in the active buffer every time
       --               -- the current file is changed while the tree is open.
       leave_dirs_open = false, -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
     },
@@ -672,12 +680,11 @@ local config = {
       Event = { icon = "", hl = "Constant" },
       Operator = { icon = "󰆕", hl = "Operator" },
       TypeParameter = { icon = "󰊄", hl = "Type" },
-
       -- ccls
-      -- TypeAlias = { icon = ' ', hl = 'Type' },
-      -- Parameter = { icon = ' ', hl = '@parameter' },
-      -- StaticMethod = { icon = '󰠄 ', hl = 'Function' },
-      -- Macro = { icon = ' ', hl = 'Macro' },
+      TypeAlias = { icon = " ", hl = "Type" },
+      Parameter = { icon = " ", hl = "@parameter" },
+      StaticMethod = { icon = "󰠄 ", hl = "Function" },
+      Macro = { icon = " ", hl = "Macro" },
     },
   },
   example = {
@@ -711,6 +718,10 @@ return {
       "s1n7ax/nvim-window-picker",
       version = "2.*",
       config = function()
+        -- Set the highlight for the cursor line in the window picker
+        -- vim.api.nvim_set_hl(0, "NeoTreeCursorLine", { bg = "#303030" })
+        -- Set the highlight for the current file in the window picker
+        -- vim.api.nvim_set_hl(0, "NeoTreeFileNameOpened", { bg = "#606060", italic = true })
         require("window-picker").setup({
           filter_rules = {
             include_current_win = false,

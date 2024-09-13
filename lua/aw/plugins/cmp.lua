@@ -93,11 +93,11 @@ return {
       formatting = {
         -- changing the order of fields so the icon is the first
         fields = { "menu", "abbr", "kind" },
-        -- Customize menu
+        -- Customize menu ✨
         format = function(entry, item)
           local menu_icon = {
             copilot = "🤖",
-            nvim_lsp = "✨",
+            nvim_lsp = "📚",
             luasnip = "🚀",
             buffer = "📝",
             path = "📁",

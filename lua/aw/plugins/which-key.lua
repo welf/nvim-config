@@ -9,7 +9,7 @@ return {
     preset = "helix", -- false | "classic" | "modern" | "helix"
     spec = {
       { "<leader>s", group = "[S]earch", icon = { icon = " ", hl = "Constant" } },
-      { "<leader>c", group = "[C]ode", icon = { icon = "󰑕 ", hl = "Constant" } },
+      { "<leader>c", group = "LSP [c]ode actions", icon = { icon = "󰑕 ", hl = "Constant" } },
       { "<leader>h", group = "Git [h]unk", mode = { "n", "v" } },
       { "<leader>i", group = "[I]nspect AST" },
       { "<leader>m", group = "[M]arks" },
