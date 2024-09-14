@@ -48,9 +48,6 @@ vim.keymap.set("n", "_", [[<cmd>horizontal resize -2<cr>]], { desc = "Make the w
 map("n", "<leader>to", "<cmd>Outline<CR>", { desc = "Toggle Outline" })
 -- Toggle Copilot
 map("n", "<leader>tC", "<cmd>Copilot toggle<CR>", { desc = "Toggle [C]opilot" })
--- treesitter inspect AST in a new split window
-map("n", "<leader>it", ":InspectTree<CR>", { desc = "Show the highlight groups under the cursor (treesitter)" })
-map("n", "<leader>ii", ":Inspect<CR>", { desc = "Show the parsed syntax tree (treesitter)" })
 -- Open file's folder in file explorer
 map("n", "<leader>ol", function()
   vim.ui.open(vim.fn.expand("%:p:h"))
@@ -71,6 +68,9 @@ map("v", "<leader>te", require("lsp-endhints").toggle, { desc = "[t]oggle inlay 
 map("n", "<leader>tc", function()
   require("nvim-highlight-colors").toggle()
 end, { desc = "[t]oggle [c]olorizer" })
+-- treesitter inspect AST in a new split window
+map("n", "<leader>it", ":InspectTree<CR>", { desc = "Show the highlight groups under the cursor (treesitter)" })
+map("n", "<leader>ii", ":Inspect<CR>", { desc = "Show the parsed syntax tree (treesitter)" })
 
 -- SELECT, CLEAR, AND DISMISS
 --
@@ -137,6 +137,11 @@ vim.keymap.del("n", "<leader>cx")
 
 -- GIT
 --
+-- Open Neogit
+map("n", "<leader>gs", require("neogit").open, { desc = "[g]it [s]tatus", silent = true, noremap = true })
+map("n", "<leader>gc", ":Neogit commit<CR>", { desc = "[g]it [c]ommit", silent = true, noremap = true })
+map("n", "<leader>gp", ":Neogit pull<CR>", { desc = "[g]it [p]ull", silent = true, noremap = true })
+map("n", "<leader>gP", ":Neogit push<CR>", { desc = "[g]it [P]ush", silent = true, noremap = true })
 -- Git actions
 -- visual mode
 map("v", "<leader>hs", function()
