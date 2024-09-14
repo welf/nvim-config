@@ -1,7 +1,9 @@
 return {
   "nvim-lualine/lualine.nvim",
   event = { "BufReadPost", "BufNewFile" },
-  dependencies = { "nvim-tree/nvim-web-devicons" },
+  dependencies = {
+    "nvim-tree/nvim-web-devicons",
+  },
   config = function()
     local filename = {
       "filename",
@@ -32,7 +34,37 @@ return {
         lualine_b = { "branch", "diff", "diagnostics" },
         lualine_c = { "buffers" },
         -- lualine_c = { filename },
-        lualine_x = { "encoding", "fileformat", "filetype" },
+        lualine_x = {
+          {
+            "copilot",
+            -- Default values
+            symbols = {
+              status = {
+                icons = {
+                  enabled = " ",
+                  sleep = " ", -- auto-trigger disabled
+                  disabled = " ",
+                  warning = " ",
+                  unknown = " ",
+                },
+                hl = {
+                  enabled = "#61afef",
+                  sleep = "#AEB7D0",
+                  disabled = "#6272A4",
+                  warning = "#FFB86C",
+                  unknown = "#FF5555",
+                },
+              },
+              spinners = require("copilot-lualine.spinners").dots,
+              spinner_color = "#6272A4",
+            },
+            show_colors = true,
+            show_loading = true,
+          },
+          "encoding",
+          "fileformat",
+          "filetype",
+        },
         lualine_y = { "progress" },
         lualine_z = { "location" },
       },
