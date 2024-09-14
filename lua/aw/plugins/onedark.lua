@@ -3,11 +3,12 @@ return {
   lazy = false, -- make sure we load this during startup if it is your main colorscheme
   priority = 1000, -- make sure to load this before all the other start plugins
   config = function()
+    local onedark = require("onedark")
     -- load the colorscheme here
-    vim.cmd([[colorscheme onedark]])
+    -- vim.cmd([[colorscheme onedark]])
 
     -- Lua
-    require("onedark").setup({
+    onedark.setup({
       -- Main options --
       style = "deep", -- Choose between 'dark', 'darker', 'cool', 'deep', 'warm', 'warmer' and 'light'
       transparent = false, -- Show/hide background
@@ -71,6 +72,7 @@ return {
         background = true, -- use background color for virtual text
       },
     })
+    onedark.load()
     -- load the colorscheme here
     vim.cmd([[colorscheme onedark]])
   end,

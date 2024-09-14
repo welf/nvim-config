@@ -33,7 +33,7 @@ vim.api.nvim_set_hl(0, "LspInlayHint", { fg = "#70758c", italic = true })
 vim.opt.foldcolumn = "1"
 vim.opt.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
 vim.opt.foldlevelstart = 99
-vim.opt.foldenable = true
+vim.opt.foldenable = false
 
 require("aw.core.autocmd")
 require("aw.core.mappings")

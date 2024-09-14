@@ -2,41 +2,33 @@
 --  See `:help vim.keymap.set()`
 
 local map = vim.keymap.set
+local gitsigns = require("gitsigns")
 
--- Clear highlights on search when pressing <Esc> in normal mode
---  See `:help hlsearch`
-map("n", "<ESC>", ":nohlsearch<CR>", { desc = "Clear search highlights" })
-
--- Toggle colorizer
-map("n", "<leader>tc", function()
-  require("nvim-highlight-colors").toggle()
-end, { desc = "[t]oggle [c]olorizer" })
-
--- Diagnostic keymaps
-map("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [q]uickfix list" })
-
--- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
--- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
--- is not what someone will guess without a bit more experience.
+-- NEXT/PREVIOUS NAVIGATION
 --
--- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
--- or just use <C-\><C-n> to exit terminal mode
-map("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+--  Use <Tab> and <S-Tab> to navigate through buffers
+map("n", "]b", ":bnext<CR>", { desc = "Go to next [b]uffer" })
+map("n", "[b", ":bprev<CR>", { desc = "Go to previous [b]uffer" })
+-- Git hunk navigation
+-- Go to next git change
+map("n", "]c", function()
+  if vim.wo.diff then
+    vim.cmd.normal({ "]c", bang = true })
+  else
+    gitsigns.nav_hunk("next")
+  end
+end, { desc = "Jump to next git [c]hange" })
+-- Go to previous git change
+map("n", "[c", function()
+  if vim.wo.diff then
+    vim.cmd.normal({ "[c", bang = true })
+  else
+    gitsigns.nav_hunk("prev")
+  end
+end, { desc = "Jump to previous git [c]hange" })
 
--- Dismiss notify popups with <Esc>
-map("n", "<Esc>", function()
-  require("notify").dismiss()
-end, { desc = "Dismiss notify popup and clear hlsearch" })
-
--- Toggle symbols outline window
-map("n", "<leader>to", "<cmd>Outline<CR>", { desc = "Toggle Outline" })
-
--- TIP: Disable arrow keys in normal mode
-map("n", "<left>", "<cmd>echo \"Use h to move!!\"<CR>")
-map("n", "<right>", "<cmd>echo \"Use l to move!!\"<CR>")
-map("n", "<up>", "<cmd>echo \"Use k to move!!\"<CR>")
-map("n", "<down>", "<cmd>echo \"Use j to move!!\"<CR>")
-
+-- WINDOW NAVIGATION AND RESIZING
+--
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
 --  See `:help wincmd` for a list of all window commands
@@ -44,23 +36,62 @@ map("n", "<C-h>", "<C-w><C-h>", { desc = "Move focus to the left window" })
 map("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })
 map("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
 map("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
-
 -- Resize windows with =, -, +, and _
 vim.keymap.set("n", "=", [[<cmd>vertical resize +5<cr>]], { desc = "Make the window bigger vertically" })
 vim.keymap.set("n", "-", [[<cmd>vertical resize -5<cr>]], { desc = "Make the window smaller vertically" })
 vim.keymap.set("n", "+", [[<cmd>horizontal resize +2<cr>]], { desc = "Make the window bigger horizontally" })
 vim.keymap.set("n", "_", [[<cmd>horizontal resize -2<cr>]], { desc = "Make the window smaller horizontally" })
 
--- Better escape to normal mode
-map("i", "jj", "<ESC>", { desc = "Exit insert mode" })
-
+-- TOGGLE, OPEN, AND CLOSE
+--
+-- Toggle symbols outline window
+map("n", "<leader>to", "<cmd>Outline<CR>", { desc = "Toggle Outline" })
+-- Toggle Copilot
+map("n", "<leader>tC", "<cmd>Copilot toggle<CR>", { desc = "Toggle [C]opilot" })
+-- treesitter inspect AST in a new split window
+map("n", "<leader>it", ":InspectTree<CR>", { desc = "Show the highlight groups under the cursor (treesitter)" })
+map("n", "<leader>ii", ":Inspect<CR>", { desc = "Show the parsed syntax tree (treesitter)" })
 -- Open file's folder in file explorer
 map("n", "<leader>ol", function()
   vim.ui.open(vim.fn.expand("%:p:h"))
+  -- Diagnostic keymaps
+  map("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [q]uickfix list" })
 end, { desc = "[o]pen file [l]ocation in file explorer" })
+-- Toggles git actions
+map("n", "<leader>tb", gitsigns.toggle_current_line_blame, { desc = "[t]oggle git show [b]lame line" })
+map("n", "<leader>td", gitsigns.toggle_deleted, { desc = "[t]oggle git show [d]eleted" })
+-- Toggle LSP diagnostics
+local diaglist = require("diaglist")
+map("n", "<leader>cb", diaglist.open_buffer_diagnostics, { desc = "Open [b]uffer [c]ode diagnostics" })
+map("n", "<leader>cw", diaglist.open_all_diagnostics, { desc = "Open [w]orkspace [c]ode diagnostics" })
+-- Toggle LSP inline end hints on and off
+map("n", "<leader>te", require("lsp-endhints").toggle, { desc = "[t]oggle inlay [e]nd hints" })
+map("v", "<leader>te", require("lsp-endhints").toggle, { desc = "[t]oggle inlay [e]nd hints" })
+-- Toggle colorizer
+map("n", "<leader>tc", function()
+  require("nvim-highlight-colors").toggle()
+end, { desc = "[t]oggle [c]olorizer" })
 
+-- SELECT, CLEAR, AND DISMISS
+--
 -- Select all content of the file (Ctrl-a)
 map("n", "<C-a>", "gg0vG$", { desc = "Select [A]ll" })
+-- Clear highlights on search when pressing `<Esc>h` in normal mode
+--  See `:help hlsearch`
+map("n", "<ESC>h", ":nohlsearch<CR>", { desc = "Clear search [h]ighlights" })
+-- Dismiss notify popups with <Ctrl-c>
+map("n", "<ESC>n", function()
+  require("notify").dismiss()
+end, { desc = "Dismiss [n]otify popup" })
+
+-- TIP: Disable arrow keys in normal mode
+map("n", "<left>", "<cmd>echo \"Use h to move!!\"<CR>")
+map("n", "<right>", "<cmd>echo \"Use l to move!!\"<CR>")
+map("n", "<up>", "<cmd>echo \"Use k to move!!\"<CR>")
+map("n", "<down>", "<cmd>echo \"Use j to move!!\"<CR>")
+
+-- Better escape to normal mode
+map("i", "jj", "<ESC>", { desc = "Exit insert mode" })
 
 -- Move lines up/down
 map("n", "<A-Down>", ":m .+1<CR>", { desc = "Move line down" })
@@ -76,10 +107,6 @@ map("v", "<A-j>", ":m '>+1<CR>gv=gv", { desc = "Move line down" })
 map("v", "<A-Up>", ":m '<-2<CR>gv=gv", { desc = "Move line up" })
 map("v", "<A-k>", ":m '<-2<CR>gv=gv", { desc = "Move line up" })
 
--- treesitter inspect
-map("n", "<leader>it", ":InspectTree<CR>", { desc = "Show the highlight groups under the cursor (treesitter)" })
-map("n", "<leader>ii", ":Inspect<CR>", { desc = "Show the parsed syntax tree (treesitter)" })
-
 -- folds
 map("n", "zR", require("ufo").openAllFolds, { desc = "Open all folds" })
 map("n", "zM", require("ufo").closeAllFolds, { desc = "Close all folds" })
@@ -92,10 +119,12 @@ map("n", "<A-o>", ":FTermOpen<CR>", { desc = "Open Terminal" })
 map("v", "<A-o>", ":FTermOpen<CR>", { desc = "Open Terminal" })
 map("t", "<A-w>", "<C-\\><C-n>:FTermClose<CR>", { desc = "Close Terminal but preserve terminal session" })
 map("t", "<A-e>", "<C-\\><C-n>:FTermExit<CR>", { desc = "Exit Terminal and remove terminal session" })
-
--- Toggle LSP inline end hints on and off
-map("n", "<leader>th", require("lsp-endhints").toggle, { desc = "[t]oggle inlay [h]ints" })
-map("v", "<leader>th", require("lsp-endhints").toggle, { desc = "[t]oggle inlay [h]ints" })
+-- -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
+-- -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
+-- -- is not what someone will guess without a bit more experience.
+-- -- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
+-- -- or just use <C-\><C-n> to exit terminal mode
+-- map("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
 -- Add keymaps to the Claude AI
 vim.keymap.set("v", "<leader>Ci", ":'<,'>ClaudeImplement ", { desc = "Claude Implement" })
@@ -106,25 +135,8 @@ vim.keymap.del("n", "<leader>cc")
 vim.keymap.del("v", "<leader>ci")
 vim.keymap.del("n", "<leader>cx")
 
-local gitsigns = require("gitsigns")
-
--- Navigation
-map("n", "]c", function()
-  if vim.wo.diff then
-    vim.cmd.normal({ "]c", bang = true })
-  else
-    gitsigns.nav_hunk("next")
-  end
-end, { desc = "Jump to next git [c]hange" })
-
-map("n", "[c", function()
-  if vim.wo.diff then
-    vim.cmd.normal({ "[c", bang = true })
-  else
-    gitsigns.nav_hunk("prev")
-  end
-end, { desc = "Jump to previous git [c]hange" })
-
+-- GIT
+--
 -- Git actions
 -- visual mode
 map("v", "<leader>hs", function()
@@ -145,14 +157,6 @@ map("n", "<leader>hR", gitsigns.reset_buffer, { desc = "git [R]eset buffer" })
 map("n", "<leader>hs", gitsigns.stage_hunk, { desc = "git [s]tage hunk" })
 map("n", "<leader>hS", gitsigns.stage_buffer, { desc = "git [S]tage buffer (git add)" })
 map("n", "<leader>hu", gitsigns.undo_stage_hunk, { desc = "git [u]ndo stage hunk" })
--- Toggles
-map("n", "<leader>tb", gitsigns.toggle_current_line_blame, { desc = "[t]oggle git show [b]lame line" })
-map("n", "<leader>td", gitsigns.toggle_deleted, { desc = "[t]oggle git show [d]eleted" })
-
--- LSP diagnostics
-local diaglist = require("diaglist")
-map("n", "<leader>cb", diaglist.open_buffer_diagnostics, { desc = "Open [b]uffer [c]ode diagnostics" })
-map("n", "<leader>cw", diaglist.open_all_diagnostics, { desc = "Open [w]orkspace [c]ode diagnostics" })
 
 -- -- Scroll in command line suggestions with Ctrl-j and Ctrl-k
 -- vim.keymap.set({ "n", "i", "s" }, "<c-j>", function()

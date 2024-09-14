@@ -97,7 +97,7 @@ return {
         format = function(entry, item)
           local menu_icon = {
             copilot = "🤖",
-            nvim_lsp = "📚",
+            nvim_lsp = "💎",
             luasnip = "🚀",
             buffer = "📝",
             path = "📁",
@@ -158,8 +158,8 @@ return {
         ["<C-Space>"] = cmp.mapping.complete(),
 
         -- Scroll the documentation window [b]ack / [f]orward
-        ["<C-b>"] = cmp.mapping.scroll_docs(-4),
         ["<C-f>"] = cmp.mapping.scroll_docs(4),
+        ["<C-b>"] = cmp.mapping.scroll_docs(-4),
 
         -- Think of <c-l> as moving to the right of your snippet expansion.
         --  So if you have a snippet that's like:

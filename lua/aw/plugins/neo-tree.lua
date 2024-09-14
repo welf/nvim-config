@@ -102,13 +102,13 @@ local config = {
     --     -- add something to the state that can be used by custom components
     --   end,
     -- },
-    -- {
-    --   event = "file_opened",
-    --   handler = function(file_path)
-    --     --auto close
-    --     require("neo-tree.command").execute({ action = "close" })
-    --   end,
-    -- },
+    {
+      event = "file_opened",
+      handler = function(file_path)
+        --auto close
+        require("neo-tree.command").execute({ action = "close" })
+      end,
+    },
     -- {
     --   event = "file_opened",
     --   handler = function(file_path)
@@ -181,9 +181,9 @@ local config = {
     diagnostics = {
       symbols = {
         hint = "💡",
-        info = "📘",
-        warn = "❗",
-        error = "💥",
+        info = "ℹ",
+        warn = "⚠️",
+        error = "❌",
       },
       highlights = {
         hint = "DiagnosticSignHint",
