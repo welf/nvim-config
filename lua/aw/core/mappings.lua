@@ -7,8 +7,8 @@ local gitsigns = require("gitsigns")
 -- NEXT/PREVIOUS NAVIGATION
 --
 --  Use <Tab> and <S-Tab> to navigate through buffers
-map("n", "]b", ":bnext<CR>", { desc = "Go to next [b]uffer" })
-map("n", "[b", ":bprev<CR>", { desc = "Go to previous [b]uffer" })
+map("n", "gb", ":bnext<CR>", { desc = "Go to next buffer" })
+map("n", "gB", ":bprev<CR>", { desc = "Go to previous buffer" })
 -- Git hunk navigation
 -- Go to next git change
 map("n", "]c", function()
