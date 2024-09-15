@@ -33,6 +33,7 @@ return {
   { import = "aw.plugins.todo-comments" },
   { import = "aw.plugins.treesitter" },
   { import = "aw.plugins.ufo" },
+  { import = "aw.plugins.visual-multi" },
   { import = "aw.plugins.web-devicons" },
   { import = "aw.plugins.which-key" },
 }
