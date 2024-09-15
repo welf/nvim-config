@@ -7,15 +7,57 @@ return {
   config = function()
     local filename = {
       "filename",
-      color = { gui = "bold", fg = "#61afef" },
+      color = { fg = "#61afef" },
     }
+
+    -- get active LSP client for the current buffer
+    local get_active_lsp = function()
+      local msg = "No Active Lsp"
+      local buf_ft = vim.api.nvim_get_option_value("filetype", {})
+      local clients = vim.lsp.get_clients({ bufnr = 0 })
+      if next(clients) == nil then
+        return msg
+      end
+
+      for _, client in ipairs(clients) do
+        ---@diagnostic disable-next-line: undefined-field
+        local filetypes = client.config.filetypes
+        if filetypes and vim.fn.index(filetypes, buf_ft) ~= -1 then
+          return client.name
+        end
+      end
+      return msg
+    end
+
+    -- get virtual env for Python files
+    local virtual_env = function()
+      -- only show virtual env for Python
+      if vim.bo.filetype ~= "python" then
+        return ""
+      end
+
+      local conda_env = os.getenv("CONDA_DEFAULT_ENV")
+      local venv_path = os.getenv("VIRTUAL_ENV")
+
+      if venv_path == nil then
+        if conda_env == nil then
+          return ""
+        else
+          return string.format("  %s (conda)", conda_env)
+        end
+      else
+        local venv_name = vim.fn.fnamemodify(venv_path, ":t")
+        return string.format("  %s (venv)", venv_name)
+      end
+    end
+
     require("lualine").setup({
       options = {
         icons_enabled = true,
         theme = "auto",
         component_separators = { left = "", right = "" },
-        section_separators = "",
-        -- section_separators = { left = "", right = "" },
+        section_separators = { left = "", right = "" },
+        -- section_separators = "",
         disabled_filetypes = {
           statusline = {},
           winbar = {},
@@ -31,10 +73,67 @@ return {
       },
       sections = {
         lualine_a = { "mode" },
-        lualine_b = { "branch", "diff", "diagnostics" },
-        lualine_c = { "buffers" },
+        lualine_b = {
+          {
+            "branch",
+            fmt = function(name, _)
+              -- truncate branch name in case the name is too long
+              return string.sub(name, 1, 20)
+            end,
+          },
+          {
+            virtual_env,
+            color = { fg = "black", bg = "#F1CA81" },
+          },
+          "diagnostics",
+          {
+            "searchcount",
+            maxcount = 999,
+            timeout = 500,
+          },
+        },
+        lualine_c = {
+          {
+            "buffers",
+            show_filename_only = true, -- Shows shortened relative path when set to false.
+            hide_filename_extension = false, -- Hide filename extension when set to true.
+            show_modified_status = true, -- Shows indicator when the buffer is modified.
+
+            mode = 0, -- 0: Shows buffer name
+            -- 1: Shows buffer index
+            -- 2: Shows buffer name + buffer index
+            -- 3: Shows buffer number
+            -- 4: Shows buffer name + buffer number
+
+            max_length = vim.o.columns * 2 / 3, -- Maximum width of buffers component,
+            -- it can also be a function that returns
+            -- the value of `max_length` dynamically.
+            filetype_names = {
+              TelescopePrompt = "Telescope",
+              dashboard = "Dashboard",
+              packer = "Packer",
+              fzf = "FZF",
+              alpha = "Alpha",
+            }, -- Shows specific buffer name for that filetype ( { `filetype` = `buffer_name`, ... } )
+            --
+            -- Automatically updates active buffer color to match color of other components (will be overidden if buffers_color is set)
+            use_mode_colors = true,
+
+            symbols = {
+              modified = " ●", -- Text to show when the buffer is modified
+              alternate_file = "#", -- Text to show to identify the alternate file
+              directory = "", -- Text to show when the buffer is a directory
+              readonly = "[🔒]", -- Text to show when the buffer is read-only
+            },
+          },
+        },
         -- lualine_c = { filename },
         lualine_x = {
+          {
+            get_active_lsp,
+            icon = "  LSP:",
+            color = { fg = "#dd9046" },
+          },
           {
             "copilot",
             -- Default values
@@ -62,7 +161,14 @@ return {
             show_loading = true,
           },
           "encoding",
-          "fileformat",
+          {
+            "fileformat",
+            symbols = {
+              unix = "", -- e712
+              dos = "", -- e70f
+              mac = "", -- e711
+            },
+          },
           "filetype",
         },
         lualine_y = { "progress" },

@@ -9,6 +9,7 @@ return {
   { import = "aw.plugins.diaglist" },
   { import = "aw.plugins.fterm" },
   { import = "aw.plugins.gitsigns" },
+  { import = "aw.plugins.incline" },
   { import = "aw.plugins.indent-line" },
   { import = "aw.plugins.highlight-colors" },
   { import = "aw.plugins.lazydev" },

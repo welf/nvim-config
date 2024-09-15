@@ -46,6 +46,8 @@ vim.keymap.set("n", "_", [[<cmd>horizontal resize -2<cr>]], { desc = "Make the w
 --
 -- Toggle symbols outline window
 map("n", "<leader>to", "<cmd>Outline<CR>", { desc = "Toggle Outline" })
+-- Toogle Navbuddy explorer
+map("n", "<leader>tn", require("nvim-navbuddy").open, { desc = "Toggle NavBuddy" })
 -- Toggle Copilot
 map("n", "<leader>tC", "<cmd>Copilot toggle<CR>", { desc = "Toggle [C]opilot" })
 -- Open file's folder in file explorer
@@ -68,9 +70,11 @@ map("v", "<leader>te", require("lsp-endhints").toggle, { desc = "[t]oggle inlay 
 map("n", "<leader>tc", function()
   require("nvim-highlight-colors").toggle()
 end, { desc = "[t]oggle [c]olorizer" })
--- treesitter inspect AST in a new split window
+-- Toggle treesitter inspect AST in a new split window
 map("n", "<leader>it", ":InspectTree<CR>", { desc = "Show the highlight groups under the cursor (treesitter)" })
 map("n", "<leader>ii", ":Inspect<CR>", { desc = "Show the parsed syntax tree (treesitter)" })
+-- Show web-devicons
+map("n", "<leader>tI", ":NvimWebDeviconsHiTest<CR>", { desc = "Show web-devicons" })
 
 -- SELECT, CLEAR, AND DISMISS
 --
