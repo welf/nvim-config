@@ -48,6 +48,7 @@
   "nvim-window-picker": { "branch": "main", "commit": "41cfaa428577c53552200a404ae9b3a0b5719706" },
   "onedark.nvim": { "branch": "master", "commit": "fae34f7c635797f4bf62fb00e7d0516efa8abe37" },
   "outline.nvim": { "branch": "main", "commit": "41e7b88a2b0baa90619af5ec8af462fcb442db65" },
+  "persistence.nvim": { "branch": "main", "commit": "f6aad7dde7fcf54148ccfc5f622c6d5badd0cc3d" },
   "plenary.nvim": { "branch": "master", "commit": "ec289423a1693aeae6cd0d503bac2856af74edaa" },
   "promise-async": { "branch": "main", "commit": "119e8961014c9bfaf1487bf3c2a393d254f337e2" },
   "rustaceanvim": { "branch": "master", "commit": "7d917beca9b6b84168197a6bac2d9067b895de42" },
@@ -59,6 +60,5 @@
   "vim-dadbod": { "branch": "master", "commit": "7888cb7164d69783d3dce4e0283decd26b82538b" },
   "vim-dadbod-completion": { "branch": "master", "commit": "880f7e9f2959e567c718d52550f9fae1aa07aa81" },
   "vim-dadbod-ui": { "branch": "master", "commit": "a5ff8bd69fcaf53cd24827b54492c8ce87806d18" },
-  "vim-visual-multi": { "branch": "master", "commit": "a6975e7c1ee157615bbc80fc25e4392f71c344d4" },
   "which-key.nvim": { "branch": "main", "commit": "bfec3d6bc0a9b0b2cb11644642f78c2c3915eef0" }
 }

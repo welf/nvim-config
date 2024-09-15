@@ -9,6 +9,7 @@ return {
     preset = "helix", -- false | "classic" | "modern" | "helix"
     spec = {
       { "<leader>s", group = "Search" },
+      { "<leader>q", group = "Sessions", icon = { icon = "⚙️ ", hl = "Constant" } },
       { "<leader>c", group = "LSP [c]ode actions", icon = { icon = "📝 ", hl = "Constant" } },
       { "<leader>h", group = "Git [h]unk", mode = { "n", "v" } },
       { "<leader>g", group = "Git Actions", mode = { "n", "v" } },

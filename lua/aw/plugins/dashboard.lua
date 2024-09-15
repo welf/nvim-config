@@ -7,7 +7,7 @@ return {
   },
   opts = {
     theme = "hyper", --  theme is doom and hyper default is hyper
-    disable_move = false, --  default is false disable move keymap for hyper
+    disable_move = true, --  default is false disable move keymap for hyper
     shortcut_type = "letter", --  shorcut type 'letter' or 'number'
     shuffle_letter = false, --  default is true, shortcut 'letter' will be randomize, set to false to have ordered letter.
     change_to_vcs_root = false, -- default is false,for open file in hyper mru. it will change to the root of vcs
@@ -28,11 +28,9 @@ return {
         "                                                       ",
         "                                                       ",
       }, -- type is table def
-      -- week_header = {
-      --   enable = true, --boolean use a week header
-      --   concat = "string", --concat string after time string line
-      --   append = "string", --table append after time string line
-      -- },
+      week_header = {
+        enable = true, --boolean use a week header
+      },
       disable_move = false, -- boolean default is false disable move key
       shortcut = {
         -- action can be a function type
@@ -41,6 +39,14 @@ return {
           desc = "New",
           action = "ene | startinsert",
           key = "e",
+        },
+        {
+          icon = " ",
+          desc = "Restore Last Session",
+          action = function()
+            require("persistence").load({ last = true })
+          end,
+          key = "r",
         },
         {
           icon = "󰍉 ",
@@ -95,8 +101,4 @@ return {
     --   file_width    -- preview file width
     -- },
   },
-  config = function()
-    -- show dashboard when new tab page is opened
-    vim.api.nvim_create_autocmd("TabNewEntered", { command = "Dashboard" })
-  end,
 }
