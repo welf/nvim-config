@@ -6,6 +6,7 @@ return {
   { import = "aw.plugins.copilot-cmp" },
   { import = "aw.plugins.copilot-lualine" },
   { import = "aw.plugins.dadbod" },
+  { import = "aw.plugins.dashboard" },
   { import = "aw.plugins.diaglist" },
   { import = "aw.plugins.fterm" },
   { import = "aw.plugins.gitsigns" },
@@ -22,6 +23,7 @@ return {
   { import = "aw.plugins.noice" },
   { import = "aw.plugins.neogit" },
   { import = "aw.plugins.neo-tree" },
+  { import = "aw.plugins.onedark" },
   { import = "aw.plugins.outline" },
   { import = "aw.plugins.plenary" },
   { import = "aw.plugins.rustaceanvim" },
@@ -33,5 +35,4 @@ return {
   { import = "aw.plugins.ufo" },
   { import = "aw.plugins.web-devicons" },
   { import = "aw.plugins.which-key" },
-  { import = "aw.plugins.onedark" },
 }
