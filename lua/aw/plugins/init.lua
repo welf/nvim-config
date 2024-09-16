@@ -7,6 +7,7 @@ return {
   { import = "aw.plugins.copilot-lualine" },
   { import = "aw.plugins.dadbod" },
   { import = "aw.plugins.dashboard" },
+  { import = "aw.plugins.dev-container" },
   { import = "aw.plugins.diaglist" },
   { import = "aw.plugins.fterm" },
   { import = "aw.plugins.gitsigns" },

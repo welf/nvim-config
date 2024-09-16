@@ -1,5 +1,8 @@
 local command = vim.api.nvim_create_user_command
 
+-- Execute a command `set laststatus=3` to enble the global statusline
+vim.opt.laststatus = 3
+
 -- create vim commands
 command("FTermOpen", require("FTerm").open, { bang = true })
 command("FTermClose", require("FTerm").close, { bang = true })
