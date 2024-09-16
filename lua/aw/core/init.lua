@@ -1,6 +1,6 @@
 local command = vim.api.nvim_create_user_command
 
--- Execute a command `set laststatus=3` to enble the global statusline
+-- Execute a command `:set laststatus=3` to enable the global statusline
 vim.opt.laststatus = 3
 
 -- create vim commands

@@ -17,7 +17,7 @@ return {
       window = {
         margin = {
           horizontal = 1,
-          vertical = 2,
+          vertical = 3,
         },
         placement = {
           horizontal = "right",

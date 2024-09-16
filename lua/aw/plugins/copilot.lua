@@ -59,5 +59,7 @@ return {
   opts = opts,
   config = function()
     require("copilot").setup(opts)
+    -- autocommand to attach copilot to the current buffer
+    vim.cmd([[autocmd InsertEnter * Copilot]])
   end,
 }
