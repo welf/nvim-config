@@ -63,6 +63,8 @@ map("n", "<leader>td", gitsigns.toggle_deleted, { desc = "[t]oggle git show [d]e
 local diaglist = require("diaglist")
 map("n", "<leader>cb", diaglist.open_buffer_diagnostics, { desc = "Open [b]uffer [c]ode diagnostics" })
 map("n", "<leader>cw", diaglist.open_all_diagnostics, { desc = "Open [w]orkspace [c]ode diagnostics" })
+-- Show LspInfo
+map("n", "<leader>ci", ":LspInfo<CR>", { desc = "Show LSP [i]nfo" })
 -- Toggle LSP inline end hints on and off
 map("n", "<leader>te", require("lsp-endhints").toggle, { desc = "[t]oggle inlay [e]nd hints" })
 map("v", "<leader>te", require("lsp-endhints").toggle, { desc = "[t]oggle inlay [e]nd hints" })
@@ -95,7 +97,7 @@ map("n", "<up>", "<cmd>echo \"Use k to move!!\"<CR>")
 map("n", "<down>", "<cmd>echo \"Use j to move!!\"<CR>")
 
 -- Better escape to normal mode
-map("i", "jj", "<ESC>", { desc = "Exit insert mode" })
+map("i", "jk", "<ESC>", { desc = "Exit insert mode" })
 
 -- Move lines up/down
 map("n", "<A-Down>", ":m .+1<CR>", { desc = "Move line down" })

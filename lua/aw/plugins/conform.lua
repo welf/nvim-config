@@ -36,18 +36,19 @@ return {
       }
     end,
     formatters_by_ft = {
-      lua = { "stylua" },
+      css = { "biome" },
+      html = { "biome" },
       javascript = { "biome" },
+      javascriptreact = { "biome" },
+      json = { "biome" },
+      jsx = { "biome" },
+      lua = { "stylua" },
+      scss = { "biome" }, -- You can also customize some of the format options for the filetype
+      -- rust = { "rustfmt", lsp_format = "fallback" },
+      tsx = { "biome" },
       typescript = { "biome" },
       typescriptreact = { "biome" },
-      javascriptreact = { "biome" },
-      html = { "biome" },
-      css = { "biome" },
-      scss = { "biome" },
-      json = { "biome" },
       yaml = { "biome" },
-      jsx = { "biome" },
-      tsx = { "biome" },
       -- Conform can also run multiple formatters sequentially
       -- python = { "isort", "black" },
       --

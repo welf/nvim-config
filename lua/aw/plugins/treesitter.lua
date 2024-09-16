@@ -75,16 +75,19 @@ return {
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
         additional_vim_regex_highlighting = { "ruby" },
       },
+
       indent = { enable = true, disable = { "ruby" } },
+
       incremental_selection = {
         enable = true,
         keymaps = {
           init_selection = "<c-space>",
           node_incremental = "<c-space>",
           scope_incremental = "<c-s>",
-          node_decremental = "<c-backspace>",
+          node_decremental = "<backspace>",
         },
       },
+
       textobjects = {
         select = {
           enable = true,
@@ -104,6 +107,7 @@ return {
             ["at"] = "@comment.outer",
           },
         },
+
         move = {
           enable = true,
           set_jumps = true, -- whether to set jumps in the jumplist
@@ -130,6 +134,7 @@ return {
           --   ['[i'] = "@conditional.inner",
           -- }
         },
+
         swap = {
           enable = true,
           swap_next = {
@@ -141,6 +146,7 @@ return {
         },
       },
     })
+
     local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
     parser_config.tsx.filetype_to_parsername = { "javascript", "typescript.tsx" }
   end,

@@ -11,7 +11,7 @@ local opts = {
     },
     layout = {
       position = "bottom", -- | top | left | right
-      ratio = 0.3,
+      ratio = 0.4,
     },
   },
   suggestion = {
@@ -46,7 +46,7 @@ local opts = {
     settings = {
       advanced = {
         listCount = 10, -- #completions for panel
-        inlineSuggestCount = 3, -- #completions for getCompletions
+        inlineSuggestCount = 5, -- #completions for getCompletions
       },
     },
   },

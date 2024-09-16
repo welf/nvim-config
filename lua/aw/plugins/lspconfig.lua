@@ -247,20 +247,67 @@ return {
     },
   },
   opts = {
-    inlay_hints = { enabled = true },
+    inlay_hints = {
+      enabled = true,
+      exclude = {},
+    },
+    -- Enable this to enable the builtin LSP code lenses on Neovim >= 0.10.0
+    -- Be aware that you also will need to properly configure your LSP server to
+    -- provide the code lenses.
+    codelens = {
+      enabled = true,
+    },
+    -- Enable lsp cursor word highlighting
+    document_highlight = {
+      enabled = true,
+    },
+    -- add any global capabilities here
+    capabilities = {
+      workspace = {
+        fileOperations = {
+          didRename = true,
+          willRename = true,
+        },
+      },
+    },
     servers = {
       lua_ls = {
         settings = {
           Lua = {
+            codeLens = {
+              enable = true,
+            },
             completion = {
               callSnippet = "Replace",
             },
-            workspace = { checkThirdParty = false },
+            doc = {
+              privateName = { "^_" },
+            },
+            hint = {
+              enable = true,
+              setType = false,
+              paramType = true,
+              paramName = "Disable",
+              semicolon = "Disable",
+              arrayIndex = "Disable",
+            },
             telemetry = { enable = false },
-            hint = { enable = true },
+            workspace = { checkThirdParty = false },
           },
         },
       },
+    },
+    -- you can do any additional lsp server setup here
+    -- return true if you don't want this server to be setup with lspconfig
+    ---@type table<string, fun(server:string, opts:_.lspconfig.options):boolean?>
+    setup = {
+      -- example to setup with typescript.nvim
+      -- tsserver = function(_, opts)
+      --   require("typescript").setup({ server = opts })
+      --   return true
+      -- end,
+      -- Specify * to use this function as a fallback for any server
+      -- ["*"] = function(server, opts) end,
     },
   },
   config = function()
