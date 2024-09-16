@@ -37,32 +37,7 @@ return {
       },
 
       -- Custom Highlights --
-      colors = {
-        -- bg = "#282c34",
-        -- bg_alt = "#21252b",
-        -- fg = "#abb2bf",
-        -- fg_alt = "#5c6370",
-        -- fg_cursor = "#282c34",
-        -- fg_inactive = "#3e4452",
-        -- fg_gutter = "#636d83",
-        -- fg_dark = "#5c6370",
-        -- red = "#e06c75",
-        -- orange = "#dd9046",
-        -- yellow = "#e5c07b",
-        -- green = "#98c379",
-        -- cyan = "#56b6c2",
-        -- blue = "#61afef",
-        -- purple = "#c678dd",
-        -- magenta = "#c678dd",
-        -- cursor_bg = "#528bff",
-        -- visual_bg = "#3e4452",
-        -- replace_bg = "#e06c75",
-        -- insert_bg = "#98c379",
-        -- visual_fg = "#abb2bf",
-        -- replace_fg = "#282c34",
-        -- insert_fg = "#282c34",
-        -- none = "NONE",
-      }, -- Override default colors
+      colors = {}, -- Override default colors
       highlights = {}, -- Override highlight groups
 
       -- Plugins Config --

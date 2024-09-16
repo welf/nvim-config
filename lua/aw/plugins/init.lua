@@ -30,7 +30,6 @@ return {
   { import = "aw.plugins.rustaceanvim" },
   { import = "aw.plugins.telescope" },
   { import = "aw.plugins.telescope-fzf-native" },
-  { import = "aw.plugins.ts-autotag" },
   { import = "aw.plugins.typescript-tools" },
   { import = "aw.plugins.todo-comments" },
   { import = "aw.plugins.treesitter" },

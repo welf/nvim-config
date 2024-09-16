@@ -23,8 +23,7 @@ return {
         ---@diagnostic disable-next-line: undefined-field
         local filetypes = client.config.filetypes
         if filetypes and vim.fn.index(filetypes, buf_ft) ~= -1 then
-          -- append a client.name to the msg
-          -- if there are multiple clients for the same filetype
+          -- append a client.name to the msg if there are multiple clients for the same filetype
           if msg == "No Active Lsp" then
             msg = client.name
           else
@@ -61,9 +60,9 @@ return {
       options = {
         icons_enabled = true,
         theme = "auto",
-        component_separators = { left = "", right = "" },
+        -- component_separators = { left = "", right = "" },
+        component_separators = "|",
         section_separators = { left = "", right = "" },
-        -- section_separators = "",
         disabled_filetypes = {
           statusline = {},
           winbar = {},
@@ -78,8 +77,9 @@ return {
         },
       },
       sections = {
-        lualine_a = { "mode" },
+        lualine_a = { { "mode", separator = { left = "" }, right_padding = 2 } },
         lualine_b = {
+          filename,
           {
             "branch",
             fmt = function(name, _)
@@ -133,11 +133,11 @@ return {
         --     },
         --   },
         -- },
-        lualine_c = { filename },
+        lualine_c = {},
         lualine_x = {
           {
             get_active_lsp,
-            icon = "  LSP:",
+            icon = " ",
             color = { fg = "black", bg = "#dd9046" },
           },
           {
@@ -178,32 +178,40 @@ return {
           "filetype",
         },
         lualine_y = { "progress" },
-        lualine_z = { "location" },
+        lualine_z = { { "location", separator = { right = "" }, left_padding = 2 } },
       },
       inactive_sections = {
-        lualine_a = {},
+        lualine_a = { filename },
         lualine_b = {},
-        lualine_c = { filename },
-        lualine_x = { "location" },
+        lualine_c = {},
+        lualine_x = {},
         lualine_y = {},
         lualine_z = {},
       },
       tabline = {
         lualine_a = {
-          { "filetype", icon_only = true },
-        },
-        lualine_b = {
-          { "tabs", mode = 2, max_length = vim.o.columns },
           {
-            function()
-              vim.o.showtabline = 1
-              return ""
-              --HACK: lualine will set &showtabline to 2 if you have configured
-              --lualine for displaying tabline. We want to restore the default
-              --behavior here.
-            end,
+            "buffers",
+            separator = { left = "", right = "" },
+            right_padding = 2,
+            symbols = { alternate_file = "" },
           },
         },
+        -- lualine_a = {
+        --   { "filetype", icon_only = true },
+        -- },
+        -- lualine_b = {
+        --   { "tabs", mode = 2, max_length = vim.o.columns },
+        --   {
+        --     function()
+        --       vim.o.showtabline = 1
+        --       return ""
+        --       --HACK: lualine will set &showtabline to 2 if you have configured
+        --       --lualine for displaying tabline. We want to restore the default
+        --       --behavior here.
+        --     end,
+        --   },
+        -- },
       },
       winbar = {},
       inactive_winbar = {},
