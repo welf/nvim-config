@@ -17,10 +17,10 @@ return {
       entry_prefix = " ",
       file_ignore_patterns = { "node_modules" },
       mappings = {
-        i = {
-          ["<C-j>"] = require("telescope.actions").move_selection_next,
-          ["<C-k>"] = require("telescope.actions").move_selection_previous,
-        },
+        -- i = {
+        --   ["<C-j>"] = require("telescope.actions").move_selection_next,
+        --   ["<C-k>"] = require("telescope.actions").move_selection_previous
+        -- },
       },
     },
     pickers = {
@@ -79,7 +79,7 @@ return {
     vim.keymap.set("n", "<leader>sd", builtin.diagnostics, { desc = "[s]earch [d]iagnostics" })
     vim.keymap.set("n", "<leader>sr", builtin.resume, { desc = "[s]earch [r]esume" })
     vim.keymap.set("n", "<leader>s.", builtin.oldfiles, { desc = "[s]earch recent files (\".\" for repeat)" })
-    vim.keymap.set("n", "<leader>b", builtin.buffers, { desc = "Show open [b]uffers" })
+    vim.keymap.set("n", "<leader><space>", builtin.buffers, { desc = "Show open buffers" })
 
     -- Slightly advanced example of overriding default behavior and theme
     vim.keymap.set("n", "<leader>/", function()

@@ -92,47 +92,47 @@ return {
             timeout = 500,
           },
         },
-        lualine_c = {
-          {
-            "buffers",
-            show_filename_only = true, -- Shows shortened relative path when set to false.
-            hide_filename_extension = false, -- Hide filename extension when set to true.
-            show_modified_status = true, -- Shows indicator when the buffer is modified.
-
-            mode = 0, -- 0: Shows buffer name
-            -- 1: Shows buffer index
-            -- 2: Shows buffer name + buffer index
-            -- 3: Shows buffer number
-            -- 4: Shows buffer name + buffer number
-
-            max_length = vim.o.columns * 2 / 3, -- Maximum width of buffers component,
-            -- it can also be a function that returns
-            -- the value of `max_length` dynamically.
-            filetype_names = {
-              TelescopePrompt = "Telescope",
-              dashboard = "Dashboard",
-              packer = "Packer",
-              fzf = "FZF",
-              alpha = "Alpha",
-            }, -- Shows specific buffer name for that filetype ( { `filetype` = `buffer_name`, ... } )
-            --
-            -- Automatically updates active buffer color to match color of other components (will be overidden if buffers_color is set)
-            use_mode_colors = true,
-
-            symbols = {
-              modified = " ●", -- Text to show when the buffer is modified
-              alternate_file = "#", -- Text to show to identify the alternate file
-              directory = "", -- Text to show when the buffer is a directory
-              readonly = "[🔒]", -- Text to show when the buffer is read-only
-            },
-          },
-        },
-        -- lualine_c = { filename },
+        -- lualine_c = {
+        --   {
+        --     "buffers",
+        --     show_filename_only = true, -- Shows shortened relative path when set to false.
+        --     hide_filename_extension = false, -- Hide filename extension when set to true.
+        --     show_modified_status = true, -- Shows indicator when the buffer is modified.
+        --
+        --     mode = 0, -- 0: Shows buffer name
+        --     -- 1: Shows buffer index
+        --     -- 2: Shows buffer name + buffer index
+        --     -- 3: Shows buffer number
+        --     -- 4: Shows buffer name + buffer number
+        --
+        --     max_length = vim.o.columns * 2 / 3, -- Maximum width of buffers component,
+        --     -- it can also be a function that returns
+        --     -- the value of `max_length` dynamically.
+        --     filetype_names = {
+        --       TelescopePrompt = "Telescope",
+        --       dashboard = "Dashboard",
+        --       packer = "Packer",
+        --       fzf = "FZF",
+        --       alpha = "Alpha",
+        --     }, -- Shows specific buffer name for that filetype ( { `filetype` = `buffer_name`, ... } )
+        --     --
+        --     -- Automatically updates active buffer color to match color of other components (will be overidden if buffers_color is set)
+        --     use_mode_colors = true,
+        --
+        --     symbols = {
+        --       modified = " ●", -- Text to show when the buffer is modified
+        --       alternate_file = "#", -- Text to show to identify the alternate file
+        --       directory = "", -- Text to show when the buffer is a directory
+        --       readonly = "[🔒]", -- Text to show when the buffer is read-only
+        --     },
+        --   },
+        -- },
+        lualine_c = { filename },
         lualine_x = {
           {
             get_active_lsp,
             icon = "  LSP:",
-            color = { fg = "#dd9046" },
+            color = { fg = "black", bg = "#dd9046" },
           },
           {
             "copilot",
@@ -182,7 +182,23 @@ return {
         lualine_y = {},
         lualine_z = {},
       },
-      tabline = {},
+      tabline = {
+        lualine_a = {
+          { "filetype", icon_only = true },
+        },
+        lualine_b = {
+          { "tabs", mode = 2, max_length = vim.o.columns },
+          {
+            function()
+              vim.o.showtabline = 1
+              return ""
+              --HACK: lualine will set &showtabline to 2 if you have configured
+              --lualine for displaying tabline. We want to restore the default
+              --behavior here.
+            end,
+          },
+        },
+      },
       winbar = {},
       inactive_winbar = {},
       extensions = { "neo-tree", "fugitive", "quickfix", "symbols-outline", "mason", "fzf", "lazy" },
