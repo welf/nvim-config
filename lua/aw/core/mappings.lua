@@ -68,6 +68,8 @@ map("n", "<leader>ci", ":LspInfo<CR>", { desc = "Show LSP [i]nfo" })
 -- Toggle LSP inline end hints on and off
 map("n", "<leader>te", require("lsp-endhints").toggle, { desc = "[t]oggle inlay [e]nd hints" })
 map("v", "<leader>te", require("lsp-endhints").toggle, { desc = "[t]oggle inlay [e]nd hints" })
+-- Toggle lsp_lines plugin on and off
+map("n", "<leader>tl", require("lsp_lines").toggle, { desc = "[t]oggle [l]sp lines" })
 -- Toggle colorizer
 map("n", "<leader>tc", function()
   require("nvim-highlight-colors").toggle()

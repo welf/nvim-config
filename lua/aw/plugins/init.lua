@@ -16,6 +16,7 @@ return {
   { import = "aw.plugins.lazydev" },
   { import = "aw.plugins.lspconfig" },
   { import = "aw.plugins.lspkind" },
+  { import = "aw.plugins.lsp_lines" },
   { import = "aw.plugins.lsp-endhints" },
   { import = "aw.plugins.lsp-zero" },
   { import = "aw.plugins.lualine" },
