@@ -23,7 +23,13 @@ return {
         ---@diagnostic disable-next-line: undefined-field
         local filetypes = client.config.filetypes
         if filetypes and vim.fn.index(filetypes, buf_ft) ~= -1 then
-          return client.name
+          -- append a client.name to the msg
+          -- if there are multiple clients for the same filetype
+          if msg == "No Active Lsp" then
+            msg = client.name
+          else
+            msg = msg .. ", " .. client.name
+          end
         end
       end
       return msg

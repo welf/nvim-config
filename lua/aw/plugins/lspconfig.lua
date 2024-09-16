@@ -312,7 +312,6 @@ return {
   },
   config = function()
     local lsp_zero = require("lsp-zero")
-
     --  This function gets run when an LSP attaches to a particular buffer.
     --    That is to say, every time a new file is opened that is associated with
     --    an lsp (for example, opening `main.rs` is associated with `rust_analyzer`) this
@@ -491,7 +490,7 @@ return {
     require("mason-lspconfig").setup({
       -- Replace the language servers listed here
       -- with the ones you want to install
-      ensure_installed = { "lua_ls" },
+      ensure_installed = { "lua_ls", "taplo" },
       handlers = {
         function(server_name)
           require("lspconfig")[server_name].setup({})
