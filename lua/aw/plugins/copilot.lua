@@ -55,11 +55,11 @@ local opts = {
 return {
   "zbirenbaum/copilot.lua",
   cmd = "Copilot",
-  event = "InsertEnter",
+  event = { "BufReadPre", "BufNewFile" },
   opts = opts,
   config = function()
     require("copilot").setup(opts)
     -- autocommand to attach copilot to the current buffer
-    vim.cmd([[autocmd InsertEnter * Copilot]])
+    vim.cmd([[autocmd BufReadPre * Copilot]])
   end,
 }

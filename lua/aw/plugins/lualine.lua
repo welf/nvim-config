@@ -1,3 +1,99 @@
+local modified_icon = ""
+local readonly_icon = ""
+local python_icon = ""
+
+local colors = {
+  red = "#ca1243",
+  blue_grey = "#6272A4",
+  grey = "#AEB7D0",
+  black = "#383a42",
+  white = "#f3f3f3",
+  dark_orange = "#d65d0e",
+  yellow = "#F1CA81",
+  orange = "#FFB86C",
+  green = "#8ec07c",
+  blue = "#61afef",
+  magenta = "magenta",
+}
+
+-- get active LSP client for the current buffer
+local active_lsp = function()
+  local msg = "No Active Lsp"
+  local buf_ft = vim.api.nvim_get_option_value("filetype", {})
+  local clients = vim.lsp.get_clients({ bufnr = 0 })
+  if next(clients) == nil then
+    return msg
+  end
+
+  for _, client in ipairs(clients) do
+    ---@diagnostic disable-next-line: undefined-field
+    local filetypes = client.config.filetypes
+    if filetypes and vim.fn.index(filetypes, buf_ft) ~= -1 then
+      -- append a client.name to the msg if there are multiple clients for the same filetype
+      if msg == "No Active Lsp" then
+        msg = client.name
+      else
+        msg = msg .. ", " .. client.name
+      end
+    end
+  end
+  return msg
+end
+
+local get_active_lsp = {
+  active_lsp,
+  icon = " ",
+  color = { fg = colors.white, bg = colors.blue_grey },
+}
+
+-- get virtual env for Python files
+local virtual_env = function()
+  -- only show virtual env for Python
+  if vim.bo.filetype ~= "python" then
+    return ""
+  end
+
+  local conda_env = os.getenv("CONDA_DEFAULT_ENV")
+  local venv_path = os.getenv("VIRTUAL_ENV")
+
+  if venv_path == nil then
+    if conda_env == nil then
+      return ""
+    else
+      return string.format(python_icon .. "  %s (conda)", conda_env)
+    end
+  else
+    local venv_name = vim.fn.fnamemodify(venv_path, ":t")
+    return string.format(python_icon .. "  %s (venv)", venv_name)
+  end
+end
+
+local get_virtual_env = {
+  virtual_env,
+  color = { fg = colors.black, bg = colors.yellow },
+}
+
+local copilot_symbols = {
+  status = {
+    icons = {
+      enabled = " ",
+      sleep = " ", -- auto-trigger disabled
+      disabled = " ",
+      warning = " ",
+      unknown = " ",
+    },
+    hl = {
+      enabled = colors.green,
+      sleep = colors.grey,
+      disabled = colors.blue_grey,
+      warning = colors.orange,
+      unknown = colors.red,
+    },
+  },
+  spinners = require("copilot-lualine.spinners").dots,
+  spinner_color = colors.blue_grey,
+}
+
 return {
   "nvim-lualine/lualine.nvim",
   event = { "BufReadPost", "BufNewFile" },
@@ -7,62 +103,23 @@ return {
   config = function()
     local filename = {
       "filename",
-      color = { fg = "#61afef" },
+      color = {
+        fg = colors.grey,
+        gui = "none",
+      },
+      symbols = { modified = modified_icon, readonly = readonly_icon },
+      path = 1,
     }
-
-    -- get active LSP client for the current buffer
-    local get_active_lsp = function()
-      local msg = "No Active Lsp"
-      local buf_ft = vim.api.nvim_get_option_value("filetype", {})
-      local clients = vim.lsp.get_clients({ bufnr = 0 })
-      if next(clients) == nil then
-        return msg
-      end
-
-      for _, client in ipairs(clients) do
-        ---@diagnostic disable-next-line: undefined-field
-        local filetypes = client.config.filetypes
-        if filetypes and vim.fn.index(filetypes, buf_ft) ~= -1 then
-          -- append a client.name to the msg if there are multiple clients for the same filetype
-          if msg == "No Active Lsp" then
-            msg = client.name
-          else
-            msg = msg .. ", " .. client.name
-          end
-        end
-      end
-      return msg
-    end
-
-    -- get virtual env for Python files
-    local virtual_env = function()
-      -- only show virtual env for Python
-      if vim.bo.filetype ~= "python" then
-        return ""
-      end
-
-      local conda_env = os.getenv("CONDA_DEFAULT_ENV")
-      local venv_path = os.getenv("VIRTUAL_ENV")
-
-      if venv_path == nil then
-        if conda_env == nil then
-          return ""
-        else
-          return string.format("  %s (conda)", conda_env)
-        end
-      else
-        local venv_name = vim.fn.fnamemodify(venv_path, ":t")
-        return string.format("  %s (venv)", venv_name)
-      end
-    end
 
     require("lualine").setup({
       options = {
         icons_enabled = true,
         theme = "auto",
         -- component_separators = { left = "", right = "" },
-        component_separators = "|",
-        section_separators = { left = "", right = "" },
+        -- component_separators = "|",
+        component_separators = { left = "", right = "|" },
+        -- section_separators = { left = "", right = "" },
+        section_separators = { left = "", right = "" },
         disabled_filetypes = {
           statusline = {},
           winbar = {},
@@ -77,9 +134,8 @@ return {
         },
       },
       sections = {
-        lualine_a = { { "mode", separator = { left = "" }, right_padding = 2 } },
+        lualine_a = { "mode" },
         lualine_b = {
-          filename,
           {
             "branch",
             fmt = function(name, _)
@@ -87,16 +143,41 @@ return {
               return string.sub(name, 1, 20)
             end,
           },
+          get_virtual_env,
           {
-            virtual_env,
-            color = { fg = "black", bg = "#F1CA81" },
+            "diagnostics",
+            sections = { "error" },
+            diagnostics_color = {
+              error = { bg = colors.red, fg = colors.white },
+            },
           },
-          "diagnostics",
+          {
+            "diagnostics",
+            sections = { "warn" },
+            diagnostics_color = {
+              warn = { bg = colors.dark_orange, fg = colors.white },
+            },
+          },
+          {
+            "diagnostics",
+            sections = { "info" },
+            diagnostics_color = {
+              info = { bg = colors.blue, fg = colors.black },
+            },
+          },
+          {
+            "diagnostics",
+            sections = { "hint" },
+            diagnostics_color = {
+              hint = { bg = colors.magenta, fg = colors.white },
+            },
+          },
           {
             "searchcount",
             maxcount = 999,
             timeout = 500,
           },
+          filename,
         },
         -- lualine_c = {
         --   {
@@ -135,34 +216,11 @@ return {
         -- },
         lualine_c = {},
         lualine_x = {
-          {
-            get_active_lsp,
-            icon = " ",
-            color = { fg = "black", bg = "#dd9046" },
-          },
+          get_active_lsp,
           {
             "copilot",
             -- Default values
-            symbols = {
-              status = {
-                icons = {
-                  enabled = " ",
-                  sleep = " ", -- auto-trigger disabled
-                  disabled = " ",
-                  warning = " ",
-                  unknown = " ",
-                },
-                hl = {
-                  enabled = "#61afef",
-                  sleep = "#AEB7D0",
-                  disabled = "#6272A4",
-                  warning = "#FFB86C",
-                  unknown = "#FF5555",
-                },
-              },
-              spinners = require("copilot-lualine.spinners").dots,
-              spinner_color = "#6272A4",
-            },
+            symbols = copilot_symbols,
             show_colors = true,
             show_loading = true,
           },
@@ -178,7 +236,7 @@ return {
           "filetype",
         },
         lualine_y = { "progress" },
-        lualine_z = { { "location", separator = { right = "" }, left_padding = 2 } },
+        lualine_z = { "location" },
       },
       inactive_sections = {
         lualine_a = { filename },
