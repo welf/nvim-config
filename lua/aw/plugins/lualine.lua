@@ -1,6 +1,8 @@
 local modified_icon = ""
 local readonly_icon = ""
 local python_icon = ""
+local left = { left = "", right = "" }
+local right = { left = "", right = "" }
 
 local colors = {
   red = "#ca1243",
@@ -44,6 +46,7 @@ local get_active_lsp = {
   active_lsp,
   icon = " ",
   color = { fg = colors.white, bg = colors.blue_grey },
+  separator = right,
 }
 
 -- get virtual env for Python files
@@ -71,6 +74,7 @@ end
 local get_virtual_env = {
   virtual_env,
   color = { fg = colors.black, bg = colors.yellow },
+  separator = left,
 }
 
 local copilot_symbols = {
@@ -116,8 +120,8 @@ return {
         icons_enabled = true,
         theme = "auto",
         -- component_separators = { left = "", right = "" },
-        -- component_separators = "|",
-        component_separators = { left = "", right = "|" },
+        component_separators = "",
+        -- section_separators = { left = "", right = "" },
         -- section_separators = { left = "", right = "" },
         section_separators = { left = "", right = "" },
         disabled_filetypes = {
@@ -134,7 +138,9 @@ return {
         },
       },
       sections = {
-        lualine_a = { "mode" },
+        lualine_a = {
+          { "mode", separator = { left = "", right = "" } },
+        },
         lualine_b = {
           {
             "branch",
@@ -142,14 +148,24 @@ return {
               -- truncate branch name in case the name is too long
               return string.sub(name, 1, 20)
             end,
+            -- Set background color to the same as the statusline
+            color = { fg = colors.white, bg = colors.blue_grey },
+            separator = left,
           },
           get_virtual_env,
+          {
+            "searchcount",
+            maxcount = 999,
+            timeout = 500,
+            separator = left,
+          },
           {
             "diagnostics",
             sections = { "error" },
             diagnostics_color = {
               error = { bg = colors.red, fg = colors.white },
             },
+            separator = left,
           },
           {
             "diagnostics",
@@ -157,6 +173,7 @@ return {
             diagnostics_color = {
               warn = { bg = colors.dark_orange, fg = colors.white },
             },
+            separator = left,
           },
           {
             "diagnostics",
@@ -164,6 +181,7 @@ return {
             diagnostics_color = {
               info = { bg = colors.blue, fg = colors.black },
             },
+            separator = left,
           },
           {
             "diagnostics",
@@ -171,14 +189,11 @@ return {
             diagnostics_color = {
               hint = { bg = colors.magenta, fg = colors.white },
             },
-          },
-          {
-            "searchcount",
-            maxcount = 999,
-            timeout = 500,
+            separator = left,
           },
           filename,
         },
+        lualine_c = {},
         -- lualine_c = {
         --   {
         --     "buffers",
@@ -214,7 +229,6 @@ return {
         --     },
         --   },
         -- },
-        lualine_c = {},
         lualine_x = {
           get_active_lsp,
           {
@@ -223,8 +237,11 @@ return {
             symbols = copilot_symbols,
             show_colors = true,
             show_loading = true,
+            separator = right,
           },
-          "encoding",
+        },
+        lualine_y = {
+          { "encoding", separator = right },
           {
             "fileformat",
             symbols = {
@@ -232,11 +249,24 @@ return {
               dos = "", -- e70f
               mac = "", -- e711
             },
+            separator = right,
           },
-          "filetype",
+          {
+            "filetype",
+            icon_only = true,
+            separator = right,
+          },
+          {
+            "progress",
+            separator = right,
+          },
         },
-        lualine_y = { "progress" },
-        lualine_z = { "location" },
+        lualine_z = {
+          {
+            "location",
+            separator = { left = "", right = "" },
+          },
+        },
       },
       inactive_sections = {
         lualine_a = { filename },
