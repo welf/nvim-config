@@ -29,6 +29,7 @@ return {
   { import = "aw.plugins.onedark" },
   { import = "aw.plugins.outline" },
   { import = "aw.plugins.plenary" },
+  { import = "aw.plugins.rainbow-delimiters" },
   { import = "aw.plugins.rustaceanvim" },
   { import = "aw.plugins.telescope" },
   { import = "aw.plugins.telescope-fzf-native" },
