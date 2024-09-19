@@ -139,7 +139,7 @@ return {
       },
       sections = {
         lualine_a = {
-          { "mode", separator = { left = "", right = "" } },
+          { "mode", separator = left },
         },
         lualine_b = {
           {
@@ -166,6 +166,8 @@ return {
               error = { bg = colors.red, fg = colors.white },
             },
             separator = left,
+            update_in_insert = false, -- Update diagnostics in insert mode.
+            always_visible = false, -- Show diagnostics even if there are none.
           },
           {
             "diagnostics",
@@ -174,6 +176,8 @@ return {
               warn = { bg = colors.dark_orange, fg = colors.white },
             },
             separator = left,
+            update_in_insert = false, -- Update diagnostics in insert mode.
+            always_visible = false, -- Show diagnostics even if there are none.
           },
           {
             "diagnostics",
@@ -182,6 +186,8 @@ return {
               info = { bg = colors.blue, fg = colors.black },
             },
             separator = left,
+            update_in_insert = false, -- Update diagnostics in insert mode.
+            always_visible = false, -- Show diagnostics even if there are none.
           },
           {
             "diagnostics",
@@ -189,6 +195,13 @@ return {
             diagnostics_color = {
               hint = { bg = colors.magenta, fg = colors.white },
             },
+            separator = left,
+            update_in_insert = false, -- Update diagnostics in insert mode.
+            always_visible = false, -- Show diagnostics even if there are none.
+          },
+          {
+            "filetype",
+            icon_only = true,
             separator = left,
           },
           filename,
@@ -252,11 +265,6 @@ return {
             separator = right,
           },
           {
-            "filetype",
-            icon_only = true,
-            separator = right,
-          },
-          {
             "progress",
             separator = right,
           },
@@ -264,7 +272,7 @@ return {
         lualine_z = {
           {
             "location",
-            separator = { left = "", right = "" },
+            separator = right,
           },
         },
       },
