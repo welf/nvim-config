@@ -14,11 +14,11 @@ return {
     local ts = require("telescope")
     local h_pct = 0.90
     local w_pct = 0.80
-    local w_limit = 90
+    local w_limit = 80
 
     local standard_setup = {
       borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
-      preview = { hide_on_startup = false },
+      preview = { hide_on_startup = true },
       layout_strategy = "vertical",
       layout_config = {
         vertical = {
@@ -38,18 +38,16 @@ return {
 
     local fullscreen_setup = {
       borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
-      preview = { hide_on_startup = false },
+      preview = { hide_on_startup = true },
       layout_strategy = "flex",
       layout_config = {
         flex = { flip_columns = 100 },
         horizontal = {
           mirror = false,
           prompt_position = "top",
-          -- set height
           width = function(_, cols, _)
             return cols
           end,
-          -- set width
           height = function(_, _, rows)
             return rows
           end,
@@ -59,11 +57,9 @@ return {
         vertical = {
           mirror = true,
           prompt_position = "top",
-          -- set width
           width = function(_, cols, _)
             return cols
           end,
-          -- set height
           height = function(_, _, rows)
             return rows
           end,
@@ -74,20 +70,20 @@ return {
     }
 
     ts.setup({
-      defaults = vim.tbl_extend("error", fullscreen_setup, {
+      defaults = vim.tbl_extend("error", standard_setup, {
         selection_caret = " ",
         entry_prefix = " ",
         file_ignore_patterns = { "node_modules", ".git" },
         sorting_strategy = "ascending",
         path_display = { "filename_first" },
         mappings = {
-          -- n = {
-          --   ["o"] = require("telescope.actions.layout").toggle_preview,
-          --   ["<C-c>"] = require("telescope.actions").close,
-          -- },
-          -- i = {
-          --   ["<C-o>"] = require("telescope.actions.layout").toggle_preview,
-          -- },
+          n = {
+            ["o"] = require("telescope.actions.layout").toggle_preview,
+            ["<C-c>"] = require("telescope.actions").close,
+          },
+          i = {
+            ["<C-o>"] = require("telescope.actions.layout").toggle_preview,
+          },
         },
       }),
       pickers = {

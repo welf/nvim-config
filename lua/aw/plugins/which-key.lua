@@ -16,6 +16,7 @@ return {
       { "<leader>i", group = "Inspect Abstract Syntax Tree", icon = { icon = "🌴 ", hl = "Constant" } },
       { "<leader>m", group = "Marks" },
       { "<leader>o", group = "Open", icon = { icon = "📂 ", hl = "Constant" } },
+      { "<leader>d", group = "Debugger", icon = { icon = "🐞 ", hl = "Constant" } },
       { "<leader>t", group = "Toggle" },
       { "<leader>D", group = "Database", icon = { icon = " ", hl = "Constant" } },
       { "<leader>V", group = "View", icon = { icon = "👁 ", hl = "Constant" } },

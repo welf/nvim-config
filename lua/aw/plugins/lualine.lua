@@ -8,6 +8,7 @@ local colors = {
   red = "#ca1243",
   blue_grey = "#6272A4",
   grey = "#AEB7D0",
+  dark_grey = "#4b5263",
   black = "#383a42",
   white = "#f3f3f3",
   dark_orange = "#d65d0e",
@@ -98,6 +99,18 @@ local copilot_symbols = {
   spinner_color = colors.blue_grey,
 }
 
+local get_filename_color = function()
+  local modified = vim.bo.modified
+  local readonly = vim.bo.readonly
+  if modified then
+    return { fg = colors.orange, gui = "italic" }
+  elseif readonly then
+    return { fg = colors.blue_grey, gui = "none" }
+  else
+    return { fg = colors.grey, gui = "none" }
+  end
+end
+
 return {
   "nvim-lualine/lualine.nvim",
   event = { "BufReadPost", "BufNewFile" },
@@ -107,10 +120,7 @@ return {
   config = function()
     local filename = {
       "filename",
-      color = {
-        fg = colors.grey,
-        gui = "none",
-      },
+      color = get_filename_color,
       symbols = { modified = modified_icon, readonly = readonly_icon },
       path = 1,
     }
