@@ -8,6 +8,11 @@ vim.g.maplocalleader = " "
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
+-- Bootstrap and setup lazy.nvim
+require("aw.lazy")
+-- Setup autocommands and mappings
+require("aw.core")
+
 -- Set neovim language to en_US
 vim.api.nvim_exec2("language en_US", {})
 
@@ -86,6 +91,3 @@ vim.opt.softtabstop = 2
 
 -- enable 24-bit color
 vim.opt.termguicolors = true
-
-require("aw.lazy")
-require("aw.core")

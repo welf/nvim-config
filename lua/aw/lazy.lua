@@ -47,4 +47,3 @@ require("lazy").setup("aw.plugins", {
     },
   },
 })
-
