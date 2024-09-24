@@ -38,7 +38,9 @@ return {
 
       -- Custom Highlights --
       colors = {}, -- Override default colors
-      highlights = {}, -- Override highlight groups
+      highlights = {
+        CursorLineNr = { fg = "orange", style = "bold" }, -- Cursor line number color
+      }, -- Override highlight groups
 
       -- Plugins Config --
       diagnostics = {

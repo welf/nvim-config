@@ -4,6 +4,11 @@
 local map = vim.keymap.set
 local gitsigns = require("gitsigns")
 
+-- Remap <Enter> to insert a blank line below in normal mode
+map("n", "<Enter>", "o<Esc>", { desc = "Insert a blank line below the cursor" })
+-- Remap <S-Enter> to insert a blank line above in normal mode
+map("n", "<S-Enter>", "O<Esc>", { desc = "Insert a blank line above the cursor" })
+
 -- NEXT/PREVIOUS NAVIGATION
 --
 --  Use <Tab> and <S-Tab> to navigate through buffers
@@ -99,7 +104,7 @@ map("n", "<up>", "<cmd>echo \"Use k to move!!\"<CR>")
 map("n", "<down>", "<cmd>echo \"Use j to move!!\"<CR>")
 
 -- Better escape to normal mode
-map("i", "jk", "<ESC>", { desc = "Exit insert mode" })
+map("i", "jj", "<ESC>", { desc = "Exit insert mode" })
 
 -- Move lines up/down
 map("n", "<A-Down>", ":m .+1<CR>", { desc = "Move line down" })

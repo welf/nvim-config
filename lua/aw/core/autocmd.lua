@@ -80,3 +80,12 @@ vim.api.nvim_create_autocmd("BufEnter", {
     vim.api.nvim_set_hl(0, "GitSignsUntrackedNr", { link = "GitSignsAddNr" })
   end,
 })
+
+-- Save *.rs files on InsertLeave to trigger rust-analyzer
+vim.api.nvim_create_autocmd("InsertLeave", {
+  pattern = "*.rs",
+  desc = "Save *.rs files on InsertLeave to trigger rust-analyzer",
+  callback = function()
+    vim.cmd("write")
+  end,
+})
