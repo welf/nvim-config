@@ -37,10 +37,19 @@ return {
       },
 
       -- Custom Highlights --
-      colors = {}, -- Override default colors
+      --
+      -- Override default colors
+      -- green = "#00ffaa", -- redefine an existing color
+      colors = {
+        bright_orange = "#ff8800", -- define a new color
+      },
+      -- Override highlight groups
+      -- ["@function"] = {fg = "$blue", bg = "$green", sp = "$cyan", fmt = "underline,italic"},
       highlights = {
-        CursorLineNr = { fg = "orange", style = "bold" }, -- Cursor line number color
-      }, -- Override highlight groups
+        CursorLineNr = { fg = "$blue", fmt = "bold" }, -- Cursor line number color
+        ["@lsp.type.interface"] = { fg = "$bright_orange" }, -- Change the interface and trait color
+        ["@lsp.type.derive"] = { fg = "$bright_orange" }, -- Use the same color for traits in derive macro
+      },
 
       -- Plugins Config --
       diagnostics = {

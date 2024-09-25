@@ -1,39 +1,44 @@
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+-- set shorter name for keymap function
 local map = vim.keymap.set
-local gitsigns = require("gitsigns")
+
+-- get required plugins
+local git = require("gitsigns")
 local mc = require("multicursor-nvim")
 
--- Remap <Enter> to insert a blank line below in normal mode
+-- INSERT BLANK LINES --
+--
+-- Insert a blank line below in normal mode
 map("n", "<Enter>", "o<Esc>", { desc = "Insert a blank line below the cursor" })
--- Remap <S-Enter> to insert a blank line above in normal mode
+-- Insert a blank line above in normal mode
 map("n", "<S-Enter>", "O<Esc>", { desc = "Insert a blank line above the cursor" })
 
--- NEXT/PREVIOUS NAVIGATION
+-- NEXT/PREVIOUS NAVIGATION --
 --
---  Use <Tab> and <S-Tab> to navigate through buffers
-map("n", "gb", ":bnext<CR>", { desc = "Go to next buffer" })
-map("n", "gB", ":bprev<CR>", { desc = "Go to previous buffer" })
--- Git hunk navigation
--- Go to next git change
+-- Go to next buffer
+map("n", "]b", ":bnext<CR>", { desc = "Go to next buffer" })
+-- Go to previous buffer
+map("n", "[b", ":bprev<CR>", { desc = "Go to previous buffer" })
+-- Go to next git hunk
 map("n", "]c", function()
   if vim.wo.diff then
     vim.cmd.normal({ "]c", bang = true })
   else
-    gitsigns.nav_hunk("next")
+    git.nav_hunk("next")
   end
 end, { desc = "Jump to next git [c]hange" })
--- Go to previous git change
+-- Go to previous git hunk
 map("n", "[c", function()
   if vim.wo.diff then
     vim.cmd.normal({ "[c", bang = true })
   else
-    gitsigns.nav_hunk("prev")
+    git.nav_hunk("prev")
   end
 end, { desc = "Jump to previous git [c]hange" })
 
--- WINDOW NAVIGATION AND RESIZING
+-- WINDOW NAVIGATION AND RESIZING --
 --
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
@@ -43,12 +48,12 @@ map("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })
 map("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
 map("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
 -- Resize windows with =, -, +, and _
-vim.keymap.set("n", "=", [[<cmd>vertical resize +5<cr>]], { desc = "Make the window bigger vertically" })
-vim.keymap.set("n", "-", [[<cmd>vertical resize -5<cr>]], { desc = "Make the window smaller vertically" })
-vim.keymap.set("n", "+", [[<cmd>horizontal resize +2<cr>]], { desc = "Make the window bigger horizontally" })
-vim.keymap.set("n", "_", [[<cmd>horizontal resize -2<cr>]], { desc = "Make the window smaller horizontally" })
+map("n", "=", [[<cmd>vertical resize +5<cr>]], { desc = "Make the window bigger vertically" })
+map("n", "-", [[<cmd>vertical resize -5<cr>]], { desc = "Make the window smaller vertically" })
+map("n", "+", [[<cmd>horizontal resize +2<cr>]], { desc = "Make the window bigger horizontally" })
+map("n", "_", [[<cmd>horizontal resize -2<cr>]], { desc = "Make the window smaller horizontally" })
 
--- TOGGLE, OPEN, AND CLOSE
+-- TOGGLE, OPEN, AND CLOSE --
 --
 -- Toggle symbols outline window
 map("n", "<leader>to", "<cmd>Outline<CR>", { desc = "Toggle Outline" })
@@ -63,8 +68,8 @@ map("n", "<leader>ol", function()
   map("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [q]uickfix list" })
 end, { desc = "[o]pen file [l]ocation in file explorer" })
 -- Toggles git actions
-map("n", "<leader>tb", gitsigns.toggle_current_line_blame, { desc = "[t]oggle git show [b]lame line" })
-map("n", "<leader>td", gitsigns.toggle_deleted, { desc = "[t]oggle git show [d]eleted" })
+map("n", "<leader>tb", git.toggle_current_line_blame, { desc = "[t]oggle git show [b]lame line" })
+map("n", "<leader>td", git.toggle_deleted, { desc = "[t]oggle git show [d]eleted" })
 -- Toggle LSP diagnostics
 local diaglist = require("diaglist")
 map("n", "<leader>cb", diaglist.open_buffer_diagnostics, { desc = "Open [b]uffer [c]ode diagnostics" })
@@ -86,17 +91,18 @@ map("n", "<leader>ii", ":Inspect<CR>", { desc = "Show the parsed syntax tree (tr
 -- Show web-devicons
 map("n", "<leader>tI", ":NvimWebDeviconsHiTest<CR>", { desc = "Show web-devicons" })
 
--- SELECT, CLEAR, AND DISMISS
+-- SELECT, CLEAR, AND DISMISS --
 --
 -- Select all content of the file (Ctrl-a)
-map("n", "<C-a>", "gg0vG$", { desc = "Select [A]ll" })
+map("n", "<C-a>", "gg0vG$", { desc = "Select [a]ll" })
 -- Clear highlights on search when pressing `<Esc>h` in normal mode
 --  See `:help hlsearch`
 map("n", "<ESC>h", ":nohlsearch<CR>", { desc = "Clear search [h]ighlights" })
--- Dismiss notify popups with <Ctrl-c>
-map("n", "<ESC>n", function()
+-- Dismiss notify popup(s)
+map("n", "<ESC>p", function()
   require("notify").dismiss()
-end, { desc = "Dismiss [n]otify popup" })
+end, { desc = "Dismiss notify [p]opup" })
+-- "<ESC>c": Clear all cursors (defined in MULTICURSOR section).
 
 -- TIP: Disable arrow keys in normal mode
 map("n", "<left>", "<cmd>echo \"Use h to move!!\"<CR>")
@@ -141,62 +147,71 @@ map("t", "<A-e>", "<C-\\><C-n>:FTermExit<CR>", { desc = "Exit Terminal and remov
 -- map("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
 -- Add keymaps to the Claude AI
-vim.keymap.set("v", "<leader>Ci", ":'<,'>ClaudeImplement ", { desc = "Claude Implement" })
-vim.keymap.set("n", "<leader>Cx", ":ClaudeCancel<CR>", { silent = true, desc = "Claude Cancel" })
-vim.keymap.set("n", "<leader>Cc", ":ClaudeChat<CR>", { silent = true, desc = "Claude Chat" })
+map("v", "<leader>Ci", ":'<,'>ClaudeImplement ", { desc = "Claude Implement" })
+map("n", "<leader>Cx", ":ClaudeCancel<CR>", { silent = true, desc = "Claude Cancel" })
+map("n", "<leader>Cc", ":ClaudeChat<CR>", { silent = true, desc = "Claude Chat" })
 -- Delete default Claude keymaps
 vim.keymap.del("n", "<leader>cc")
 vim.keymap.del("v", "<leader>ci")
 vim.keymap.del("n", "<leader>cx")
 
--- GIT
+-- GIT --
 --
--- Open Neogit
+-- git status
 map("n", "<leader>gs", require("neogit").open, { desc = "[g]it [s]tatus", silent = true, noremap = true })
+-- git commit
 map("n", "<leader>gc", ":Neogit commit<CR>", { desc = "[g]it [c]ommit", silent = true, noremap = true })
+-- git pull
 map("n", "<leader>gp", ":Neogit pull<CR>", { desc = "[g]it [p]ull", silent = true, noremap = true })
+-- git push
 map("n", "<leader>gP", ":Neogit push<CR>", { desc = "[g]it [P]ush", silent = true, noremap = true })
--- Git actions
--- visual mode
-map("v", "<leader>hs", function()
-  gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
-end, { desc = "stage git hunk" })
-map("v", "<leader>hr", function()
-  gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
-end, { desc = "reset git hunk" })
--- normal mode
-map("n", "<leader>hb", gitsigns.blame_line, { desc = "git [b]lame line" })
-map("n", "<leader>hd", gitsigns.diffthis, { desc = "git [d]iff against index" })
+-- blame current line
+map("n", "<leader>hb", git.blame_line, { desc = "git [b]lame line" })
+-- diff against index
+map("n", "<leader>hd", git.diffthis, { desc = "git [d]iff against index" })
+-- diff against last commit
 map("n", "<leader>hD", function()
-  gitsigns.diffthis("@")
+  git.diffthis("@")
 end, { desc = "git [D]iff against last commit" })
-map("n", "<leader>hp", gitsigns.preview_hunk, { desc = "git [p]review hunk" })
-map("n", "<leader>hr", gitsigns.reset_hunk, { desc = "git [r]eset hunk" })
-map("n", "<leader>hR", gitsigns.reset_buffer, { desc = "git [R]eset buffer" })
-map("n", "<leader>hs", gitsigns.stage_hunk, { desc = "git [s]tage hunk" })
-map("n", "<leader>hS", gitsigns.stage_buffer, { desc = "git [S]tage buffer (git add)" })
-map("n", "<leader>hu", gitsigns.undo_stage_hunk, { desc = "git [u]ndo stage hunk" })
+-- preview hunk
+map("n", "<leader>hp", git.preview_hunk, { desc = "git [p]review hunk" })
+-- reset hunk
+map("n", "<leader>hr", git.reset_hunk, { desc = "git [r]eset hunk" })
+map("v", "<leader>hr", function()
+  git.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
+end, { desc = "git [r]eset hunk" })
+-- reset buffer
+map("n", "<leader>hR", git.reset_buffer, { desc = "git [R]eset buffer" })
+-- stage hunk
+map("n", "<leader>hs", git.stage_hunk, { desc = "git [s]tage hunk" })
+map("v", "<leader>hs", function()
+  git.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
+end, { desc = "git [s]tage hunk" })
+-- stage buffer
+map("n", "<leader>hS", git.stage_buffer, { desc = "git [S]tage buffer (git add)" })
+-- undo stage hunk
+map("n", "<leader>hu", git.undo_stage_hunk, { desc = "git [u]ndo stage hunk" })
 
--- TELESCOPE
+-- TELESCOPE --
 --
 -- Enable Telescope extensions if they are installed
 pcall(require("telescope").load_extension, "fzf")
 pcall(require("telescope").load_extension, "ui-select")
 -- See `:help telescope.builtin`
 local builtin = require("telescope.builtin")
--- vim.keymap.set("n", "<leader>sh", builtin.help_tags, { desc = "[s]earch [h]elp" })
-vim.keymap.set("n", "<leader>sk", builtin.keymaps, { desc = "[s]earch [k]eymaps" })
-vim.keymap.set("n", "<leader>sb", builtin.git_branches, { desc = "[s]earch Git [b]ranches" })
-vim.keymap.set("n", "<leader>sf", builtin.find_files, { desc = "[s]earch [f]iles" })
-vim.keymap.set("n", "<leader>ss", builtin.builtin, { desc = "[s]earch [s]elections" })
-vim.keymap.set("n", "<leader>sw", builtin.grep_string, { desc = "[s]earch current [w]ord" })
-vim.keymap.set("n", "<leader>sg", builtin.live_grep, { desc = "[s]earch by [g]rep" })
-vim.keymap.set("n", "<leader>sd", builtin.diagnostics, { desc = "[s]earch [d]iagnostics" })
-vim.keymap.set("n", "<leader>sr", builtin.resume, { desc = "[s]earch [r]esume" })
-vim.keymap.set("n", "<leader>s.", builtin.oldfiles, { desc = "[s]earch recent files (\".\" for repeat)" })
-vim.keymap.set("n", "<leader><space>", builtin.buffers, { desc = "Show open buffers" })
+-- map("n", "<leader>sh", builtin.help_tags, { desc = "[s]earch [h]elp" })
+map("n", "<leader>sk", builtin.keymaps, { desc = "[s]earch [k]eymaps" })
+map("n", "<leader>sb", builtin.git_branches, { desc = "[s]earch Git [b]ranches" })
+map("n", "<leader>sf", builtin.find_files, { desc = "[s]earch [f]iles" })
+map("n", "<leader>ss", builtin.builtin, { desc = "[s]earch [s]elections" })
+map("n", "<leader>sw", builtin.grep_string, { desc = "[s]earch current [w]ord" })
+map("n", "<leader>sg", builtin.live_grep, { desc = "[s]earch by [g]rep" })
+map("n", "<leader>sd", builtin.diagnostics, { desc = "[s]earch [d]iagnostics" })
+map("n", "<leader>sr", builtin.resume, { desc = "[s]earch [r]esume" })
+map("n", "<leader>s.", builtin.oldfiles, { desc = "[s]earch recent files (\".\" for repeat)" })
+map("n", "<leader><space>", builtin.buffers, { desc = "Show open buffers" })
 -- Slightly advanced example of overriding default behavior and theme
-vim.keymap.set("n", "<leader>/", function()
+map("n", "<leader>/", function()
   -- You can pass additional configuration to Telescope to change the theme, layout, etc.
   builtin.current_buffer_fuzzy_find(require("telescope.themes").get_dropdown({
     winblend = 10,
@@ -205,18 +220,18 @@ vim.keymap.set("n", "<leader>/", function()
 end, { desc = "[/] Fuzzily search in current buffer" })
 -- It's also possible to pass additional configuration options.
 --  See `:help telescope.builtin.live_grep()` for information about particular keys
-vim.keymap.set("n", "<leader>s/", function()
+map("n", "<leader>s/", function()
   builtin.live_grep({
     grep_open_files = true,
     prompt_title = "Live grep in open files",
   })
 end, { desc = "[s]earch [/] in open files" })
 -- Shortcut for searching your Neovim configuration files
-vim.keymap.set("n", "<leader>sn", function()
+map("n", "<leader>sn", function()
   builtin.find_files({ cwd = vim.fn.stdpath("config") })
 end, { desc = "[s]earch [n]eovim files" })
 
--- DEBUGGING
+-- DEBUGGING --
 --
 -- See `:help nvim-dap`
 -- Nvim DAP
@@ -228,11 +243,10 @@ map("n", "<Leader>db", "<cmd>lua require'dap'.toggle_breakpoint()<CR>", { desc =
 map("n", "<Leader>dd", "<cmd>lua require'dap'.set_breakpoint(vim.fn.input('Breakpoint condition: '))<CR>", { desc = "Debugger set conditional breakpoint" })
 map("n", "<Leader>de", "<cmd>lua require'dap'.terminate()<CR>", { desc = "Debugger reset" })
 map("n", "<Leader>dr", "<cmd>lua require'dap'.run_last()<CR>", { desc = "Debugger run last" })
-
 -- rustaceanvim
 map("n", "<Leader>dt", "<cmd>lua vim.cmd('RustLsp testables')<CR>", { desc = "Debugger testables" })
 
--- MULTICURSOR
+-- MULTICURSOR --
 -- https://github.com/jake-stewart/multicursor.nvim
 --
 -- Add cursor below the main cursor.
@@ -266,7 +280,7 @@ map({ "n", "v" }, "<leader>x", mc.deleteCursor, { desc = "Delete the main cursor
 -- Add and remove cursors with control + left click.
 map("n", "<c-leftmouse>", mc.handleMouse, { desc = "Add and remove cursors with control + left click" })
 
--- Stop other cursors from moving.
+-- Stop other cursors from moving to reposition the main cursor.
 map({ "n", "v" }, "<C-q>", function()
   if mc.cursorsEnabled() then
     -- Stop other cursors from moving.
@@ -275,7 +289,7 @@ map({ "n", "v" }, "<C-q>", function()
   else
     mc.addCursor()
   end
-end, { desc = "Stop other cursors from moving" })
+end, { desc = "Stop other cursors to reposition the main" })
 
 -- Clear all cursors.
 map("n", "<ESC>c", function()
@@ -312,3 +326,6 @@ end, { desc = "Rotate visual selection contents forward" })
 map("v", "<leader>R", function()
   mc.transposeCursors(-1)
 end, { desc = "Rotate visual selection contents backwards" })
+
+-- Inspect cursor position.
+map("n", "<leader>Vi", ":Inspect<CR>", { desc = "[i]nspect cursor position" })
