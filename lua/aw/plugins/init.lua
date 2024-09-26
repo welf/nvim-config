@@ -33,6 +33,7 @@ return {
   { import = "aw.plugins.outline" },
   { import = "aw.plugins.plenary" },
   { import = "aw.plugins.rainbow-delimiters" },
+  { import = "aw.plugins.render-markdown" },
   { import = "aw.plugins.rust" },
   { import = "aw.plugins.rustaceanvim" },
   { import = "aw.plugins.telescope" },
