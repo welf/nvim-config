@@ -268,6 +268,12 @@ return {
           didRename = true,
           willRename = true,
         },
+        textDocument = {
+          foldingRange = {
+            dynamicRegistration = false,
+            lineFoldingOnly = true,
+          },
+        },
       },
     },
     servers = {

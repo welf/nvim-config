@@ -10,7 +10,7 @@ return {
     spec = {
       { "<leader>s", group = "Search" },
       { "<leader>q", group = "Sessions", icon = { icon = "⚙️ ", hl = "Constant" } },
-      { "<leader>c", group = "LSP [c]ode actions", icon = { icon = "📝 ", hl = "Constant" } },
+      { "<leader>c", group = "LSP [c]ode actions", icon = { icon = "🔧 ", hl = "Constant" } },
       { "<leader>h", group = "Git [h]unk", mode = { "n", "v" } },
       { "<leader>g", group = "Git Actions", mode = { "n", "v" } },
       { "<leader>i", group = "Inspect Abstract Syntax Tree", icon = { icon = "🌴 ", hl = "Constant" } },
@@ -21,6 +21,7 @@ return {
       { "<leader>D", group = "Database", icon = { icon = " ", hl = "Constant" } },
       { "<leader>V", group = "View information", icon = { icon = "👁 ", hl = "Constant" } },
       { "<leader>C", group = "Claude AI", icon = { icon = "🧠 ", hl = "Constant" }, mode = { "n", "v" } },
+      { "<leader>A", group = "AI Code Companion", icon = { icon = "🧠 ", hl = "Constant" }, mode = { "n", "v" } },
     },
   },
   keys = {
