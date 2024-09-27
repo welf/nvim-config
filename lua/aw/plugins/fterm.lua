@@ -3,24 +3,24 @@ return {
   opts = {
     ---Filetype of the terminal buffer
     ---@type string
-    ft = 'FTerm',
+    ft = "FTerm",
 
     ---Command to run inside the terminal
     ---NOTE: if given string[], it will skip the shell and directly executes the command
-    ---@type fun():(string|string[])|string|string[]
-    cmd = os.getenv("SHELL"),
+    ---@type fun():(string|string[]) | string | string[]
+    cmd = os.getenv("SHELL") or "/bin/sh",
 
     ---Neovim's native window border. See `:h nvim_open_win` for more configuration options.
-    border = 'double', -- |single|double|shadow|none
+    border = "double", -- |single|double|shadow|none
 
     ---Close the terminal as soon as shell/command exits.
     ---Disabling this will mimic the native terminal behaviour.
     ---@type boolean
-    auto_close = true,
+    auto_close = false,
 
     ---Highlight group for the terminal. See `:h winhl`
     ---@type string
-    hl = 'Normal',
+    hl = "Normal",
 
     ---Transparency of the floating window. See `:h winblend`
     ---@type integer
@@ -30,10 +30,10 @@ return {
     ---The value for each field should be between `0` and `1`
     ---@type table<string,number>
     dimensions = {
-      height = 0.8,   -- Height of the terminal window
-      width = 0.8,    -- Width of the terminal window
-      x = 0.5,        -- X axis of the terminal window
-      y = 0.5,        -- Y axis of the terminal window
+      height = 0.8, -- Height of the terminal window
+      width = 0.8, -- Width of the terminal window
+      x = 0.5, -- X axis of the terminal window
+      y = 0.5, -- Y axis of the terminal window
     },
 
     ---Replace instead of extend the current environment with `env`.

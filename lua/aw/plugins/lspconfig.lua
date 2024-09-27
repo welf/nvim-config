@@ -29,11 +29,11 @@ local lsp_attach = function(client, bufnr)
 
   -- Fuzzy find all the symbols in your current document.
   --  Symbols are things like variables, functions, types, etc.
-  -- map("<leader>Vd", require("telescope.builtin").lsp_document_symbols, "[V]iew [d]ocument symbols")
+  -- map("<leader>Sd", require("telescope.builtin").lsp_document_symbols, "[V]iew [d]ocument symbols")
 
   -- Fuzzy find all the symbols in your current workspace.
   --  Similar to document symbols, except searches over your entire project.
-  -- map("<leader>Vw", require("telescope.builtin").lsp_dynamic_workspace_symbols, "[V]iew [w]orkspace symbols")
+  -- map("<leader>Sw", require("telescope.builtin").lsp_dynamic_workspace_symbols, "[V]iew [w]orkspace symbols")
 
   -- Rename the variable under your cursor.
   --  Most Language Servers support renaming across files, etc.
@@ -228,6 +228,7 @@ return {
     { "williamboman/mason.nvim", config = true }, -- NOTE: Must be loaded before dependants
 
     { "williamboman/mason-lspconfig.nvim" },
+    { "nvim-lua/lsp-status.nvim" },
 
     { "WhoIsSethDaniel/mason-tool-installer.nvim" },
 
@@ -354,11 +355,11 @@ return {
 
         -- Fuzzy find all the symbols in your current document.
         --  Symbols are things like variables, functions, types, etc.
-        map("<leader>Vd", require("telescope.builtin").lsp_document_symbols, "[V]iew [d]ocument symbols")
+        map("<leader>Sd", require("telescope.builtin").lsp_document_symbols, "[V]iew [d]ocument symbols")
 
         -- Fuzzy find all the symbols in your current workspace.
         --  Similar to document symbols, except searches over your entire project.
-        map("<leader>Vw", require("telescope.builtin").lsp_dynamic_workspace_symbols, "[V]iew [w]orkspace symbols")
+        map("<leader>Sw", require("telescope.builtin").lsp_dynamic_workspace_symbols, "[V]iew [w]orkspace symbols")
 
         -- Rename the variable under your cursor.
         --  Most Language Servers support renaming across files, etc.
@@ -484,22 +485,18 @@ return {
     --  You can press `g?` for help in this menu.
     require("mason").setup()
 
-    -- You can add other tools here that you want Mason to install
-    -- for you, so that they are available from within Neovim.
-    local ensure_installed = vim.tbl_keys(servers or {})
-    vim.list_extend(ensure_installed, {
-      "stylua", -- Used to format Lua code
-    })
-    require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
-
-    -- require("mason").setup({})
     require("mason-lspconfig").setup({
       -- Replace the language servers listed here
       -- with the ones you want to install
       ensure_installed = { "lua_ls", "taplo" },
       handlers = {
-        function(server_name)
-          require("lspconfig")[server_name].setup({})
+        -- The first entry (without a key) will be the default handler
+        -- and will be called for each installed server that doesn't have
+        -- a dedicated handler.
+        function(server_name) -- default handler (optional)
+          require("lspconfig")[server_name].setup({
+            capabilities = lsp_capabilities,
+          })
         end,
         lua_ls = function()
           require("lspconfig").lua_ls.setup({
@@ -509,13 +506,30 @@ return {
             end,
           })
         end,
+        ["yamlls"] = function()
+          require("lspconfig").yamlls.setup({
+            capabilities = lsp_capabilities,
+            settings = {
+              yaml = {
+                schemas = {
+                  kubernetes = "/*.yaml",
+                  -- Add the schema for gitlab piplines
+                  -- ["https://gitlab.com/gitlab-org/gitlab/-/raw/master/app/assets/javascripts/editor/schema/ci.json"] = "*.gitlab-ci.yml",
+                },
+              },
+            },
+          })
+        end,
         -- this is the "custom handler" for `rust_analyzer`
         -- noop is an empty function that doesn't do anything
         rust_analyzer = lsp_zero.noop, -- NOTE: we don't activate rust-analyzer here!
       },
     })
 
+    local lsp_status = require("lsp-status")
+
     lsp_zero.on_attach(function(client, bufnr)
+      lsp_status.on_attach(client)
       lsp_zero.default_keymaps({ buffer = bufnr })
     end)
 

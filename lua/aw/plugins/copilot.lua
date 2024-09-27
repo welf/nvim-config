@@ -22,12 +22,12 @@ local opts = {
     hide_during_completion = true,
     debounce = 75,
     keymap = {
-      accept = "<M-l>",
-      accept_word = "<M-;>",
-      accept_line = "<M-'>",
-      next = "<M-]>",
-      prev = "<M-[>",
-      dismiss = "<C-]>",
+      accept = "<A-l>",
+      accept_word = "<A-;>",
+      accept_line = "<A-'>",
+      next = "<A-]>",
+      prev = "<A-[>",
+      dismiss = "<A-x>",
     },
   },
   -- Specify filetypes for attaching copilot. If not specified, copilot will attach to all filetypes.
@@ -55,7 +55,7 @@ local opts = {
 return {
   "zbirenbaum/copilot.lua",
   cmd = "Copilot",
-  event = { "BufReadPre", "BufNewFile" },
+  event = { "InsertEnter", "BufReadPre", "BufNewFile" },
   opts = opts,
   config = function()
     require("copilot").setup(opts)

@@ -19,3 +19,10 @@ map("i", "jj", "<ESC>", { desc = "Exit insert mode" })
 map("n", "<Enter>", "o<Esc>", { desc = "Insert a blank line below the cursor" })
 -- Insert a blank line above in normal mode
 map("n", "<S-Enter>", "O<Esc>", { desc = "Insert a blank line above the cursor" })
+
+-- OPEN FILE LOCATION --
+--
+-- Open file's folder in file explorer
+map("n", "<leader>ol", function()
+  vim.ui.open(vim.fn.expand("%:p:h"))
+end, { desc = "[o]pen file [l]ocation in file explorer" })
