@@ -35,7 +35,6 @@ return {
   { import = "aw.plugins.render-markdown" },
   { import = "aw.plugins.rust" },
   { import = "aw.plugins.rustaceanvim" },
-  { import = "aw.plugins.smart-splits" },
   { import = "aw.plugins.telescope" },
   { import = "aw.plugins.telescope-fzf-native" },
   { import = "aw.plugins.typescript-tools" },
