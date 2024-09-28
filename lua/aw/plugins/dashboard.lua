@@ -63,7 +63,7 @@ return {
         {
           icon = " ",
           desc = "Browse",
-          action = "Neotree reveal",
+          action = "Yazi cwd",
           key = "\\",
         },
         {

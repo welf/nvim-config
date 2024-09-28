@@ -740,7 +740,7 @@ return {
   },
   cmd = "Neotree",
   keys = {
-    { "\\", ":Neotree reveal<CR>", desc = "Toggle NeoTree window", silent = true },
+    { "<C-w>e", ":Neotree reveal<CR>", desc = "Toggle NeoTree [e]xplorer", silent = true },
   },
   opts = config,
 }
