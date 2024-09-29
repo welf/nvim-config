@@ -209,11 +209,6 @@ return {
             update_in_insert = false, -- Update diagnostics in insert mode.
             always_visible = false, -- Show diagnostics even if there are none.
           },
-          {
-            "filetype",
-            icon_only = true,
-            separator = left,
-          },
           filename,
         },
         lualine_c = {},
@@ -265,6 +260,11 @@ return {
         },
         lualine_y = {
           { "encoding", separator = right },
+          {
+            "filetype", -- displays filetype icon
+            icon_only = true,
+            separator = left,
+          },
           {
             "fileformat",
             symbols = {
