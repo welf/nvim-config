@@ -5,9 +5,9 @@
 local map = vim.keymap.set
 
 -- Add keymaps to the Claude AI
-map("v", "<leader>Ci", ":'<,'>ClaudeImplement ", { desc = "Claude Implement" })
-map("n", "<leader>Cx", ":ClaudeCancel<CR>", { silent = true, desc = "Claude Cancel" })
-map("n", "<leader>Cc", ":ClaudeChat<CR>", { silent = true, desc = "Claude Chat" })
+map("v", "<leader>aI", ":'<,'>ClaudeImplement ", { desc = "[I]mplement with Claude AI" })
+map("n", "<leader>ax", ":ClaudeCancel<CR>", { silent = true, desc = "Cancel Claude AI prompt" })
+map("n", "<leader>aC", ":ClaudeChat<CR>", { silent = true, desc = "[C]hat with Claude AI" })
 -- Delete default Claude keymaps
 vim.keymap.del("n", "<leader>cc")
 vim.keymap.del("v", "<leader>ci")

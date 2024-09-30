@@ -304,6 +304,19 @@ return {
         },
       },
     },
+    settings = {
+      html = {
+        format = {
+          templating = true,
+          wrapLineLength = 120,
+          wrapAttributes = "auto",
+        },
+        hover = {
+          documentation = true,
+          references = true,
+        },
+      },
+    },
     -- you can do any additional lsp server setup here
     -- return true if you don't want this server to be setup with lspconfig
     ---@type table<string, fun(server:string, opts:_.lspconfig.options):boolean?>
@@ -336,42 +349,44 @@ return {
           vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = "LSP: " .. desc })
         end
 
-        -- Jump to the definition of the word under your cursor.
-        --  This is where a variable was first declared, or where a function is defined, etc.
-        --  To jump back, press <C-t>.
-        map("gd", require("telescope.builtin").lsp_definitions, "[g]oto [d]efinition")
+        local lsp_group_prefix = "<leader>c"
+        local show_group_prefix = "<leader>S"
 
         -- Find references for the word under your cursor.
         map("gr", require("telescope.builtin").lsp_references, "[g]oto [r]eferences")
+        map(lsp_group_prefix .. "R", require("telescope.builtin").lsp_references, "goto [R]eferences")
 
         -- Jump to the implementation of the word under your cursor.
         --  Useful when your language has ways of declaring types without an actual implementation.
         map("gI", require("telescope.builtin").lsp_implementations, "[g]oto [I]mplementation")
+        map(lsp_group_prefix .. "I", require("telescope.builtin").lsp_implementations, "goto [I]mplementation")
 
         -- Jump to the type of the word under your cursor.
         --  Useful when you're not sure what type a variable is and you want to see
         --  the definition of its *type*, not where it was *defined*.
         map("gf", require("telescope.builtin").lsp_type_definitions, "Type De[f]inition")
-
-        -- Fuzzy find all the symbols in your current document.
-        --  Symbols are things like variables, functions, types, etc.
-        map("<leader>Sd", require("telescope.builtin").lsp_document_symbols, "[V]iew [d]ocument symbols")
-
-        -- Fuzzy find all the symbols in your current workspace.
-        --  Similar to document symbols, except searches over your entire project.
-        map("<leader>Sw", require("telescope.builtin").lsp_dynamic_workspace_symbols, "[V]iew [w]orkspace symbols")
+        map(lsp_group_prefix .. "d", require("telescope.builtin").lsp_type_definitions, "goto type [d]efinition")
 
         -- Rename the variable under your cursor.
         --  Most Language Servers support renaming across files, etc.
-        map("<leader>cr", vim.lsp.buf.rename, "[r]ename the variable under cursor")
+        map(lsp_group_prefix .. "r", vim.lsp.buf.rename, "[r]ename the variable under cursor")
 
         -- Execute a code action, usually your cursor needs to be on top of an error
         -- or a suggestion from your LSP for this to activate.
-        map("<leader>ca", vim.lsp.buf.code_action, "Show available [c]ode [a]ctions", { "n", "x" })
+        map(lsp_group_prefix .. "a", vim.lsp.buf.code_action, "Show available [c]ode [a]ctions", { "n", "x" })
 
         -- WARN: This is not Goto Definition, this is Goto Declaration.
         --  For example, in C this would take you to the header.
         map("gD", vim.lsp.buf.declaration, "[g]oto [D]eclaration")
+        map(lsp_group_prefix .. "D", vim.lsp.buf.declaration, "goto [D]eclaration")
+
+        -- Fuzzy find all the symbols in your current document.
+        --  Symbols are things like variables, functions, types, etc.
+        map(show_group_prefix .. "d", require("telescope.builtin").lsp_document_symbols, "[S]how [d]ocument symbols")
+
+        -- Fuzzy find all the symbols in your current workspace.
+        --  Similar to document symbols, except searches over your entire project.
+        map(show_group_prefix .. "w", require("telescope.builtin").lsp_dynamic_workspace_symbols, "[S]how [w]orkspace symbols")
 
         -- The following two autocommands are used to highlight references of the
         -- word under your cursor when your cursor rests there for a little while.
@@ -488,7 +503,18 @@ return {
     require("mason-lspconfig").setup({
       -- Replace the language servers listed here
       -- with the ones you want to install
-      ensure_installed = { "lua_ls", "taplo" },
+      ensure_installed = {
+        "arduino_language_server",
+        "biome",
+        "denols",
+        "emmet_language_server",
+        "htmx",
+        "lua_ls",
+        "ruby_lsp",
+        "taplo",
+        "tailwindcss",
+        "yamlls",
+      },
       handlers = {
         -- The first entry (without a key) will be the default handler
         -- and will be called for each installed server that doesn't have
@@ -537,6 +563,34 @@ return {
     -- -- servers you have installed in your system
     -- require('lspconfig').gleam.setup({})
     -- require('lspconfig').ocamllsp.setup({})
+    require("lspconfig").emmet_language_server.setup({
+      filetypes = { "css", "eruby", "html", "javascript", "javascriptreact", "less", "sass", "scss", "pug", "typescriptreact" },
+      -- Read more about this options in the [vscode docs](https://code.visualstudio.com/docs/editor/emmet#_emmet-configuration).
+      -- **Note:** only the options listed in the table are supported.
+      init_options = {
+        ---@type table<string, string>
+        includeLanguages = {},
+        --- @type string[]
+        excludeLanguages = {},
+        --- @type string[]
+        extensionsPath = {},
+        --- @type table<string, any> [Emmet Docs](https://docs.emmet.io/customization/preferences/)
+        preferences = {},
+        --- @type boolean Defaults to `true`
+        showAbbreviationSuggestions = true,
+        --- @type "always" | "never" Defaults to `"always"`
+        showExpandedAbbreviation = "always",
+        --- @type boolean Defaults to `false`
+        showSuggestionsAsSnippets = false,
+        --- @type table<string, any> [Emmet Docs](https://docs.emmet.io/customization/syntax-profiles/)
+        syntaxProfiles = {},
+        --- @type table<string, string> [Emmet Docs](https://docs.emmet.io/customization/snippets/#variables)
+        variables = {},
+      },
+    })
+    require("lspconfig").biome.setup({
+      filetypes = { "css", "javascript", "javascriptreact", "less", "sass", "scss", "typescriptreact", "json" },
+    })
     vim.g.rustaceanvim = {
       server = {
         capabilities = lsp_zero.get_capabilities(),

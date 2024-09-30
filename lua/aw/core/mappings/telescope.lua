@@ -29,7 +29,7 @@ map("n", "<leader>/", function()
     winblend = 10,
     previewer = true,
   }))
-end, { desc = "[/] Fuzzily search in current buffer" })
+end, { desc = "Fuzzily search in current buffer" })
 -- It's also possible to pass additional configuration options.
 --  See `:help telescope.builtin.live_grep()` for information about particular keys
 map("n", "<leader>s/", function()

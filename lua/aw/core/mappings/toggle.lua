@@ -29,8 +29,8 @@ map("n", toggle_prefix .. "b", git.toggle_current_line_blame, { desc = "[t]oggle
 map("n", toggle_prefix .. "d", git.toggle_deleted, { desc = "[t]oggle git show [d]eleted" })
 
 -- Toggle LSP diagnostics
-map("n", lsp_prefix .. "b", diaglist.open_buffer_diagnostics, { desc = "Open [b]uffer [c]ode diagnostics" })
-map("n", lsp_prefix .. "w", diaglist.open_all_diagnostics, { desc = "Open [w]orkspace [c]ode diagnostics" })
+map("n", lsp_prefix .. "b", diaglist.open_buffer_diagnostics, { desc = "[b]uffer code diagnostics" })
+map("n", lsp_prefix .. "w", diaglist.open_all_diagnostics, { desc = "[w]orkspace code diagnostics" })
 
 -- Show LspInfo
 map("n", lsp_prefix .. "i", ":LspInfo<CR>", { desc = "Show LSP [i]nfo" })
