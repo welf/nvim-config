@@ -36,7 +36,7 @@ return {
         -- action can be a function type
         {
           icon = " ",
-          desc = "New",
+          desc = "New buffer",
           action = "ene | startinsert",
           key = "e",
         },
@@ -50,7 +50,7 @@ return {
         },
         {
           icon = "󰍉 ",
-          desc = "Find",
+          desc = "Find files",
           action = "Telescope find_files cwd=",
           key = "f",
         },
@@ -73,6 +73,7 @@ return {
           key = "g",
         },
         { icon = " ", desc = "Lazy", group = "Label", action = "Lazy check", key = "l" },
+        { icon = " ", desc = "Mason", group = "Label", action = "Mason", key = "m" },
         { desc = "Quit", group = "Number", action = "q", key = "q" },
       },
       packages = { enable = true }, -- show how many plugins neovim loaded
