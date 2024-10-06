@@ -1,3 +1,65 @@
+-- Enable the following language servers
+--  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
+--
+--  Add any additional override configuration in the following tables. Available keys are:
+--  - cmd (table): Override the default command used to start the server
+--  - filetypes (table): Override the default list of associated filetypes for the server
+--  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
+--  - settings (table): Override the default settings passed when initializing the server.
+--        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+local servers = {
+  -- clangd = {},
+  -- gopls = {},
+  -- pyright = {},
+  -- rust_analyzer = {}, -- WARN: DON'T activate rust-analyzer here!!!
+  --
+  -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
+  --
+  -- Some languages (like typescript) have entire language plugins that can be useful:
+  --    https://github.com/pmizio/typescript-tools.nvim
+  --
+  -- But for many setups, the LSP (`tsserver`) will work just fine
+  -- tsserver = {},
+  --
+
+  taplo = {},
+  lua_ls = {
+    -- cmd = {...},
+    -- filetypes = { ...},
+    -- capabilities = {},
+    settings = {
+      Lua = {
+        codeLens = {
+          enable = true,
+        },
+        completion = {
+          callSnippet = "Replace",
+        },
+        doc = {
+          privateName = { "^_" },
+        },
+        hint = {
+          enable = true,
+          setType = false,
+          paramType = true,
+          paramName = "Disable",
+          semicolon = "Disable",
+          arrayIndex = "Disable",
+        },
+        diagnostics = { globals = { "vim", "hs" } },
+        runtime = {
+          version = "LuaJIT",
+          path = vim.split(package.path, ";"),
+        },
+        telemetry = { enable = false },
+        workspace = { checkThirdParty = false },
+        -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
+        -- diagnostics = { disable = { 'missing-fields' } },
+      },
+    },
+  },
+}
+
 local lsp_attach = function(client, bufnr)
   -- In this case, we create a function that lets us more easily define mappings specific
   -- for LSP related items. It sets the mode, buffer and description for us each time.
@@ -277,33 +339,7 @@ return {
         },
       },
     },
-    servers = {
-      lua_ls = {
-        settings = {
-          Lua = {
-            codeLens = {
-              enable = true,
-            },
-            completion = {
-              callSnippet = "Replace",
-            },
-            doc = {
-              privateName = { "^_" },
-            },
-            hint = {
-              enable = true,
-              setType = false,
-              paramType = true,
-              paramName = "Disable",
-              semicolon = "Disable",
-              arrayIndex = "Disable",
-            },
-            telemetry = { enable = false },
-            workspace = { checkThirdParty = false },
-          },
-        },
-      },
-    },
+    servers = servers,
     settings = {
       html = {
         format = {
@@ -319,7 +355,6 @@ return {
     },
     -- you can do any additional lsp server setup here
     -- return true if you don't want this server to be setup with lspconfig
-    ---@type table<string, fun(server:string, opts:_.lspconfig.options):boolean?>
     setup = {
       -- example to setup with typescript.nvim
       -- tsserver = function(_, opts)
@@ -331,6 +366,9 @@ return {
     },
   },
   config = function()
+    local lspconfig = require("lspconfig")
+    local configs = require("lspconfig.configs")
+
     local lsp_zero = require("lsp-zero")
     --  This function gets run when an LSP attaches to a particular buffer.
     --    That is to say, every time a new file is opened that is associated with
@@ -448,51 +486,7 @@ return {
       capabilities = lsp_capabilities,
     })
 
-    -- Enable the following language servers
-    --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
-    --
-    --  Add any additional override configuration in the following tables. Available keys are:
-    --  - cmd (table): Override the default command used to start the server
-    --  - filetypes (table): Override the default list of associated filetypes for the server
-    --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
-    --  - settings (table): Override the default settings passed when initializing the server.
-    --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
-    local servers = {
-      -- clangd = {},
-      -- gopls = {},
-      -- pyright = {},
-      -- rust_analyzer = {}, -- WARN: DON'T activate rust-analyzer here!!!
-      --
-      -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
-      --
-      -- Some languages (like typescript) have entire language plugins that can be useful:
-      --    https://github.com/pmizio/typescript-tools.nvim
-      --
-      -- But for many setups, the LSP (`tsserver`) will work just fine
-      -- tsserver = {},
-      --
-
-      taplo = {},
-      lua_ls = {
-        -- cmd = {...},
-        -- filetypes = { ...},
-        -- capabilities = {},
-        settings = {
-          Lua = {
-            completion = {
-              callSnippet = "Replace",
-            },
-            workspace = { checkThirdParty = false },
-            telemetry = { enable = false },
-            hint = { enable = true },
-            -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-            -- diagnostics = { disable = { 'missing-fields' } },
-          },
-        },
-      },
-    }
-
-    -- Ensure the servers and tools above are installed
+    -- Ensure the servers and tools listed in lspconfig.opts.servers are installed
     --  To check the current status of installed tools and/or manually install
     --  other tools, you can run
     --    :Mason
@@ -509,6 +503,7 @@ return {
         "denols",
         "emmet_language_server",
         "htmx",
+        "lexical", -- Elixir LSP
         "lua_ls",
         "ruby_lsp",
         "taplo",
@@ -520,20 +515,47 @@ return {
         -- and will be called for each installed server that doesn't have
         -- a dedicated handler.
         function(server_name) -- default handler (optional)
-          require("lspconfig")[server_name].setup({
+          lspconfig[server_name].setup({
             capabilities = lsp_capabilities,
           })
         end,
         lua_ls = function()
-          require("lspconfig").lua_ls.setup({
+          lspconfig.lua_ls.setup({
             on_init = function(client, bufnr)
               lsp_zero.nvim_lua_settings(client, {})
               lsp_zero.default_keymaps({ buffer = bufnr })
+
+              if client.workspace_folders then
+                local path = client.workspace_folders[1].name
+                if vim.uv.fs_stat(path .. "/.luarc.json") or vim.uv.fs_stat(path .. "/.luarc.jsonc") then
+                  return
+                end
+              end
+
+              client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
+                runtime = {
+                  -- Tell the language server which version of Lua you're using
+                  -- (most likely LuaJIT in the case of Neovim)
+                  version = "LuaJIT",
+                },
+                -- Make the server aware of Neovim runtime files
+                workspace = {
+                  checkThirdParty = false,
+                  library = {
+                    vim.env.VIMRUNTIME,
+                    -- Depending on the usage, you might want to add additional paths here.
+                    -- "${3rd}/luv/library"
+                    -- "${3rd}/busted/library",
+                  },
+                  -- or pull in all of 'runtimepath'. NOTE: this is a lot slower
+                  -- library = vim.api.nvim_get_runtime_file("", true)
+                },
+              })
             end,
           })
         end,
         ["yamlls"] = function()
-          require("lspconfig").yamlls.setup({
+          lspconfig.yamlls.setup({
             capabilities = lsp_capabilities,
             settings = {
               yaml = {
@@ -563,8 +585,24 @@ return {
     -- -- servers you have installed in your system
     -- require('lspconfig').gleam.setup({})
     -- require('lspconfig').ocamllsp.setup({})
-    require("lspconfig").emmet_language_server.setup({
-      filetypes = { "css", "eruby", "html", "javascript", "javascriptreact", "less", "sass", "scss", "pug", "typescriptreact" },
+    lspconfig.emmet_language_server.setup({
+      filetypes = {
+        "css",
+        "eruby",
+        "html",
+        "javascript",
+        "javascriptreact",
+        "less",
+        "sass",
+        "scss",
+        "pug",
+        "typescriptreact",
+        "vue",
+        "eelxir",
+        "heex",
+        "eelexir",
+        "surface",
+      },
       -- Read more about this options in the [vscode docs](https://code.visualstudio.com/docs/editor/emmet#_emmet-configuration).
       -- **Note:** only the options listed in the table are supported.
       init_options = {
@@ -588,7 +626,8 @@ return {
         variables = {},
       },
     })
-    require("lspconfig").biome.setup({
+
+    lspconfig.biome.setup({
       filetypes = { "css", "javascript", "javascriptreact", "less", "sass", "scss", "typescriptreact", "json" },
     })
     vim.g.rustaceanvim = {
@@ -596,5 +635,39 @@ return {
         capabilities = lsp_zero.get_capabilities(),
       },
     }
+
+    -- Elixir LSP setup
+    if not configs.lexical then
+      configs.lexical = {
+        default_config = {
+          filetypes = { "elixir", "eelixir", "heex" },
+          cmd = { "lexical" },
+          root_dir = function(fname)
+            return lspconfig.util.root_pattern("mix.exs", ".git")(fname) or vim.loop.os_homedir()
+          end,
+          -- optional settings
+          settings = {},
+        },
+      }
+    end
+
+    lspconfig.lexical.setup({})
+
+    -- TailwindCSS LSP setup
+    lspconfig.tailwindcss.setup({
+      init_options = {
+        userLanguages = {
+          elixir = "html-eex",
+          eelixir = "html-eex",
+          heex = "html-eex",
+        },
+      },
+      cmd = { "tailwindcss-language-server", "--stdio" },
+      filetypes = { "html", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact", "eruby", "eelixir", "heex", "surface", "elixir" },
+      root_dir = function(fname)
+        return lspconfig.util.root_pattern("tailwind.config.js", "tailwind.config.cjs", "tailwind.config.ts", "tailwind.config.tsx", ".git")(fname)
+          or vim.loop.os_homedir()
+      end,
+    })
   end,
 }
