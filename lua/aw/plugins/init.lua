@@ -1,4 +1,5 @@
 return {
+  { import = "aw.plugins.actions-preview" },
   { import = "aw.plugins.claude" },
   { import = "aw.plugins.cmp" },
   { import = "aw.plugins.conform" },
@@ -17,6 +18,7 @@ return {
   { import = "aw.plugins.indent-line" },
   { import = "aw.plugins.highlight-colors" },
   { import = "aw.plugins.lazydev" },
+  { import = "aw.plugins.lightbulb" },
   { import = "aw.plugins.lspconfig" },
   { import = "aw.plugins.lspkind" },
   { import = "aw.plugins.lsp_lines" },
