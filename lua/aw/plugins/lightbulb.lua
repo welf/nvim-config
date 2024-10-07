@@ -128,7 +128,7 @@ return {
     },
   },
   config = function()
-    require("lightbulb").setup({
+    require("nvim-lightbulb").setup({
       autocmd = { enabled = true },
     })
   end,

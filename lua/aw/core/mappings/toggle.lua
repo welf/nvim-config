@@ -51,6 +51,6 @@ end, { desc = "[t]oggle [c]olorizer" })
 map("n", toggle_prefix .. "m", ":RenderMarkdown toggle<CR>", { desc = "[t]oggle [m]arkdown preview" })
 
 -- Toggle code actions preview
-map({ "n", "v" }, toggle_prefix .. "p", require("actions-preview").code_actions, { desc = "[t]oggle [c]ode actions [p]review" })
+map({ "n", "v" }, lsp_prefix .. "p", require("actions-preview").code_actions, { desc = "[c]ode actions [p]review" })
 
 -- Toggle terminal (<leader>tt) is defined in the TERMINAL section

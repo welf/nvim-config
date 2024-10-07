@@ -26,7 +26,6 @@ return {
   { import = "aw.plugins.lsp-zero" },
   { import = "aw.plugins.lualine" },
   { import = "aw.plugins.mason" },
-  { import = "aw.plugins.navic" },
   { import = "aw.plugins.noice" },
   { import = "aw.plugins.neogit" },
   { import = "aw.plugins.neotest" },
