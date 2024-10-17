@@ -21,7 +21,6 @@ local servers = {
   -- But for many setups, the LSP (`tsserver`) will work just fine
   -- tsserver = {},
   --
-
   taplo = {},
   lua_ls = {
     -- cmd = {...},
@@ -501,6 +500,7 @@ return {
         "arduino_language_server",
         "biome",
         "denols",
+        -- "elixirls",
         "emmet_language_server",
         "htmx",
         "lexical", -- Elixir LSP
@@ -628,7 +628,8 @@ return {
     })
 
     lspconfig.biome.setup({
-      filetypes = { "css", "javascript", "javascriptreact", "less", "sass", "scss", "typescriptreact", "json" },
+      cmd = { "biome", "lsp-proxy" },
+      filetypes = { "javascript", "javascriptreact", "json", "jsonc", "typescript", "typescript.tsx", "typescriptreact", "astro", "svelte", "vue", "css" },
     })
     vim.g.rustaceanvim = {
       server = {
@@ -637,6 +638,7 @@ return {
     }
 
     -- Elixir LSP setup
+    --
     if not configs.lexical then
       configs.lexical = {
         default_config = {
@@ -650,8 +652,15 @@ return {
         },
       }
     end
-
     lspconfig.lexical.setup({})
+
+    -- require("lspconfig").elixirls.setup({
+    --   -- cmd = { "/opt/homebrew/bin/elixir-ls" },
+    --   filetypes = { "elixir", "eelixir", "heex", "surface" },
+    --   single_file_support = true,
+    --   dialyzerEnabled = true,
+    --   enableTestLenses = true,
+    -- })
 
     -- TailwindCSS LSP setup
     lspconfig.tailwindcss.setup({
