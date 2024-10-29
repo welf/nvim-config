@@ -24,6 +24,7 @@ map("n", inspect_prefix .. "h", ":Inspect<CR>", { desc = "[i]nspect  [h]ighlight
 map("n", show_prefix .. "q", vim.diagnostic.setloclist, { desc = "[S]how diagnostic [q]uickfix list" })
 -- Show web-devicons
 map("n", show_prefix .. "i", ":NvimWebDeviconsHiTest<CR>", { desc = "[S]how web-dev[i]cons" })
+-- Show LSP output panel
+map("n", show_prefix .. "o", ":OutputPanel<CR>", { desc = "[S]how LSP [o]utput panel" })
 -- Show LSP diagnostics
 map("n", show_prefix .. "db", diaglist.open_buffer_diagnostics, { desc = "[S]how [d]iagnostics for [b]uffer" })
-map("n", show_prefix .. "dw", diaglist.open_all_diagnostics, { desc = "[S]how [d]iagnostics for [w]orkspace" })

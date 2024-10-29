@@ -499,15 +499,16 @@ return {
       ensure_installed = {
         "arduino_language_server",
         "biome",
-        "denols",
+        -- "denols",
         -- "elixirls",
-        "emmet_language_server",
-        "htmx",
+        -- "emmet_language_server",
+        -- "htmx",
         "lexical", -- Elixir LSP
         "lua_ls",
+        -- "nextls", -- Elixir LSP
         "ruby_lsp",
         "taplo",
-        "tailwindcss",
+        -- "tailwindcss",
         "yamlls",
       },
       handlers = {
@@ -552,6 +553,11 @@ return {
                 },
               })
             end,
+            settings = {
+              Lua = {},
+            },
+            log_level = 2,
+            single_file_support = true,
           })
         end,
         ["yamlls"] = function()
@@ -598,7 +604,8 @@ return {
         "pug",
         "typescriptreact",
         "vue",
-        "eelxir",
+        "eelixir",
+        "elixir",
         "heex",
         "eelexir",
         "surface",
@@ -625,11 +632,45 @@ return {
         --- @type table<string, string> [Emmet Docs](https://docs.emmet.io/customization/snippets/#variables)
         variables = {},
       },
+      root_dir = function(fname)
+        return lspconfig.util.root_pattern(".git", "package.json", "yarn.lock", "pnpm-lock.yaml", "lerna.json", "tsconfig.json", "jsconfig.json", "mix.exs")(
+          fname
+        ) or vim.loop.os_homedir()
+      end,
+      single_file_support = true,
     })
 
     lspconfig.biome.setup({
       cmd = { "biome", "lsp-proxy" },
-      filetypes = { "javascript", "javascriptreact", "json", "jsonc", "typescript", "typescript.tsx", "typescriptreact", "astro", "svelte", "vue", "css" },
+      filetypes = {
+        "astro",
+        "css",
+        "graphql",
+        "javascript",
+        "javascriptreact",
+        "json",
+        "jsonc",
+        "svelte",
+        "typescript",
+        "typescript.tsx",
+        "typescriptreact",
+        "vue",
+      },
+      root_dir = function(fname)
+        return lspconfig.util.root_pattern(
+          ".git",
+          "package.json",
+          "yarn.lock",
+          "pnpm-lock.yaml",
+          "lerna.json",
+          "tsconfig.json",
+          "jsconfig.json",
+          ".biome",
+          "biome.json",
+          "biome.jsonc"
+        )(fname) or vim.loop.os_homedir()
+      end,
+      single_file_support = false,
     })
     vim.g.rustaceanvim = {
       server = {
@@ -637,13 +678,131 @@ return {
       },
     }
 
+    local nvim_lsp = require("lspconfig")
+    nvim_lsp.denols.setup({
+      cmd = { "deno", "lsp" },
+      root_dir = nvim_lsp.util.root_pattern("deno.json", "deno.jsonc", "package.json", "tsconfig.json", ".git"),
+      filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx", "markdown", "mdx" },
+      on_attach = lsp_attach,
+      cmd_env = {
+        NO_COLOR = true,
+      },
+      settings = {
+        deno = {
+          enable = true,
+          enablePaths = true,
+          codeLens = {
+            implementations = true,
+            references = true,
+            referencesAllFunctions = true,
+            test = true,
+          },
+          lint = true,
+          showReferences = true,
+          signal_file_support = true,
+          suggest = {
+            autoImports = true,
+            completeFunctionCalls = true,
+            imports = {
+              autoDiscover = true,
+              hosts = {
+                ["https://deno.land"] = true,
+              },
+            },
+            names = true,
+            paths = true,
+          },
+          unstable = true,
+        },
+      },
+    })
+
+    lspconfig.htmx.setup({
+      cmd = { "htmx-lsp" },
+      filetypes = {
+        "aspnetcorerazor",
+        "astro",
+        "astro-markdown",
+        "blade",
+        "clojure",
+        "django-html",
+        "htmldjango",
+        "edge",
+        "eelixir",
+        "elixir",
+        "ejs",
+        "erb",
+        "eruby",
+        "gohtml",
+        "gohtmltmpl",
+        "haml",
+        "handlebars",
+        "hbs",
+        "html",
+        "htmlangular",
+        "html-eex",
+        "heex",
+        "jade",
+        "leaf",
+        "liquid",
+        "markdown",
+        "mdx",
+        "mustache",
+        "njk",
+        "nunjucks",
+        "php",
+        "razor",
+        "slim",
+        "twig",
+        "javascript",
+        "javascriptreact",
+        "reason",
+        "rescript",
+        "typescript",
+        "typescriptreact",
+        "vue",
+        "svelte",
+        "templ",
+      },
+      root_dir = function(fname)
+        return lspconfig.util.root_pattern(
+          ".git",
+          "package.json",
+          "yarn.lock",
+          "pnpm-lock.yaml",
+          "lerna.json",
+          "node_modules",
+          "tsconfig.json",
+          "jsconfig.json",
+          "mix.exs"
+        )(fname) or vim.loop.os_homedir()
+      end,
+      single_file_support = true,
+    })
+
     -- Elixir LSP setup
     --
+    -- require("lspconfig")["nextls"].setup({
+    --   cmd = { "nextls", "--stdio" },
+    --   filetypes = { "eelixir", "elixir", "heex", "surface" },
+    --   init_options = {
+    --     extensions = {
+    --       credo = { enable = true },
+    --     },
+    --     experimental = {
+    --       completions = { enable = true },
+    --     },
+    --   },
+    --   root_dir = function(fname)
+    --     return lspconfig.util.root_pattern("mix.exs", ".git")(fname) or vim.loop.os_homedir()
+    --   end,
+    --   single_file_support = true,
+    -- })
     if not configs.lexical then
       configs.lexical = {
         default_config = {
-          filetypes = { "elixir", "eelixir", "heex" },
           cmd = { "lexical" },
+          filetypes = { "elixir", "eelixir", "heex", "surface" },
           root_dir = function(fname)
             return lspconfig.util.root_pattern("mix.exs", ".git")(fname) or vim.loop.os_homedir()
           end,
@@ -655,27 +814,119 @@ return {
     lspconfig.lexical.setup({})
 
     -- require("lspconfig").elixirls.setup({
-    --   -- cmd = { "/opt/homebrew/bin/elixir-ls" },
+    --   cmd = { "/opt/homebrew/bin/elixir-ls" },
     --   filetypes = { "elixir", "eelixir", "heex", "surface" },
     --   single_file_support = true,
     --   dialyzerEnabled = true,
+    --   incrementalDialyzer = true,
     --   enableTestLenses = true,
+    --   suggestSpecs = true,
     -- })
+    -- require("lspconfig").elixirls.on_attach = function(client, bufnr)
+    --   vim.keymap.set("n", "<space>ef", ":ElixirFromPipe<cr>", { buffer = true, noremap = true, desc = "Convert from Elixir pipe" })
+    --   vim.keymap.set("n", "<space>et", ":ElixirToPipe<cr>", { buffer = true, noremap = true, desc = "Convert to Elixir pipe" })
+    --   vim.keymap.set("v", "<space>em", ":ElixirExpandMacro<cr>", { buffer = true, noremap = true, desc = "Expand Elixir macro" })
+    -- end
 
     -- TailwindCSS LSP setup
     lspconfig.tailwindcss.setup({
-      init_options = {
-        userLanguages = {
-          elixir = "html-eex",
-          eelixir = "html-eex",
-          heex = "html-eex",
+      cmd = { "tailwindcss-language-server", "--stdio" },
+      filetypes = {
+        "aspnetcorerazor",
+        "astro",
+        "astro-markdown",
+        "blade",
+        "clojure",
+        "django-html",
+        "htmldjango",
+        "edge",
+        "eelixir",
+        "elixir",
+        "ejs",
+        "erb",
+        "eruby",
+        "gohtml",
+        "gohtmltmpl",
+        "haml",
+        "handlebars",
+        "hbs",
+        "html",
+        "htmlangular",
+        "html-eex",
+        "heex",
+        "jade",
+        "leaf",
+        "liquid",
+        "markdown",
+        "mdx",
+        "mustache",
+        "njk",
+        "nunjucks",
+        "php",
+        "razor",
+        "slim",
+        "twig",
+        "css",
+        "less",
+        "postcss",
+        "sass",
+        "scss",
+        "stylus",
+        "sugarss",
+        "javascript",
+        "javascriptreact",
+        "reason",
+        "rescript",
+        "typescript",
+        "typescriptreact",
+        "vue",
+        "svelte",
+        "templ",
+      },
+      settings = {
+        tailwindCSS = {
+          classAttributes = { "class", "className", "class:list", "classList", "ngClass" },
+          includeLanguages = {
+            elixir = "html-eex",
+            eelixir = "html-eex",
+            eruby = "erb",
+            heex = "html-eex",
+            htmlangular = "html",
+            templ = "html",
+          },
+          experimental = {
+            classRegex = {
+              "class[:]\\s*\"([^\"]*)\"",
+            },
+          },
+          lint = {
+            cssConflict = "warning",
+            invalidApply = "error",
+            invalidConfigPath = "error",
+            invalidScreen = "error",
+            invalidTailwindDirective = "error",
+            invalidVariant = "error",
+            recommendedVariantOrder = "warning",
+          },
+          validate = true,
         },
       },
-      cmd = { "tailwindcss-language-server", "--stdio" },
-      filetypes = { "html", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact", "eruby", "eelixir", "heex", "surface", "elixir" },
       root_dir = function(fname)
-        return lspconfig.util.root_pattern("tailwind.config.js", "tailwind.config.cjs", "tailwind.config.ts", "tailwind.config.tsx", ".git")(fname)
-          or vim.loop.os_homedir()
+        return lspconfig.util.root_pattern(
+          ".git",
+          "mix.exs",
+          "node_modules",
+          "package.json",
+          "postcss.config.js",
+          "postcss.config.cjs",
+          "postcss.config.mjs",
+          "postcss.config.ts",
+          "tailwind.config.cjs",
+          "tailwind.config.mjs",
+          "tailwind.config.js",
+          "tailwind.config.ts",
+          "tailwind.config.tsx"
+        )(fname) or vim.loop.os_homedir()
       end,
     })
   end,

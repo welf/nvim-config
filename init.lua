@@ -91,3 +91,8 @@ vim.opt.softtabstop = 2
 
 -- enable 24-bit color
 vim.opt.termguicolors = true
+
+-- To appropriately highlight codefences returned from denols, you will need to augment vim.g.markdown_fenced languages
+vim.g.markdown_fenced_languages = {
+  "ts=typescript",
+}

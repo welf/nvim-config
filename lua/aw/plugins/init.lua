@@ -32,6 +32,7 @@ return {
   { import = "aw.plugins.neo-tree" },
   { import = "aw.plugins.onedark" },
   { import = "aw.plugins.outline" },
+  { import = "aw.plugins.output-panel" },
   { import = "aw.plugins.plenary" },
   { import = "aw.plugins.rainbow-delimiters" },
   { import = "aw.plugins.render-markdown" },

@@ -15,6 +15,7 @@ return {
     "rafamadriz/friendly-snippets",
     "onsails/lspkind.nvim",
     "windwp/nvim-autopairs",
+    "kdheepak/cmp-latex-symbols",
     {
       "L3MON4D3/LuaSnip",
       build = (function()
@@ -62,6 +63,16 @@ return {
       { name = "nvim_lsp" },
       { name = "luasnip", keyword_length = 2 },
       { name = "buffer", keyword_length = 3 },
+      { name = "emoji" },
+      { name = "nerdfont" },
+      { name = "greek" },
+      { name = "treesitter" },
+      {
+        name = "latex_symbols",
+        option = {
+          strategy = 0, -- mixed
+        },
+      },
     },
     experimental = {
       native_menu = false,
@@ -79,8 +90,8 @@ return {
     local luasnip = require("luasnip")
     luasnip.config.setup({})
 
-    local lsp_kind = require("lspkind")
-    lsp_kind.init()
+    local lspkind = require("lspkind")
+    lspkind.init()
 
     -- this is the function that loads the extra snippets
     -- from rafamadriz/friendly-snippets
@@ -108,20 +119,37 @@ return {
       formatting = {
         -- changing the order of fields so the icon is the first
         fields = { "menu", "abbr", "kind" },
-        -- Customize menu ✨
-        format = function(entry, item)
-          local menu_icon = {
+        format = lspkind.cmp_format({
+          mode = "symbol_text", -- options: 'text', 'text_symbol', 'symbol_text', 'symbol'
+          maxwidth = 50, -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
+          menu = { -- adds a menu icon to the completion menu
             copilot = "🤖",
             nvim_lsp = "💎",
             luasnip = "🚀",
             buffer = "📝",
             path = "📁",
             cmdline = "💻",
-          }
-
-          item.menu = menu_icon[entry.source.name]
-          return item
-        end,
+          },
+          before = function(entry, vim_item) -- for tailwind css autocomplete
+            if vim_item.kind == "Color" and entry.completion_item.documentation then
+              local _, _, r, g, b = string.find(entry.completion_item.documentation, "^rgb%((%d+), (%d+), (%d+)")
+              if r then
+                local color = string.format("%02x", r) .. string.format("%02x", g) .. string.format("%02x", b)
+                local group = "Tw_" .. color
+                if vim.fn.hlID(group) < 1 then
+                  vim.api.nvim_set_hl(0, group, { fg = "#" .. color })
+                end
+                vim_item.kind = "⬤" -- or "⬤", or "■", or anything
+                vim_item.kind_hl_group = group
+                return vim_item
+              end
+            end
+            -- vim_item.kind = icons[vim_item.kind] and (icons[vim_item.kind] .. vim_item.kind) or vim_item.kind
+            -- or just show the icon
+            vim_item.kind = lspkind.symbolic(vim_item.kind) and lspkind.symbolic(vim_item.kind) or vim_item.kind
+            return vim_item
+          end,
+        }),
       },
       -- For an understanding of why these mappings were
       -- chosen, you will need to read `:help ins-completion`
@@ -209,6 +237,7 @@ return {
       window = {
         completion = cmp.config.window.bordered({
           winhighlight = "Normal:Normal,FloatBorder:LspBorderBG,CursorLine:PmenuSel,Search:None",
+          col_offset = -3, -- align the abbr and word on cursor
         }),
         documentation = cmp.config.window.bordered({
           winhighlight = "Normal:Normal,FloatBorder:LspBorderBG,CursorLine:PmenuSel,Search:None",
