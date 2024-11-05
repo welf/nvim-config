@@ -9,6 +9,6 @@ map("v", "<leader>aI", ":'<,'>ClaudeImplement ", { desc = "[I]mplement with Clau
 map("n", "<leader>ax", ":ClaudeCancel<CR>", { silent = true, desc = "Cancel Claude AI prompt" })
 map("n", "<leader>aC", ":ClaudeChat<CR>", { silent = true, desc = "[C]hat with Claude AI" })
 -- Delete default Claude keymaps
-vim.keymap.del("n", "<leader>cc")
-vim.keymap.del("v", "<leader>ci")
-vim.keymap.del("n", "<leader>cx")
+-- vim.keymap.del("n", "<leader>cc")
+-- vim.keymap.del("v", "<leader>ci")
+-- vim.keymap.del("n", "<leader>cx")

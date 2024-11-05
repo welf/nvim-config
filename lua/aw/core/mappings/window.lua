@@ -9,12 +9,12 @@ local map = vim.keymap.set
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
 --  See `:help wincmd` for a list of all window commands
-map("n", "<C-h>", "<C-w>h", { desc = "Move focus to the left window" })
-map("n", "<C-l>", "<C-w>l", { desc = "Move focus to the right window" })
-map("n", "<C-j>", "<C-w>j", { desc = "Move focus to the lower window" })
-map("n", "<C-k>", "<C-w>k", { desc = "Move focus to the upper window" })
+map("n", "<C-h>", require("smart-splits").move_cursor_left, { desc = "Move focus to the left window" })
+map("n", "<C-l>", require("smart-splits").move_cursor_right, { desc = "Move focus to the right window" })
+map("n", "<C-j>", require("smart-splits").move_cursor_down, { desc = "Move focus to the lower window" })
+map("n", "<C-k>", require("smart-splits").move_cursor_up, { desc = "Move focus to the upper window" })
 -- Resize windows with ALT+<hjkl>
-map("n", "<A-l>", [[<cmd>vertical resize +1<cr>]], { desc = "Increase window width" })
-map("n", "<A-h>", [[<cmd>vertical resize -1<cr>]], { desc = "Decrease window width" })
-map("n", "<A-k>", [[<cmd>horizontal resize +1<cr>]], { desc = "Increase window height" })
-map("n", "<A-j>", [[<cmd>horizontal resize -1<cr>]], { desc = "Decrease window height" })
+map("n", "<A-l>", require("smart-splits").resize_right, { desc = "Increase window width" })
+map("n", "<A-h>", require("smart-splits").resize_left, { desc = "Decrease window width" })
+map("n", "<A-k>", require("smart-splits").resize_up, { desc = "Increase window height" })
+map("n", "<A-j>", require("smart-splits").resize_down, { desc = "Decrease window height" })

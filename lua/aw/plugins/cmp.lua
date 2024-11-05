@@ -204,20 +204,20 @@ return {
         ["<C-f>"] = cmp.mapping.scroll_docs(4),
         ["<C-b>"] = cmp.mapping.scroll_docs(-4),
 
-        -- Think of <c-l> as moving to the right of your snippet expansion.
+        -- Think of <C-Tab> as moving to the right of your snippet expansion.
         --  So if you have a snippet that's like:
         --  function $name($args)
         --    $body
         --  end
         --
-        -- <c-l> will move you to the right of each of the expansion locations.
-        -- <c-h> is similar, except moving you backwards.
-        ["<C-l>"] = cmp.mapping(function()
+        -- <C-Tab> will move you to the right of each of the expansion locations.
+        -- <C-S-Tab> is similar, except moving you backwards.
+        ["<C-Tab>"] = cmp.mapping(function()
           if luasnip.expand_or_locally_jumpable() then
             luasnip.expand_or_jump()
           end
         end, { "i", "s" }),
-        ["<C-h>"] = cmp.mapping(function()
+        ["<C-S-Tab>"] = cmp.mapping(function()
           if luasnip.locally_jumpable(-1) then
             luasnip.jump(-1)
           end

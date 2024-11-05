@@ -33,11 +33,13 @@ local opts = {
   -- Specify filetypes for attaching copilot. If not specified, copilot will attach to all filetypes.
   filetypes = {
     help = false,
-    gitcommit = false,
+    gitcommit = true,
     gitrebase = false,
     hgcommit = false,
+    markdown = true,
     svn = false,
     cvs = false,
+    yaml = true,
     ["."] = false,
   },
   copilot_node_command = "node", -- Node.js version must be > 18.x
