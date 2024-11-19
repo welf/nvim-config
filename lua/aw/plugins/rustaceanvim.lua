@@ -27,7 +27,12 @@ return {
       settings = {
         -- rust-analyzer language server configuration
         ["rust-analyzer"] = {
-          cargo = { buildScripts = { enable = true }, features = "all" },
+          cargo = {
+            buildScripts = {
+              enable = true,
+            },
+            features = "all",
+          },
           check = {
             command = "clippy", -- rust-analyzer.check.command (default: "check")
             features = "all",

@@ -5,6 +5,7 @@
 return {
   {
     "lewis6991/gitsigns.nvim",
+    lazy = true,
     opts = {
       current_line_blame = true, -- Toggle with `:Gitsigns toggle_current_line_blame`
       current_line_blame_formatter = "\t<author>: <author_time:%Y-%m-%d> - <abbrev_sha>",
