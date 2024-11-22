@@ -13,12 +13,12 @@ return {
   config = function()
     local ts = require("telescope")
     local h_pct = 0.90
-    local w_pct = 0.80
-    local w_limit = 80
+    local w_pct = 0.99
+    local w_limit = 99
 
     local standard_setup = {
       borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
-      preview = { hide_on_startup = true },
+      preview = { hide_on_startup = false },
       layout_strategy = "vertical",
       layout_config = {
         vertical = {
@@ -38,7 +38,7 @@ return {
 
     local fullscreen_setup = {
       borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
-      preview = { hide_on_startup = true },
+      preview = { hide_on_startup = false },
       layout_strategy = "flex",
       layout_config = {
         flex = { flip_columns = 100 },
