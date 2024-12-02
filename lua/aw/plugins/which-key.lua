@@ -23,6 +23,7 @@ return {
       { "<leader>S", group = "[S]how", icon = { icon = "🔍 ", hl = "Constant" } },
       { "<leader>Sd", group = "[S]how [d]iagnostics", icon = { icon = "🐞 ", hl = "Constant" } },
       { "<leader>a", group = "[A]I Code Companion", icon = { icon = "🧠 ", hl = "Constant" }, mode = { "n", "v" } },
+      { "<leader>x", group = "Trouble diagnostic", icon = { icon = "⚠️ ", hl = "Constant" }, mode = { "n", "v" } },
     },
   },
   keys = {
