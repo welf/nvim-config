@@ -45,17 +45,46 @@ local servers = {
           semicolon = "Disable",
           arrayIndex = "Disable",
         },
-        diagnostics = { globals = { "vim", "hs" } },
-        runtime = {
-          version = "LuaJIT",
-          path = vim.split(package.path, ";"),
-        },
         telemetry = { enable = false },
-        workspace = { checkThirdParty = false },
-        -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-        -- diagnostics = { disable = { 'missing-fields' } },
       },
     },
+    on_init = function(client)
+      local join = vim.fs.joinpath
+      local path = client.workspace_folders[1].name
+
+      -- Don't do anything if there is project local config
+      if vim.uv.fs_stat(join(path, ".luarc.json")) or vim.uv.fs_stat(join(path, ".luarc.jsonc")) then
+        return
+      end
+
+      -- Apply neovim specific settings
+      local runtime_path = vim.split(package.path, ";")
+      table.insert(runtime_path, join("lua", "?.lua"))
+      table.insert(runtime_path, join("lua", "?", "init.lua"))
+
+      local nvim_settings = {
+        runtime = {
+          -- Tell the language server which version of Lua you're using
+          version = "LuaJIT",
+          path = runtime_path,
+        },
+        diagnostics = {
+          -- Get the language server to recognize the `vim` global
+          globals = { "vim" },
+          disable = { "missing-fields" },
+        },
+        workspace = {
+          checkThirdParty = false,
+          library = {
+            -- Make the server aware of Neovim runtime files
+            vim.env.VIMRUNTIME,
+            vim.fn.stdpath("config"),
+          },
+        },
+      }
+
+      client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, nvim_settings)
+    end,
   },
 }
 
@@ -284,6 +313,7 @@ return {
   "neovim/nvim-lspconfig",
   cmd = { "LspInfo", "LspInstall", "LspStart" },
   event = { "BufReadPre", "BufNewFile" },
+  verbose = false,
   dependencies = {
     -- Automatically install LSPs and related tools to stdpath for Neovim
     { "williamboman/mason.nvim", config = true }, -- NOTE: Must be loaded before dependants
@@ -369,6 +399,7 @@ return {
     local configs = require("lspconfig.configs")
 
     local lsp_zero = require("lsp-zero")
+
     --  This function gets run when an LSP attaches to a particular buffer.
     --    That is to say, every time a new file is opened that is associated with
     --    an lsp (for example, opening `main.rs` is associated with `rust_analyzer`) this
@@ -472,6 +503,12 @@ return {
       capabilities = require("cmp_nvim_lsp").default_capabilities(),
     })
 
+    lsp_zero.on_attach(function(client, bufnr)
+      lsp_zero.default_keymaps({ buffer = bufnr })
+    end)
+
+    lspconfig.lua_ls.setup(lsp_zero.nvim_lua_ls())
+
     local lsp_capabilities = vim.tbl_deep_extend("force", require("cmp_nvim_lsp").default_capabilities(), {
       textDocument = {
         foldingRange = {
@@ -518,46 +555,6 @@ return {
         function(server_name) -- default handler (optional)
           lspconfig[server_name].setup({
             capabilities = lsp_capabilities,
-          })
-        end,
-        lua_ls = function()
-          lspconfig.lua_ls.setup({
-            on_init = function(client, bufnr)
-              lsp_zero.nvim_lua_settings(client, {})
-              lsp_zero.default_keymaps({ buffer = bufnr })
-
-              if client.workspace_folders then
-                local path = client.workspace_folders[1].name
-                if vim.uv.fs_stat(path .. "/.luarc.json") or vim.uv.fs_stat(path .. "/.luarc.jsonc") then
-                  return
-                end
-              end
-
-              client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
-                runtime = {
-                  -- Tell the language server which version of Lua you're using
-                  -- (most likely LuaJIT in the case of Neovim)
-                  version = "LuaJIT",
-                },
-                -- Make the server aware of Neovim runtime files
-                workspace = {
-                  checkThirdParty = false,
-                  library = {
-                    vim.env.VIMRUNTIME,
-                    -- Depending on the usage, you might want to add additional paths here.
-                    -- "${3rd}/luv/library"
-                    -- "${3rd}/busted/library",
-                  },
-                  -- or pull in all of 'runtimepath'. NOTE: this is a lot slower
-                  -- library = vim.api.nvim_get_runtime_file("", true)
-                },
-              })
-            end,
-            settings = {
-              Lua = {},
-            },
-            log_level = 2,
-            single_file_support = true,
           })
         end,
         ["yamlls"] = function()
