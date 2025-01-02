@@ -33,9 +33,6 @@ end, { desc = "Add a cursor and jump to the [n]ext word under cursor" })
 map({ "n", "v" }, mc_prefix .. "s", function()
   mc.skipCursor("*")
 end, { desc = "[s]kip and jump to the next word under cursor" })
-map({ "n", "v" }, "<C-s>", function()
-  mc.skipCursor("*")
-end, { desc = "[s]kip and jump to the next word under cursor" })
 
 -- Rotate the main cursor.
 map({ "n", "v" }, "<right>", mc.nextCursor, { desc = "Make next cursor the main" })
@@ -68,7 +65,7 @@ map("n", "<ESC>c", function()
   else
     -- Default <ESC>c handler.
   end
-end, { desc = "[c]lear all cursors" })
+end, { desc = "Clear all [c]ursors" })
 
 -- Align cursor columns.
 map("n", mc_prefix .. "A", mc.alignCursors, { desc = "[A]lign cursor columns" })

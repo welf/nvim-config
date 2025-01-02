@@ -62,7 +62,15 @@ return {
       { name = "path" },
       { name = "nvim_lsp" },
       { name = "luasnip", keyword_length = 2 },
-      { name = "buffer", keyword_length = 3 },
+      {
+        name = "buffer",
+        keyword_length = 3,
+        option = {
+          get_bufnrs = function()
+            return vim.api.nvim_list_bufs()
+          end,
+        },
+      },
       { name = "emoji" },
       { name = "nerdfont" },
       { name = "greek" },
@@ -72,6 +80,7 @@ return {
         option = {
           strategy = 0, -- mixed
         },
+        { name = "crates" },
       },
     },
     experimental = {
@@ -114,9 +123,20 @@ return {
         { name = "nvim_lua", group_index = 1 },
         { name = "vim-dadbod-completion", group_index = 1 },
         { name = "path", group_index = 2 },
-        { name = "buffer", keyword_length = 3, group_index = 2, max_item_count = 5 },
+        {
+          name = "buffer",
+          keyword_length = 3,
+          group_index = 2,
+          max_item_count = 5,
+          option = {
+            get_bufnrs = function()
+              return vim.api.nvim_list_bufs()
+            end,
+          },
+        },
       },
       formatting = {
+        expandable_indicator = true,
         -- changing the order of fields so the icon is the first
         fields = { "menu", "abbr", "kind" },
         format = lspkind.cmp_format({

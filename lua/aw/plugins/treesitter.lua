@@ -84,7 +84,10 @@ return {
           additional_vim_regex_highlighting = { "ruby" },
         },
 
-        indent = { enable = true },
+        indent = {
+          enable = true,
+          -- disable = { "python", "css", "rust" },
+        },
 
         incremental_selection = {
           enable = true,

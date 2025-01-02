@@ -96,3 +96,6 @@ vim.opt.termguicolors = true
 vim.g.markdown_fenced_languages = {
   "ts=typescript",
 }
+
+-- views can only be fully collapsed with the global statusline
+vim.opt.laststatus = 3
