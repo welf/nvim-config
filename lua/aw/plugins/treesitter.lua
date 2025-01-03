@@ -86,7 +86,7 @@ return {
 
         indent = {
           enable = true,
-          -- disable = { "python", "css", "rust" },
+          disable = { "python", "css", "toml" },
         },
 
         incremental_selection = {
