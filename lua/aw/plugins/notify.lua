@@ -1,6 +1,7 @@
 return {
   "rcarriga/nvim-notify",
   opts = {
+    background_colour = "#21283b",
     timeout = 5000,
     render = "minimal",
     stages = "fade_in_slide_out",
