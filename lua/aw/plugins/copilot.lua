@@ -32,13 +32,14 @@ local opts = {
   },
   -- Specify filetypes for attaching copilot. If not specified, copilot will attach to all filetypes.
   filetypes = {
+    cvs = false,
     help = false,
     gitcommit = true,
     gitrebase = true,
     hgcommit = true,
     markdown = true,
     svn = false,
-    cvs = false,
+    typr = false,
     yaml = true,
     ["."] = false,
   },
