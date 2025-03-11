@@ -2,9 +2,9 @@ return {
   "https://git.sr.ht/~whynothugo/lsp_lines.nvim",
   opts = {},
   config = function()
-    -- Disable regular diagnostic virtual_text since it's redundant due to lsp_lines.
     vim.diagnostic.config({
-      virtual_text = false,
+      virtual_text = true, -- Enable virtual text diagnostics after the end of each line
+      virtual_lines = { only_current_line = true }, -- Extend virtual text to the entire line
     })
     require("lsp_lines").setup()
   end,
