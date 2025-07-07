@@ -92,6 +92,9 @@ vim.opt.softtabstop = 2
 -- enable 24-bit color
 vim.opt.termguicolors = true
 
+-- Set line spacing (only works in GUI clients like Neovide)
+vim.opt.linespace = 4
+
 -- To appropriately highlight codefences returned from denols, you will need to augment vim.g.markdown_fenced languages
 vim.g.markdown_fenced_languages = {
   "ts=typescript",
@@ -99,3 +102,10 @@ vim.g.markdown_fenced_languages = {
 
 -- views can only be fully collapsed with the global statusline
 vim.opt.laststatus = 3
+
+-- Force neo-tree toggle mapping (load last to override any conflicts)
+vim.keymap.set("n", "<leader>e", ":Neotree toggle<CR>", { 
+  desc = "Toggle NeoTree Explorer", 
+  silent = true, 
+  noremap = true 
+})

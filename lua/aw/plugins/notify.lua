@@ -6,7 +6,7 @@ return {
     render = "minimal",
     stages = "fade_in_slide_out",
     on_open = function(win)
-      vim.api.nvim_win_set_config(win, { focusable = false })
+      vim.api.nvim_win_set_config(win, { focusable = true })
     end,
   },
 }

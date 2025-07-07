@@ -78,26 +78,7 @@ local get_virtual_env = {
   separator = left,
 }
 
-local copilot_symbols = {
-  status = {
-    icons = {
-      enabled = " ",
-      sleep = " ", -- auto-trigger disabled
-      disabled = " ",
-      warning = " ",
-      unknown = " ",
-    },
-    hl = {
-      enabled = colors.green,
-      sleep = colors.grey,
-      disabled = colors.blue_grey,
-      warning = colors.orange,
-      unknown = colors.red,
-    },
-  },
-  spinners = require("copilot-lualine.spinners").dots,
-  spinner_color = colors.blue_grey,
-}
+-- Removed unused copilot_symbols variable that caused the error
 
 local get_filename_color = function()
   local modified = vim.bo.modified
@@ -116,6 +97,7 @@ return {
   event = { "BufReadPost", "BufNewFile" },
   dependencies = {
     "nvim-tree/nvim-web-devicons",
+    "AndreM222/copilot-lualine", -- Add the missing dependency
   },
   config = function()
     local filename = {
@@ -250,11 +232,9 @@ return {
         lualine_x = {
           get_active_lsp,
           {
+            -- Revert to the simple string component handled by copilot-lualine
             "copilot",
-            -- Default values
-            symbols = copilot_symbols,
-            show_colors = true,
-            show_loading = true,
+            color = { fg = colors.grey }, -- Optional: Set a specific color
             separator = right,
           },
         },

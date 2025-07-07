@@ -1,929 +1,546 @@
--- Enable the following language servers
---  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
---
---  Add any additional override configuration in the following tables. Available keys are:
---  - cmd (table): Override the default command used to start the server
---  - filetypes (table): Override the default list of associated filetypes for the server
---  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
---  - settings (table): Override the default settings passed when initializing the server.
---        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
-local servers = {
-  -- clangd = {},
-  -- gopls = {},
-  -- pyright = {},
-  -- rust_analyzer = {}, -- WARN: DON'T activate rust-analyzer here!!!
-  --
-  -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
-  --
-  -- Some languages (like typescript) have entire language plugins that can be useful:
-  --    https://github.com/pmizio/typescript-tools.nvim
-  --
-  -- But for many setups, the LSP (`tsserver`) will work just fine
-  -- tsserver = {},
-  --
-  taplo = {},
-  lua_ls = {
-    -- cmd = {...},
-    -- filetypes = { ...},
-    -- capabilities = {},
-    settings = {
-      Lua = {
-        codeLens = {
-          enable = true,
-        },
-        completion = {
-          callSnippet = "Replace",
-        },
-        doc = {
-          privateName = { "^_" },
-        },
-        hint = {
-          enable = true,
-          setType = false,
-          paramType = true,
-          paramName = "Disable",
-          semicolon = "Disable",
-          arrayIndex = "Disable",
-        },
-        telemetry = { enable = false },
-      },
-    },
-    on_init = function(client)
-      local join = vim.fs.joinpath
-      local path = client.workspace_folders[1].name
+--[[
+═══════════════════════════════════════════════════════════════════════════════════════════════════
+                                    LSP CONFIGURATION
+═══════════════════════════════════════════════════════════════════════════════════════════════════
 
-      -- Don't do anything if there is project local config
-      if vim.uv.fs_stat(join(path, ".luarc.json")) or vim.uv.fs_stat(join(path, ".luarc.jsonc")) then
-        return
-      end
+This module configures Language Server Protocol (LSP) support for Neovim using:
+- nvim-lspconfig: Core LSP configuration
+- mason.nvim: LSP server installation and management  
+- lsp-zero: Simplified LSP setup and defaults
+- Additional UI and navigation enhancements
 
-      -- Apply neovim specific settings
-      local runtime_path = vim.split(package.path, ";")
-      table.insert(runtime_path, join("lua", "?.lua"))
-      table.insert(runtime_path, join("lua", "?", "init.lua"))
+Key Features:
+- Automatic LSP server installation via Mason
+- Telescope integration for LSP navigation
+- Document highlighting and inlay hints
+- Code navigation with nvim-navbuddy
+- Comprehensive language support (Rust, TypeScript, Lua, etc.)
 
-      local nvim_settings = {
-        runtime = {
-          -- Tell the language server which version of Lua you're using
-          version = "LuaJIT",
-          path = runtime_path,
-        },
-        diagnostics = {
-          -- Get the language server to recognize the `vim` global
-          globals = { "vim" },
-          disable = { "missing-fields" },
-        },
-        workspace = {
-          checkThirdParty = false,
-          library = {
-            -- Make the server aware of Neovim runtime files
-            vim.env.VIMRUNTIME,
-            vim.fn.stdpath("config"),
-          },
-        },
-      }
+LSP Server Override Configuration:
+  - cmd (table): Override the default command used to start the server
+  - filetypes (table): Override the default list of associated filetypes for the server  
+  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
+  - settings (table): Language server specific settings
+--]]
 
-      client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, nvim_settings)
-    end,
-  },
-}
-
-local lsp_attach = function(client, bufnr)
-  -- In this case, we create a function that lets us more easily define mappings specific
-  -- for LSP related items. It sets the mode, buffer and description for us each time.
-  local map = function(keys, func, desc, mode)
-    mode = mode or "n"
-    vim.keymap.set(mode, keys, func, { buffer = bufnr, desc = "LSP: " .. desc })
-  end
-
-  -- Jump to the definition of the word under your cursor.
-  --  This is where a variable was first declared, or where a function is defined, etc.
-  --  To jump back, press <C-t>.
-  map("gd", require("telescope.builtin").lsp_definitions, "[g]oto [d]efinition")
-
-  -- WARN: This is not Goto Definition, this is Goto Declaration.
-  --  For example, in C this would take you to the header.
-  map("gD", vim.lsp.buf.declaration, "[g]oto [D]eclaration")
-
-  -- Find references for the word under your cursor.
-  map("gr", require("telescope.builtin").lsp_references, "[g]oto [r]eferences")
-
-  -- Jump to the implementation of the word under your cursor.
-  --  Useful when your language has ways of declaring types without an actual implementation.
-  map("gI", require("telescope.builtin").lsp_implementations, "[g]oto [I]mplementation")
-
-  -- Jump to the type of the word under your cursor.
-  --  Useful when you're not sure what type a variable is and you want to see
-  --  the definition of its *type*, not where it was *defined*.
-  map("<leader>go", require("telescope.builtin").lsp_type_definitions, "[o]pen type definition")
-
-  -- Fuzzy find all the symbols in your current document.
-  --  Symbols are things like variables, functions, types, etc.
-  -- map("<leader>Sd", require("telescope.builtin").lsp_document_symbols, "[V]iew [d]ocument symbols")
-
-  -- Fuzzy find all the symbols in your current workspace.
-  --  Similar to document symbols, except searches over your entire project.
-  -- map("<leader>Sw", require("telescope.builtin").lsp_dynamic_workspace_symbols, "[V]iew [w]orkspace symbols")
-
-  -- Rename the variable under your cursor.
-  --  Most Language Servers support renaming across files, etc.
-  -- map("<leader>cr", vim.lsp.buf.rename, "[r]ename the variable under cursor")
-
-  -- Execute a code action, usually your cursor needs to be on top of an error
-  -- or a suggestion from your LSP for this to activate.
-  -- map("<leader>ca", vim.lsp.buf.code_action, "[c]ode [a]ction", { "n", "x" })
-
-  -- The following two autocommands are used to highlight references of the
-  -- word under your cursor when your cursor rests there for a little while.
-  --    See `:help CursorHold` for information about when this is executed
-  --
-  -- When you move your cursor, the highlights will be cleared (the second autocommand).
-  if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
-    local highlight_augroup = vim.api.nvim_create_augroup("lsp-highlight", { clear = false })
-    vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-      buffer = bufnr,
-      group = highlight_augroup,
-      callback = vim.lsp.buf.document_highlight,
-    })
-
-    vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-      buffer = bufnr,
-      group = highlight_augroup,
-      callback = vim.lsp.buf.clear_references,
-    })
-
-    vim.api.nvim_create_autocmd("LspDetach", {
-      group = vim.api.nvim_create_augroup("lsp-detach", { clear = true }),
-      callback = function(event)
-        vim.lsp.buf.clear_references()
-        vim.api.nvim_clear_autocmds({ group = "lsp-highlight", buffer = event.buf })
-      end,
-    })
-    -- The following code creates a keymap to toggle inlay hints in your
-    -- code, if the language server you are using supports them
-    --
-    -- This may be unwanted, since they displace some of your code
-    if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
-      map("<leader>th", function()
-        vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }))
-      end, "[t]oggle inlay [h]ints")
-    end
-  end
-end
-
-local navbuddy_config = function()
-  local navbuddy = require("nvim-navbuddy")
-  local actions = require("nvim-navbuddy.actions")
-
-  navbuddy.setup({
-    window = {
-      border = "single", -- "rounded", "double", "solid", "none"
-      -- or an array with eight chars building up the border in a clockwise fashion
-      -- starting with the top-left corner. eg: { "╔", "═" ,"╗", "║", "╝", "═", "╚", "║" }.
-      size = "60%", -- Or table format example: { height = "40%", width = "100%"}
-      position = "50%", -- Or table format example: { row = "100%", col = "0%"}
-      scrolloff = nil, -- scrolloff value within navbuddy window
-      sections = {
-        left = {
-          size = "20%",
-          border = nil, -- You can set border style for each section individually as well.
-        },
-        mid = {
-          size = "40%",
-          border = nil,
-        },
-        right = {
-          -- No size option for right most section. It fills to
-          -- remaining area.
-          border = nil,
-          preview = "leaf", -- Right section can show previews too.
-          -- Options: "leaf", "always" or "never"
-        },
-      },
-    },
-    node_markers = {
-      enabled = true,
-      icons = {
-        leaf = "  ",
-        leaf_selected = " → ",
-        branch = " ",
-      },
-    },
-    icons = {
-      File = "󰈙 ",
-      Module = " ",
-      Namespace = "󰌗 ",
-      Package = " ",
-      Class = "󰌗 ",
-      Method = "󰆧 ",
-      Property = " ",
-      Field = " ",
-      Constructor = " ",
-      Enum = "󰕘",
-      Interface = "󰕘",
-      Function = "󰊕 ",
-      Variable = "󰆧 ",
-      Constant = "󰏿 ",
-      String = " ",
-      Number = "󰎠 ",
-      Boolean = "◩ ",
-      Array = "󰅪 ",
-      Object = "󰅩 ",
-      Key = "󰌋 ",
-      Null = "󰟢 ",
-      EnumMember = " ",
-      Struct = "󰌗 ",
-      Event = " ",
-      Operator = "󰆕 ",
-      TypeParameter = "󰊄 ",
-    },
-    use_default_mappings = true, -- If set to false, only mappings set
-    -- by user are set. Else default
-    -- mappings are used for keys
-    -- that are not set by user
-    mappings = {
-      ["<esc>"] = actions.close(), -- Close and cursor to original location
-      ["q"] = actions.close(),
-
-      ["j"] = actions.next_sibling(), -- down
-      ["k"] = actions.previous_sibling(), -- up
-
-      ["h"] = actions.parent(), -- Move to left panel
-      ["l"] = actions.children(), -- Move to right panel
-      ["0"] = actions.root(), -- Move to first panel
-
-      ["v"] = actions.visual_name(), -- Visual selection of name
-      ["V"] = actions.visual_scope(), -- Visual selection of scope
-
-      ["y"] = actions.yank_name(), -- Yank the name to system clipboard "+
-      ["Y"] = actions.yank_scope(), -- Yank the scope to system clipboard "+
-
-      ["i"] = actions.insert_name(), -- Insert at start of name
-      ["I"] = actions.insert_scope(), -- Insert at start of scope
-
-      ["a"] = actions.append_name(), -- Insert at end of name
-      ["A"] = actions.append_scope(), -- Insert at end of scope
-
-      ["r"] = actions.rename(), -- Rename currently focused symbol
-
-      ["d"] = actions.delete(), -- Delete scope
-
-      ["f"] = actions.fold_create(), -- Create fold of current scope
-      ["F"] = actions.fold_delete(), -- Delete fold of current scope
-
-      ["c"] = actions.comment(), -- Comment out current scope
-
-      ["<enter>"] = actions.select(), -- Goto selected symbol
-      ["o"] = actions.select(),
-
-      ["J"] = actions.move_down(), -- Move focused node down
-      ["K"] = actions.move_up(), -- Move focused node up
-
-      ["s"] = actions.toggle_preview(), -- Show preview of current node
-
-      ["<C-v>"] = actions.vsplit(), -- Open selected node in a vertical split
-      ["<C-s>"] = actions.hsplit(), -- Open selected node in a horizontal split
-
-      ["t"] = actions.telescope({ -- Fuzzy finder at current level.
-        layout_config = { -- All options that can be
-          height = 0.60, -- passed to telescope.nvim's
-          width = 0.60, -- default can be passed here.
-          prompt_position = "top",
-          preview_width = 0.50,
-        },
-        layout_strategy = "horizontal",
-      }),
-
-      ["g?"] = actions.help(), -- Open mappings help window
-    },
-    lsp = {
-      auto_attach = true, -- If set to true, you don't need to manually use attach function
-      preference = nil, -- list of lsp server names in order of preference
-    },
-    source_buffer = {
-      follow_node = true, -- Keep the current node in focus on the source buffer
-      highlight = true, -- Highlight the currently focused node
-      reorient = "smart", -- "smart", "top", "mid" or "none"
-      scrolloff = nil, -- scrolloff value when navbuddy is open
-    },
-    custom_hl_group = nil, -- "Visual" or any other hl group to use instead of inverted colors
-  })
-end
 return {
   "neovim/nvim-lspconfig",
-  cmd = { "LspInfo", "LspInstall", "LspStart" },
   event = { "BufReadPre", "BufNewFile" },
-  verbose = false,
   dependencies = {
-    -- Automatically install LSPs and related tools to stdpath for Neovim
-    { "williamboman/mason.nvim", config = true }, -- NOTE: Must be loaded before dependants
+    -- ═══════════════════════════════════════════════════════════════════════════════════════════════════
+    --                                 LSP INSTALLER & MANAGER
+    -- ═══════════════════════════════════════════════════════════════════════════════════════════════════
+    { "williamboman/mason.nvim", config = true }, -- Must be loaded before mason-lspconfig
+    "williamboman/mason-lspconfig.nvim", -- Bridges mason.nvim with nvim-lspconfig
+    { "WhoIsSethDaniel/mason-tool-installer.nvim" }, -- Ensures additional tools are installed
 
-    { "williamboman/mason-lspconfig.nvim" },
-    { "nvim-lua/lsp-status.nvim" },
+    -- ═══════════════════════════════════════════════════════════════════════════════════════════════════
+    --                                  UI & STATUS COMPONENTS
+    -- ═══════════════════════════════════════════════════════════════════════════════════════════════════
+    { "j-hui/fidget.nvim", tag = "legacy", opts = {} }, -- LSP progress notifications
+    { "nvim-lua/lsp-status.nvim" }, -- Status info for lualine integration
 
-    { "WhoIsSethDaniel/mason-tool-installer.nvim" },
-
-    -- Useful status updates for LSP.
-    { "j-hui/fidget.nvim", opts = {} }, -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-
-    -- Allows extra capabilities provided by nvim-cmp
-    "hrsh7th/cmp-nvim-lsp",
+    -- ═══════════════════════════════════════════════════════════════════════════════════════════════════
+    --                              LSP ENHANCEMENTS & INTEGRATIONS
+    -- ═══════════════════════════════════════════════════════════════════════════════════════════════════
+    "hrsh7th/cmp-nvim-lsp", -- Completion source for LSP
     {
-      "SmiteshP/nvim-navbuddy",
+      "SmiteshP/nvim-navbuddy", -- Code structure navigation and outline
       dependencies = {
-        "SmiteshP/nvim-navic",
-        "MunifTanjim/nui.nvim",
+        "SmiteshP/nvim-navic", -- Context breadcrumbs for winbar/statusline
+        "MunifTanjim/nui.nvim", -- UI component library
       },
-      opts = { lsp = { auto_attach = true } },
-      config = navbuddy_config,
-    },
-  },
-  opts = {
-    inlay_hints = {
-      enabled = true,
-      exclude = {},
-    },
-    -- Enable this to enable the builtin LSP code lenses on Neovim >= 0.10.0
-    -- Be aware that you also will need to properly configure your LSP server to
-    -- provide the code lenses.
-    codelens = {
-      enabled = true,
-    },
-    -- Enable lsp cursor word highlighting
-    document_highlight = {
-      enabled = true,
-    },
-    -- add any global capabilities here
-    capabilities = {
-      workspace = {
-        fileOperations = {
-          didRename = true,
-          willRename = true,
-        },
-        textDocument = {
-          foldingRange = {
-            dynamicRegistration = false,
-            lineFoldingOnly = true,
-          },
-        },
-      },
-    },
-    servers = servers,
-    settings = {
-      html = {
-        format = {
-          templating = true,
-          wrapLineLength = 120,
-          wrapAttributes = "auto",
-        },
-        hover = {
-          documentation = true,
-          references = true,
-        },
-      },
-    },
-    -- you can do any additional lsp server setup here
-    -- return true if you don't want this server to be setup with lspconfig
-    setup = {
-      -- example to setup with typescript.nvim
-      -- tsserver = function(_, opts)
-      --   require("typescript").setup({ server = opts })
-      --   return true
-      -- end,
-      -- Specify * to use this function as a fallback for any server
-      -- ["*"] = function(server, opts) end,
-    },
-  },
-  config = function()
-    local lspconfig = require("lspconfig")
-    local configs = require("lspconfig.configs")
+      config = function()
+        local navbuddy = require("nvim-navbuddy")
+        local actions = require("nvim-navbuddy.actions")
+        navbuddy.setup({
+          -- Automatically attach to LSP clients
+          lsp = { auto_attach = true },
 
+          -- Window appearance and positioning
+          window = { border = "single", size = "60%", position = "50%" },
+
+          -- Visual indicators for navigation tree
+          node_markers = {
+            enabled = true,
+            icons = { leaf = "  ", leaf_selected = " → ", branch = " " },
+          },
+
+          -- LSP symbol icons for different code elements
+          icons = {
+            File = "󰈙 ",
+            Module = " ",
+            Namespace = "󰌗 ",
+            Package = " ",
+            Class = "󰌗 ",
+            Method = "󰆧 ",
+            Property = " ",
+            Field = " ",
+            Constructor = " ",
+            Enum = "󰕘",
+            Interface = "󰕘",
+            Function = "󰊕 ",
+            Variable = "󰆧 ",
+            Constant = "󰏿 ",
+            String = " ",
+            Number = "󰎠 ",
+            Boolean = "◩ ",
+            Array = "󰅪 ",
+            Object = "󰅩 ",
+            Key = "󰌋 ",
+            Null = "󰟢 ",
+            EnumMember = " ",
+            Struct = "󰌗 ",
+            Event = " ",
+            Operator = "󰆕 ",
+            TypeParameter = "󰊄 ",
+          },
+          use_default_mappings = true,
+          mappings = {
+            ["<esc>"] = actions.close(),
+            ["q"] = actions.close(),
+            ["j"] = actions.next_sibling(),
+            ["k"] = actions.previous_sibling(),
+            ["h"] = actions.parent(),
+            ["l"] = actions.children(),
+            ["0"] = actions.root(),
+            ["v"] = actions.visual_name(),
+            ["V"] = actions.visual_scope(),
+            ["y"] = actions.yank_name(),
+            ["Y"] = actions.yank_scope(),
+            ["i"] = actions.insert_name(),
+            ["I"] = actions.insert_scope(),
+            ["a"] = actions.append_name(),
+            ["A"] = actions.append_scope(),
+            ["r"] = actions.rename(),
+            ["d"] = actions.delete(),
+            ["f"] = actions.fold_create(),
+            ["F"] = actions.fold_delete(),
+            ["c"] = actions.comment(),
+            ["<enter>"] = actions.select(),
+            ["o"] = actions.select(),
+            ["J"] = actions.move_down(),
+            ["K"] = actions.move_up(),
+            ["s"] = actions.toggle_preview(),
+            ["<C-v>"] = actions.vsplit(),
+            ["<C-s>"] = actions.hsplit(),
+            ["t"] = actions.telescope({
+              layout_strategy = "horizontal",
+              layout_config = { height = 0.60, width = 0.60, prompt_position = "top", preview_width = 0.50 },
+            }),
+            ["g?"] = actions.help(),
+          },
+          source_buffer = { follow_node = true, highlight = true, reorient = "smart" },
+        })
+      end,
+    },
+    { "VonHeikemen/lsp-zero.nvim", branch = "v3.x" }, -- Simplified LSP configuration helper
+  },
+
+  config = function()
+    -- ═══════════════════════════════════════════════════════════════════════════════════════════════════
+    --                                    MAIN CONFIGURATION
+    -- ═══════════════════════════════════════════════════════════════════════════════════════════════════
+
+    -- ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+    --                                     ON_ATTACH FUNCTION
+    -- └─────────────────────────────────────────────────────────────────────────────────────────────────┘
+    -- This function is called whenever an LSP client attaches to a buffer.
+    -- It sets up keymaps, document highlighting, and other buffer-local LSP features.
+    local on_attach = function(client, bufnr)
+      -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+      --                               HELPER FUNCTION FOR KEYMAPS
+      -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+      -- Convenience function to create LSP-specific keymaps with consistent description prefix
+      local map = function(keys, func, desc, mode)
+        mode = mode or "n"
+        vim.keymap.set(mode, keys, func, { buffer = bufnr, desc = "LSP: " .. desc })
+      end
+
+      -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+      --                                   DEFAULT LSP KEYMAPS
+      -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+      -- Apply lsp-zero's sensible default keymaps (gd, K, etc.)
+      require("lsp-zero").default_keymaps({ buffer = bufnr })
+
+      -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+      --                            TELESCOPE-ENHANCED LSP NAVIGATION
+      -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+      map("gd", require("telescope.builtin").lsp_definitions, "[G]oto [D]efinition")
+      map("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
+      map("gI", require("telescope.builtin").lsp_implementations, "[G]oto [I]mplementation")
+      map("<leader>D", require("telescope.builtin").lsp_type_definitions, "Type [D]efinition")
+      map("<leader>ds", require("telescope.builtin").lsp_document_symbols, "[D]ocument [S]ymbols")
+      map("<leader>sS", require("telescope.builtin").lsp_dynamic_workspace_symbols, "[S]earch workspace [S]ymbols")
+
+      -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+      --                                 CORE LSP ACTIONS
+      -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+      map("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")
+      map("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction", { "n", "x" }) -- Normal and visual modes
+      map("K", vim.lsp.buf.hover, "Hover Documentation")
+      map("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
+
+      -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+      --                              DOCUMENT HIGHLIGHTING
+      -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+      -- Automatically highlight references to the symbol under the cursor
+      if client.supports_method("textDocument/documentHighlight") then
+        local highlight_augroup = vim.api.nvim_create_augroup("lsp-highlight", { clear = true })
+        vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+          buffer = bufnr,
+          group = highlight_augroup,
+          callback = vim.lsp.buf.document_highlight,
+        })
+        vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+          buffer = bufnr,
+          group = highlight_augroup,
+          callback = vim.lsp.buf.clear_references,
+        })
+        -- Clear highlights when LSP detaches
+        vim.api.nvim_create_autocmd("LspDetach", {
+          group = vim.api.nvim_create_augroup("lsp-detach-highlight", { clear = true }),
+          callback = function(event)
+            if event.buf == bufnr then
+              vim.lsp.buf.clear_references()
+              vim.api.nvim_clear_autocmds({ group = "lsp-highlight", buffer = bufnr })
+            end
+          end,
+        })
+      end
+
+      -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+      --                                INLAY HINTS TOGGLE
+      -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+      -- Enable toggle for inlay hints (type annotations, parameter names, etc.)
+      if client.supports_method("textDocument/inlayHint") then
+        map("<leader>th", function()
+          vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }))
+        end, "[T]oggle Inlay [H]ints")
+      end
+
+      -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+      --                               LSP STATUS INTEGRATION
+      -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+      -- Attach lsp-status for statusline integration
+      require("lsp-status").on_attach(client)
+    end
+
+    -- ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+    --                                   MODULE REQUIREMENTS
+    -- └─────────────────────────────────────────────────────────────────────────────────────────────────┘
+    local lspconfig = require("lspconfig")
+    local mason_lspconfig = require("mason-lspconfig")
+    local cmp_nvim_lsp = require("cmp_nvim_lsp")
     local lsp_zero = require("lsp-zero")
 
-    --  This function gets run when an LSP attaches to a particular buffer.
-    --    That is to say, every time a new file is opened that is associated with
-    --    an lsp (for example, opening `main.rs` is associated with `rust_analyzer`) this
-    --    function will be executed to configure the current buffer
-    vim.api.nvim_create_autocmd("LspAttach", {
-      group = vim.api.nvim_create_augroup("lsp-attach", { clear = true }),
-      callback = function(event)
-        -- NOTE: Remember that Lua is a real programming language, and as such it is possible
-        -- to define small helper and utility functions so you don't have to repeat yourself.
-        --
-        -- In this case, we create a function that lets us more easily define mappings specific
-        -- for LSP related items. It sets the mode, buffer and description for us each time.
-        local map = function(keys, func, desc, mode)
-          mode = mode or "n"
-          vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = "LSP: " .. desc })
-        end
+    -- ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+    --                                  LSP-ZERO CONFIGURATION
+    -- └─────────────────────────────────────────────────────────────────────────────────────────────────┘
+    -- Register our on_attach function to be called for all LSP clients
+    lsp_zero.on_attach(on_attach)
 
-        local lsp_group_prefix = "<leader>c"
-        local show_group_prefix = "<leader>S"
+    -- ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+    --                                  LSP CAPABILITIES SETUP
+    -- └─────────────────────────────────────────────────────────────────────────────────────────────────┘
+    -- Configure capabilities to enable advanced LSP features and nvim-cmp integration
+    local capabilities = cmp_nvim_lsp.default_capabilities(vim.lsp.protocol.make_client_capabilities())
 
-        -- Find references for the word under your cursor.
-        map("gr", require("telescope.builtin").lsp_references, "[g]oto [r]eferences")
-        map(lsp_group_prefix .. "R", require("telescope.builtin").lsp_references, "goto [R]eferences")
+    -- Enable folding range capability for better code folding support
+    capabilities.textDocument.foldingRange = {
+      dynamicRegistration = false,
+      lineFoldingOnly = true,
+    }
 
-        -- Jump to the implementation of the word under your cursor.
-        --  Useful when your language has ways of declaring types without an actual implementation.
-        map("gI", require("telescope.builtin").lsp_implementations, "[g]oto [I]mplementation")
-        map(lsp_group_prefix .. "I", require("telescope.builtin").lsp_implementations, "goto [I]mplementation")
+    -- ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+    --                                   LSP SERVERS TO INSTALL
+    -- └─────────────────────────────────────────────────────────────────────────────────────────────────┘
+    -- List of LSP servers that mason-lspconfig will automatically install and configure
+    local ensure_installed = {
+      "arduino_language_server", -- Arduino development
+      "biome", -- JavaScript/TypeScript linting and formatting
+      "denols", -- Deno TypeScript/JavaScript runtime
+      "emmet_language_server", -- HTML/CSS abbreviation expansion
+      "htmx", -- HTMX hypermedia library support
+      "lexical", -- Elixir language server
+      "lua_ls", -- Lua language server (Neovim configuration)
+      "marksman", -- Markdown language server
+      "ruby_lsp", -- Ruby language server
+      "taplo", -- TOML language server
+      "tailwindcss", -- TailwindCSS utility-first framework
+      "yamlls", -- YAML language server
+    }
 
-        -- Jump to the type of the word under your cursor.
-        --  Useful when you're not sure what type a variable is and you want to see
-        --  the definition of its *type*, not where it was *defined*.
-        map("gf", require("telescope.builtin").lsp_type_definitions, "Type De[f]inition")
-        map(lsp_group_prefix .. "d", require("telescope.builtin").lsp_type_definitions, "goto type [d]efinition")
-
-        -- Rename the variable under your cursor.
-        --  Most Language Servers support renaming across files, etc.
-        map(lsp_group_prefix .. "r", vim.lsp.buf.rename, "[r]ename the variable under cursor")
-
-        -- Execute a code action, usually your cursor needs to be on top of an error
-        -- or a suggestion from your LSP for this to activate.
-        map(lsp_group_prefix .. "a", vim.lsp.buf.code_action, "Show available [c]ode [a]ctions", { "n", "x" })
-
-        -- WARN: This is not Goto Definition, this is Goto Declaration.
-        --  For example, in C this would take you to the header.
-        map("gD", vim.lsp.buf.declaration, "[g]oto [D]eclaration")
-        map(lsp_group_prefix .. "D", vim.lsp.buf.declaration, "goto [D]eclaration")
-
-        -- Fuzzy find all the symbols in your current document.
-        --  Symbols are things like variables, functions, types, etc.
-        map(show_group_prefix .. "d", require("telescope.builtin").lsp_document_symbols, "[S]how [d]ocument symbols")
-
-        -- Fuzzy find all the symbols in your current workspace.
-        --  Similar to document symbols, except searches over your entire project.
-        map(show_group_prefix .. "w", require("telescope.builtin").lsp_dynamic_workspace_symbols, "[S]how [w]orkspace symbols")
-
-        -- The following two autocommands are used to highlight references of the
-        -- word under your cursor when your cursor rests there for a little while.
-        --    See `:help CursorHold` for information about when this is executed
-        --
-        -- When you move your cursor, the highlights will be cleared (the second autocommand).
-        local client = vim.lsp.get_client_by_id(event.data.client_id)
-        if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
-          local highlight_augroup = vim.api.nvim_create_augroup("lsp-highlight", { clear = false })
-          vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-            buffer = event.buf,
-            group = highlight_augroup,
-            callback = vim.lsp.buf.document_highlight,
-          })
-
-          vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-            buffer = event.buf,
-            group = highlight_augroup,
-            callback = vim.lsp.buf.clear_references,
-          })
-
-          vim.api.nvim_create_autocmd("LspDetach", {
-            group = vim.api.nvim_create_augroup("lsp-detach", { clear = true }),
-            callback = function(event2)
-              vim.lsp.buf.clear_references()
-              vim.api.nvim_clear_autocmds({ group = "lsp-highlight", buffer = event2.buf })
-            end,
-          })
-          -- The following code creates a keymap to toggle inlay hints in your
-          -- code, if the language server you are using supports them
-          --
-          -- This may be unwanted, since they displace some of your code
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
-            map("<leader>th", function()
-              vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf }))
-            end, "[t]oggle inlay [h]ints")
-          end
-        end
-      end,
-    })
-
-    lsp_zero.extend_lspconfig({
-      sign_text = true,
-      lsp_attach = lsp_attach,
-      float_border = "rounded",
-      capabilities = require("cmp_nvim_lsp").default_capabilities(),
-    })
-    lsp_zero.on_attach(function(client, bufnr)
-      lsp_zero.default_keymaps({ buffer = bufnr })
-    end)
-
-    lspconfig.lua_ls.setup(lsp_zero.nvim_lua_ls())
-
-    local lsp_capabilities = vim.tbl_deep_extend("force", require("cmp_nvim_lsp").default_capabilities(), {
-      textDocument = {
-        foldingRange = {
-          dynamicRegistration = false,
-          lineFoldingOnly = true,
-        },
-      },
-    })
-
-    lsp_zero.extend_lspconfig({
-      capabilities = lsp_capabilities,
-    })
-
-    -- Ensure the servers and tools listed in lspconfig.opts.servers are installed
-    --  To check the current status of installed tools and/or manually install
-    --  other tools, you can run
-    --    :Mason
-    --
-    --  You can press `g?` for help in this menu.
-    require("mason").setup()
-
-    require("mason-lspconfig").setup({
-      -- Replace the language servers listed here
-      -- with the ones you want to install
-      ensure_installed = {
-        "arduino_language_server",
-        "biome",
-        -- "denols",
-        -- "elixirls",
-        -- "emmet_language_server",
-        -- "htmx",
-        "lexical", -- Elixir LSP
-        "lua_ls",
-        -- "nextls", -- Elixir LSP
-        "ruby_lsp",
-        "taplo",
-        -- "tailwindcss",
-        "yamlls",
-      },
+    -- ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+    --                               MASON-LSPCONFIG SETUP
+    -- └─────────────────────────────────────────────────────────────────────────────────────────────────┘
+    mason_lspconfig.setup({
+      ensure_installed = ensure_installed,
+      automatic_installation = true, -- Automatically install servers when opening relevant files
       handlers = {
-        -- The first entry (without a key) will be the default handler
-        -- and will be called for each installed server that doesn't have
-        -- a dedicated handler.
-        function(server_name) -- default handler (optional)
+        -- ─────────────────────────────────────────────────────────────────────────────────────────────
+        --                                  DEFAULT HANDLER
+        -- ─────────────────────────────────────────────────────────────────────────────────────────────
+        -- Applies to all servers unless they have a custom handler below
+        function(server_name)
           lspconfig[server_name].setup({
-            capabilities = lsp_capabilities,
+            capabilities = capabilities,
+            on_attach = on_attach,
           })
         end,
+
+        -- ═════════════════════════════════════════════════════════════════════════════════════════════
+        --                               CUSTOM SERVER HANDLERS
+        -- ═════════════════════════════════════════════════════════════════════════════════════════════
+
+        -- ─────────────────────────────────────────────────────────────────────────────────────────────
+        --                                     LUA_LS
+        -- ─────────────────────────────────────────────────────────────────────────────────────────────
+        -- Specialized configuration for Neovim Lua development
+        ["lua_ls"] = function()
+          lspconfig.lua_ls.setup(lsp_zero.nvim_lua_ls({
+            capabilities = capabilities,
+            on_attach = on_attach,
+            settings = {
+              Lua = {
+                codeLens = { enable = true }, -- Enable code lens
+                completion = { callSnippet = "Replace" }, -- Snippet completion behavior
+                doc = { privateName = { "^_" } }, -- Private name pattern
+                hint = { enable = true, setType = false, paramType = true, paramName = "Disable", semicolon = "Disable", arrayIndex = "Disable" }, -- Inlay hints config
+                telemetry = { enable = false }, -- Disable telemetry
+                diagnostics = { globals = { "vim" }, disable = { "missing-fields" } }, -- Neovim globals and disabled diagnostics
+                -- Note: workspace.library is automatically configured by lsp-zero helper
+              },
+            },
+          }))
+        end,
+
+        -- ─────────────────────────────────────────────────────────────────────────────────────────────
+        --                                     YAMLLS
+        -- ─────────────────────────────────────────────────────────────────────────────────────────────
+        -- YAML language server with schema validation
         ["yamlls"] = function()
           lspconfig.yamlls.setup({
-            capabilities = lsp_capabilities,
+            capabilities = capabilities,
+            on_attach = on_attach,
             settings = {
               yaml = {
                 schemas = {
-                  kubernetes = "/*.yaml",
-                  -- Add the schema for gitlab piplines
-                  -- ["https://gitlab.com/gitlab-org/gitlab/-/raw/master/app/assets/javascripts/editor/schema/ci.json"] = "*.gitlab-ci.yml",
+                  kubernetes = "/*.yaml", -- Kubernetes schema validation
+                  ["https://gitlab.com/gitlab-org/gitlab/-/raw/master/app/assets/javascripts/editor/schema/ci.json"] = "*.gitlab-ci.yml", -- GitLab CI schema validation
                 },
               },
             },
           })
         end,
-        -- this is the "custom handler" for `rust_analyzer`
-        -- noop is an empty function that doesn't do anything
-        rust_analyzer = lsp_zero.noop, -- NOTE: we don't activate rust-analyzer here!
-      },
-    })
 
-    local lsp_status = require("lsp-status")
+        -- ─────────────────────────────────────────────────────────────────────────────────────────────
+        --                                     BIOME
+        -- ─────────────────────────────────────────────────────────────────────────────────────────────
+        -- JavaScript/TypeScript formatter and linter (fast Rust-based alternative to ESLint/Prettier)
+        ["biome"] = function()
+          lspconfig.biome.setup({
+            capabilities = capabilities,
+            on_attach = on_attach,
+            cmd = { "biome", "lsp-proxy" },
+            filetypes = {
+              "astro", -- Astro components
+              "css", -- Cascading Style Sheets
+              "graphql", -- GraphQL queries
+              "javascript", -- JavaScript
+              "javascriptreact", -- JSX
+              "json", -- JSON files
+              "jsonc", -- JSON with comments
+              "svelte", -- Svelte components
+              "typescript", -- TypeScript
+              "typescript.tsx", -- TypeScript JSX
+              "typescriptreact", -- TypeScript React
+              "vue", -- Vue.js components
+            },
+            root_dir = lspconfig.util.root_pattern(".git", "package.json", "biome.json", "biome.jsonc"),
+          })
+        end,
 
-    lsp_zero.on_attach(function(client, bufnr)
-      lsp_status.on_attach(client)
-      lsp_zero.default_keymaps({ buffer = bufnr })
-    end)
+        -- ─────────────────────────────────────────────────────────────────────────────────────────────
+        --                                    MARKSMAN
+        -- ─────────────────────────────────────────────────────────────────────────────────────────────
+        -- Markdown language server for documentation editing
+        ["marksman"] = function()
+          lspconfig.marksman.setup({
+            capabilities = capabilities,
+            on_attach = on_attach,
+            cmd = { "marksman", "server" },
+            filetypes = { "markdown", "markdown.mdx" },
+            root_dir = lspconfig.util.root_pattern(".marksman.toml", ".git"),
+          })
+        end,
 
-    -- -- These are just examples. Replace them with the language
-    -- -- servers you have installed in your system
-    -- require('lspconfig').gleam.setup({})
-    -- require('lspconfig').ocamllsp.setup({})
-    lspconfig.emmet_language_server.setup({
-      filetypes = {
-        "css",
-        "eruby",
-        "html",
-        "javascript",
-        "javascriptreact",
-        "less",
-        "sass",
-        "scss",
-        "pug",
-        "typescriptreact",
-        "vue",
-        "eelixir",
-        "elixir",
-        "heex",
-        "eelexir",
-        "surface",
-      },
-      -- Read more about this options in the [vscode docs](https://code.visualstudio.com/docs/editor/emmet#_emmet-configuration).
-      -- **Note:** only the options listed in the table are supported.
-      init_options = {
-        ---@type table<string, string>
-        includeLanguages = {},
-        --- @type string[]
-        excludeLanguages = {},
-        --- @type string[]
-        extensionsPath = {},
-        --- @type table<string, any> [Emmet Docs](https://docs.emmet.io/customization/preferences/)
-        preferences = {},
-        --- @type boolean Defaults to `true`
-        showAbbreviationSuggestions = true,
-        --- @type "always" | "never" Defaults to `"always"`
-        showExpandedAbbreviation = "always",
-        --- @type boolean Defaults to `false`
-        showSuggestionsAsSnippets = false,
-        --- @type table<string, any> [Emmet Docs](https://docs.emmet.io/customization/syntax-profiles/)
-        syntaxProfiles = {},
-        --- @type table<string, string> [Emmet Docs](https://docs.emmet.io/customization/snippets/#variables)
-        variables = {},
-      },
-      root_dir = function(fname)
-        return lspconfig.util.root_pattern(".git", "package.json", "yarn.lock", "pnpm-lock.yaml", "lerna.json", "tsconfig.json", "jsconfig.json", "mix.exs")(
-          fname
-        ) or vim.loop.os_homedir()
-      end,
-      single_file_support = true,
-    })
+        -- Custom handler for emmet_language_server
+        ["emmet_language_server"] = function()
+          lspconfig.emmet_language_server.setup({
+            capabilities = capabilities,
+            on_attach = on_attach,
+            filetypes = {
+              "css",
+              "eruby",
+              "html",
+              "javascript",
+              "javascriptreact",
+              "less",
+              "sass",
+              "scss",
+              "pug",
+              "typescriptreact",
+              "vue",
+              "eelixir",
+              "elixir",
+              "heex",
+              "surface",
+            },
+            -- Add init_options if needed
+          })
+        end,
 
-    lspconfig.biome.setup({
-      cmd = { "biome", "lsp-proxy" },
-      filetypes = {
-        "astro",
-        "css",
-        "graphql",
-        "javascript",
-        "javascriptreact",
-        "json",
-        "jsonc",
-        "svelte",
-        "typescript",
-        "typescript.tsx",
-        "typescriptreact",
-        "vue",
-      },
-      root_dir = function(fname)
-        return lspconfig.util.root_pattern(
-          ".git",
-          "package.json",
-          "yarn.lock",
-          "pnpm-lock.yaml",
-          "lerna.json",
-          "tsconfig.json",
-          "jsconfig.json",
-          ".biome",
-          "biome.json",
-          "biome.jsonc"
-        )(fname) or vim.loop.os_homedir()
-      end,
-      single_file_support = false,
-    })
-    vim.g.rustaceanvim = {
-      server = {
-        capabilities = lsp_zero.get_capabilities(),
-      },
-    }
+        -- Custom handler for denols
+        ["denols"] = function()
+          lspconfig.denols.setup({
+            capabilities = capabilities,
+            on_attach = on_attach,
+            cmd = { "deno", "lsp" },
+            root_dir = lspconfig.util.root_pattern("deno.json", "deno.jsonc", ".git"),
+            filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx", "mdx" },
+            init_options = {
+              lint = true,
+              unstable = true,
+              suggest = { imports = { hosts = { ["https://deno.land"] = true } } },
+            },
+          })
+        end,
 
-    local nvim_lsp = require("lspconfig")
-    nvim_lsp.denols.setup({
-      cmd = { "deno", "lsp" },
-      root_dir = nvim_lsp.util.root_pattern("deno.json", "deno.jsonc", "package.json", "tsconfig.json", ".git"),
-      filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx", "markdown", "mdx" },
-      on_attach = lsp_attach,
-      cmd_env = {
-        NO_COLOR = true,
-      },
-      settings = {
-        deno = {
-          enable = true,
-          enablePaths = true,
-          codeLens = {
-            implementations = true,
-            references = true,
-            referencesAllFunctions = true,
-            test = true,
-          },
-          lint = true,
-          showReferences = true,
-          signal_file_support = true,
-          suggest = {
-            autoImports = true,
-            completeFunctionCalls = true,
-            imports = {
-              autoDiscover = true,
-              hosts = {
-                ["https://deno.land"] = true,
+        -- Custom handler for htmx
+        ["htmx"] = function()
+          lspconfig.htmx.setup({
+            capabilities = capabilities,
+            on_attach = on_attach,
+            filetypes = {
+              "html",
+              "htmldjango",
+              "jinja.html",
+              "erb",
+              "handlebars",
+              "php",
+              "twig",
+              "elixir",
+              "eelixir",
+              "heex",
+              "surface",
+              "templ",
+              "astro",
+              "vue",
+              "svelte",
+            }, -- Adjust as needed
+            -- Add init_options if needed
+          })
+        end,
+
+        -- Custom handler for tailwindcss
+        ["tailwindcss"] = function()
+          lspconfig.tailwindcss.setup({
+            capabilities = capabilities,
+            on_attach = on_attach,
+            filetypes = {
+              "html",
+              "htmldjango",
+              "jinja.html",
+              "erb",
+              "handlebars",
+              "php",
+              "twig",
+              "elixir",
+              "eelixir",
+              "heex",
+              "surface",
+              "templ",
+              "astro",
+              "vue",
+              "svelte",
+              "javascript",
+              "javascriptreact",
+              "typescript",
+              "typescriptreact",
+              "css",
+              "scss",
+              "less",
+              "postcss",
+            }, -- Adjust as needed
+            settings = {
+              tailwindCSS = {
+                includeLanguages = { elixir = "html-eex", eelixir = "html-eex", heex = "html-eex", templ = "html" },
+                classAttributes = { "class", "className", "class:list", "classList", "ngClass" },
+                lint = { cssConflict = "warning" },
+                validate = true,
               },
             },
-            names = true,
-            paths = true,
-          },
-          unstable = true,
-        },
+            root_dir = lspconfig.util.root_pattern(
+              "tailwind.config.js",
+              "tailwind.config.cjs",
+              "tailwind.config.mjs",
+              "tailwind.config.ts",
+              "postcss.config.js",
+              "package.json",
+              ".git"
+            ),
+          })
+        end,
+
+        -- Custom handler for lexical (Elixir)
+        ["lexical"] = function()
+          lspconfig.lexical.setup({
+            cmd = { "lexical" }, -- Ensure cmd is provided here
+            capabilities = capabilities,
+            on_attach = on_attach,
+            filetypes = { "elixir", "eelixir", "heex", "surface" },
+            root_dir = lspconfig.util.root_pattern("mix.exs", ".git"),
+          })
+        end,
+
+        -- ─────────────────────────────────────────────────────────────────────────────────────────────
+        --                                  RUST_ANALYZER
+        -- ─────────────────────────────────────────────────────────────────────────────────────────────
+        -- Rust language server is managed by rustaceanvim plugin, so we disable it here
+        ["rust_analyzer"] = lsp_zero.noop,
       },
     })
 
-    lspconfig.htmx.setup({
-      cmd = { "htmx-lsp" },
-      filetypes = {
-        "aspnetcorerazor",
-        "astro",
-        "astro-markdown",
-        "blade",
-        "clojure",
-        "django-html",
-        "htmldjango",
-        "edge",
-        "eelixir",
-        "elixir",
-        "ejs",
-        "erb",
-        "eruby",
-        "gohtml",
-        "gohtmltmpl",
-        "haml",
-        "handlebars",
-        "hbs",
-        "html",
-        "htmlangular",
-        "html-eex",
-        "heex",
-        "jade",
-        "leaf",
-        "liquid",
-        "markdown",
-        "mdx",
-        "mustache",
-        "njk",
-        "nunjucks",
-        "php",
-        "razor",
-        "slim",
-        "twig",
-        "javascript",
-        "javascriptreact",
-        "reason",
-        "rescript",
-        "typescript",
-        "typescriptreact",
-        "vue",
-        "svelte",
-        "templ",
-      },
-      root_dir = function(fname)
-        return lspconfig.util.root_pattern(
-          ".git",
-          "package.json",
-          "yarn.lock",
-          "pnpm-lock.yaml",
-          "lerna.json",
-          "node_modules",
-          "tsconfig.json",
-          "jsconfig.json",
-          "mix.exs"
-        )(fname) or vim.loop.os_homedir()
-      end,
-      single_file_support = true,
+    -- ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+    --                                 ADDITIONAL LSP SERVERS
+    -- └─────────────────────────────────────────────────────────────────────────────────────────────────┘
+    -- Set up additional LSP servers that are not managed by mason-lspconfig
+    
+    -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+    --                                      AST-GREP
+    -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+    -- AST-based search and code analysis tool
+    lspconfig.ast_grep.setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
+      cmd = { 'ast-grep', 'lsp' },
+      filetypes = { "c", "cpp", "rust", "go", "java", "python", "javascript", "typescript", "html", "css", "kotlin", "dart", "lua" },
+      root_dir = lspconfig.util.root_pattern('sgconfig.yaml', 'sgconfig.yml')
     })
 
-    -- Elixir LSP setup
-    --
-    -- require("lspconfig")["nextls"].setup({
-    --   cmd = { "nextls", "--stdio" },
-    --   filetypes = { "eelixir", "elixir", "heex", "surface" },
-    --   init_options = {
-    --     extensions = {
-    --       credo = { enable = true },
-    --     },
-    --     experimental = {
-    --       completions = { enable = true },
-    --     },
-    --   },
-    --   root_dir = function(fname)
-    --     return lspconfig.util.root_pattern("mix.exs", ".git")(fname) or vim.loop.os_homedir()
-    --   end,
-    --   single_file_support = true,
-    -- })
-    if not configs.lexical then
-      configs.lexical = {
-        default_config = {
-          cmd = { "lexical" },
-          filetypes = { "elixir", "eelixir", "heex", "surface" },
-          root_dir = function(fname)
-            return lspconfig.util.root_pattern("mix.exs", ".git")(fname) or vim.loop.os_homedir()
-          end,
-          -- optional settings
-          settings = {},
-        },
-      }
+    -- ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+    --                                 RUSTACEANVIM INTEGRATION
+    -- └─────────────────────────────────────────────────────────────────────────────────────────────────┘
+    -- Merge our LSP capabilities with rustaceanvim if it's configured
+    -- This ensures completion and other features work properly with Rust
+    if vim.g.rustaceanvim and vim.g.rustaceanvim.server then
+      vim.g.rustaceanvim.server.capabilities = vim.tbl_deep_extend("force", vim.g.rustaceanvim.server.capabilities or {}, capabilities)
     end
-    lspconfig.lexical.setup({})
 
-    -- require("lspconfig").elixirls.setup({
-    --   cmd = { "/opt/homebrew/bin/elixir-ls" },
-    --   filetypes = { "elixir", "eelixir", "heex", "surface" },
-    --   single_file_support = true,
-    --   dialyzerEnabled = true,
-    --   incrementalDialyzer = true,
-    --   enableTestLenses = true,
-    --   suggestSpecs = true,
-    -- })
-    -- require("lspconfig").elixirls.on_attach = function(client, bufnr)
-    --   vim.keymap.set("n", "<space>ef", ":ElixirFromPipe<cr>", { buffer = true, noremap = true, desc = "Convert from Elixir pipe" })
-    --   vim.keymap.set("n", "<space>et", ":ElixirToPipe<cr>", { buffer = true, noremap = true, desc = "Convert to Elixir pipe" })
-    --   vim.keymap.set("v", "<space>em", ":ElixirExpandMacro<cr>", { buffer = true, noremap = true, desc = "Expand Elixir macro" })
-    -- end
-
-    -- TailwindCSS LSP setup
-    lspconfig.tailwindcss.setup({
-      cmd = { "tailwindcss-language-server", "--stdio" },
-      filetypes = {
-        "aspnetcorerazor",
-        "astro",
-        "astro-markdown",
-        "blade",
-        "clojure",
-        "django-html",
-        "htmldjango",
-        "edge",
-        "eelixir",
-        "elixir",
-        "ejs",
-        "erb",
-        "eruby",
-        "gohtml",
-        "gohtmltmpl",
-        "haml",
-        "handlebars",
-        "hbs",
-        "html",
-        "htmlangular",
-        "html-eex",
-        "heex",
-        "jade",
-        "leaf",
-        "liquid",
-        "markdown",
-        "mdx",
-        "mustache",
-        "njk",
-        "nunjucks",
-        "php",
-        "razor",
-        "slim",
-        "twig",
-        "css",
-        "less",
-        "postcss",
-        "sass",
-        "scss",
-        "stylus",
-        "sugarss",
-        "javascript",
-        "javascriptreact",
-        "reason",
-        "rescript",
-        "typescript",
-        "typescriptreact",
-        "vue",
-        "svelte",
-        "templ",
-      },
-      settings = {
-        tailwindCSS = {
-          classAttributes = { "class", "className", "class:list", "classList", "ngClass" },
-          includeLanguages = {
-            elixir = "html-eex",
-            eelixir = "html-eex",
-            eruby = "erb",
-            heex = "html-eex",
-            htmlangular = "html",
-            templ = "html",
-          },
-          experimental = {
-            classRegex = {
-              "class[:]\\s*\"([^\"]*)\"",
-            },
-          },
-          lint = {
-            cssConflict = "warning",
-            invalidApply = "error",
-            invalidConfigPath = "error",
-            invalidScreen = "error",
-            invalidTailwindDirective = "error",
-            invalidVariant = "error",
-            recommendedVariantOrder = "warning",
-          },
-          validate = true,
-        },
-      },
-      root_dir = function(fname)
-        return lspconfig.util.root_pattern(
-          ".git",
-          "mix.exs",
-          "node_modules",
-          "package.json",
-          "postcss.config.js",
-          "postcss.config.cjs",
-          "postcss.config.mjs",
-          "postcss.config.ts",
-          "tailwind.config.cjs",
-          "tailwind.config.mjs",
-          "tailwind.config.js",
-          "tailwind.config.ts",
-          "tailwind.config.tsx"
-        )(fname) or vim.loop.os_homedir()
-      end,
-    })
+    -- ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+    --                                  FINALIZATION
+    -- └─────────────────────────────────────────────────────────────────────────────────────────────────┘
+    -- Note: Explicit lsp_zero.setup() call is not needed with mason-lspconfig handlers approach
   end,
 }

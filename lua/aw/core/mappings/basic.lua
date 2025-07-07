@@ -4,21 +4,26 @@
 -- set shorter name for keymap function
 local map = vim.keymap.set
 
--- Disable arrow keys in normal mode
-map("n", "<left>", "<cmd>echo \"Use h to move!!\"<CR>")
-map("n", "<right>", "<cmd>echo \"Use l to move!!\"<CR>")
-map("n", "<up>", "<cmd>echo \"Use k to move!!\"<CR>")
-map("n", "<down>", "<cmd>echo \"Use j to move!!\"<CR>")
+-- Copy last notification to clipboard
+map("n", "<leader><C-n>", function()
+  local notify = require("notify")
+  local history = notify.history()
+  if #history > 0 then
+    local last_notification = history[#history]
+    local text = last_notification.message
+    if type(text) == "table" then
+      text = table.concat(text, "\n")
+    end
+    vim.fn.setreg("+", text)
+    vim.notify("Copied last notification to clipboard", vim.log.levels.INFO)
+  else
+    vim.notify("No notifications found", vim.log.levels.WARN)
+  end
+end, { desc = "Copy last notification to clipboard" })
 
 -- Better escape to normal mode
 map("i", "jj", "<ESC>", { desc = "Exit insert mode" })
 
--- INSERT BLANK LINES --
---
--- Insert a blank line below in normal mode
-map("n", "<Enter>", "o<Esc>", { desc = "Insert a blank line below the cursor" })
--- Insert a blank line above in normal mode
-map("n", "<S-Enter>", "O<Esc>", { desc = "Insert a blank line above the cursor" })
 
 -- OPEN FILE LOCATION --
 --
@@ -26,3 +31,23 @@ map("n", "<S-Enter>", "O<Esc>", { desc = "Insert a blank line above the cursor" 
 map("n", "<leader>ol", function()
   vim.ui.open(vim.fn.expand("%:p:h"))
 end, { desc = "[o]pen file [l]ocation in file explorer" })
+
+-- Copy relative path to clipboard
+map("n", "<leader><C-y>", function()
+  local full_path = vim.fn.expand("%:p")
+  local cwd = vim.fn.getcwd()
+  local relative_path = vim.fn.fnamemodify(full_path, ":~:.")
+  
+  -- If still absolute, try to make it relative to cwd
+  if vim.startswith(relative_path, "/") then
+    relative_path = vim.fn.substitute(full_path, "^" .. vim.fn.escape(cwd, "/") .. "/", "", "")
+  end
+  
+  vim.fn.setreg("+", relative_path)
+  vim.notify("Copied relative path: " .. relative_path)
+end, { desc = "Copy relative path to clipboard" })
+
+-- FILE EXPLORER --
+--
+-- Toggle neo-tree explorer (force override any existing mapping)
+map("n", "<leader>e", ":Neotree toggle<CR>", { desc = "Toggle NeoTree [e]xplorer", remap = false, silent = true })

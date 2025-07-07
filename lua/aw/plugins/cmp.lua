@@ -107,7 +107,14 @@ return {
     require("luasnip.loaders.from_vscode").lazy_load()
 
     cmp.setup({
-      enabled = true,
+      enabled = function()
+        -- Disable completion in telescope prompts
+        local buftype = vim.api.nvim_get_option_value("buftype", { buf = 0 })
+        if buftype == "prompt" then
+          return false
+        end
+        return true
+      end,
       preselect = cmp.PreselectMode.None,
       -- -- Make the first item in completion menu always be selected
       -- preselect = "item",
@@ -117,6 +124,7 @@ return {
       -- Add sources for completion
       sources = {
         -- { name = "copilot", group_index = 2 },
+        -- { name = "render-markdown" },
         { name = "nvim_lsp_signature_help", group_index = 1 },
         { name = "luasnip", max_item_count = 5, group_index = 1 },
         { name = "nvim_lsp", max_item_count = 20, group_index = 1 },
@@ -256,14 +264,33 @@ return {
       },
       window = {
         completion = cmp.config.window.bordered({
-          winhighlight = "Normal:Normal,FloatBorder:LspBorderBG,CursorLine:PmenuSel,Search:None",
+          border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
+          winhighlight = "Normal:CmpPmenu,FloatBorder:CmpBorder,CursorLine:CmpSel,Search:None",
           col_offset = -3, -- align the abbr and word on cursor
+          side_padding = 1,
+          scrollbar = true,
         }),
         documentation = cmp.config.window.bordered({
-          winhighlight = "Normal:Normal,FloatBorder:LspBorderBG,CursorLine:PmenuSel,Search:None",
+          border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
+          winhighlight = "Normal:CmpDoc,FloatBorder:CmpDocBorder,Search:None",
+          max_width = 80,
+          max_height = 12,
         }),
       },
     })
+
+    -- Custom highlight groups for better aesthetics
+    local highlights = {
+      CmpPmenu = { bg = "#1e1e2e", fg = "#cdd6f4" },
+      CmpSel = { bg = "#45475a", fg = "#cdd6f4", bold = true },
+      CmpBorder = { fg = "#6c7086" },
+      CmpDoc = { bg = "#181825", fg = "#cdd6f4" },
+      CmpDocBorder = { fg = "#6c7086" },
+    }
+
+    for group, opts in pairs(highlights) do
+      vim.api.nvim_set_hl(0, group, opts)
+    end
 
     -- Integraite nvim-autopairs with cmp
     local presentAutopairs, cmp_autopairs = pcall(require, "nvim-autopairs.completion.cmp")

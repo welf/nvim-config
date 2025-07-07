@@ -81,11 +81,78 @@ vim.api.nvim_create_autocmd("BufEnter", {
   end,
 })
 
+-- Set visual wrapping options for markdown files
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "markdown",
+  desc = "Enable visual line wrapping for markdown",
+  callback = function(args)
+    -- Set window-local options for the current window
+    vim.opt_local.wrap = true      -- Enable visual line wrapping
+    vim.opt_local.linebreak = true -- Wrap lines at word boundaries
+    -- Also set buffer-local textwidth to guide wrapping
+    vim.bo[args.buf].textwidth = 120
+  end,
+})
+
+-- =============================================================================
+-- RUST DEVELOPMENT OPTIMIZATIONS
+-- =============================================================================
+
+local rust_augroup = vim.api.nvim_create_augroup("RustOptimizations", { clear = true })
+
 -- Save *.rs files on InsertLeave to trigger rust-analyzer
 vim.api.nvim_create_autocmd("InsertLeave", {
+  group = rust_augroup,
   pattern = "*.rs",
   desc = "Save *.rs files on InsertLeave to trigger rust-analyzer",
   callback = function()
-    vim.cmd("write")
+    if vim.bo.modified then
+      vim.cmd("write")
+    end
+  end,
+})
+
+-- Auto-format Rust files on save
+vim.api.nvim_create_autocmd("BufWritePre", {
+  group = rust_augroup,
+  pattern = "*.rs",
+  desc = "Auto-format Rust files on save",
+  callback = function()
+    vim.lsp.buf.format({ async = false })
+  end,
+})
+
+-- Enhanced Rust file settings
+vim.api.nvim_create_autocmd("FileType", {
+  group = rust_augroup,
+  pattern = "rust",
+  desc = "Enhanced settings for Rust files",
+  callback = function()
+    -- Better text width for Rust (common community standard)
+    vim.opt_local.textwidth = 100
+    
+    -- Enable spell check in comments
+    vim.opt_local.spell = true
+    vim.opt_local.spelllang = "en_us"
+    
+    -- Enhanced folding for Rust
+    vim.opt_local.foldmethod = "syntax"
+    vim.opt_local.foldlevel = 99
+    
+    -- Set up better indentation for Rust
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.tabstop = 4
+    vim.opt_local.softtabstop = 4
+  end,
+})
+
+-- Smart Cargo.toml handling
+vim.api.nvim_create_autocmd("BufWritePost", {
+  group = rust_augroup,
+  pattern = "Cargo.toml",
+  desc = "Reload rust-analyzer workspace when Cargo.toml changes",
+  callback = function()
+    vim.notify("Cargo.toml updated - reloading workspace...", vim.log.levels.INFO)
+    vim.cmd("RustLsp reloadWorkspace")
   end,
 })

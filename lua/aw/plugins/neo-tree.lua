@@ -388,12 +388,12 @@ local config = {
       },
       ["<2-LeftMouse>"] = "open",
       ["<cr>"] = "open",
+      ["l"] = "open",
       -- ["<cr>"] = { "open", config = { expand_nested_files = true } }, -- expand nested file takes precedence
       ["<esc>"] = "cancel", -- close preview or floating neo-tree window
       ["P"] = { "toggle_preview", config = { use_float = false, use_image_nvim = true } },
       ["<C-f>"] = { "scroll_preview", config = { direction = -10 } },
       ["<C-b>"] = { "scroll_preview", config = { direction = 10 } },
-      ["l"] = "focus_preview",
       ["S"] = "open_split",
       -- ["S"] = "split_with_window_picker",
       ["s"] = "open_vsplit",
@@ -421,6 +421,14 @@ local config = {
       ["y"] = "copy_to_clipboard",
       ["x"] = "cut_to_clipboard",
       ["p"] = "paste_from_clipboard",
+      ["<C-y>"] = function(state)
+        local node = state.tree:get_node()
+        if node then
+          local relative_path = vim.fn.fnamemodify(node.path, ":~:.")
+          vim.fn.setreg("+", relative_path)
+          vim.notify("Copied relative path: " .. relative_path)
+        end
+      end,
       ["c"] = "copy", -- takes text input for destination, also accepts the config.show_path and config.insert_as options
       ["m"] = "move", -- takes text input for destination, also accepts the config.show_path and config.insert_as options
       ["e"] = "toggle_auto_expand_width",
@@ -739,8 +747,5 @@ return {
     },
   },
   cmd = "Neotree",
-  keys = {
-    { "<leader>te", ":Neotree reveal<CR>", desc = "[t]oggle NeoTree [e]xplorer", silent = true },
-  },
   opts = config,
 }

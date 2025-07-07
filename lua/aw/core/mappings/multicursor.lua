@@ -25,9 +25,6 @@ end, { desc = "Add cursor above the main cursor" })
 map({ "n", "v" }, mc_prefix .. "a", function()
   mc.addCursor("*")
 end, { desc = "[a]dd a cursor and jump to the next word under cursor" })
-map({ "n", "v" }, "<C-n>", function()
-  mc.addCursor("*")
-end, { desc = "Add a cursor and jump to the [n]ext word under cursor" })
 
 -- Jump to the next word under cursor but do not add a cursor.
 map({ "n", "v" }, mc_prefix .. "s", function()
@@ -35,10 +32,6 @@ map({ "n", "v" }, mc_prefix .. "s", function()
 end, { desc = "[s]kip and jump to the next word under cursor" })
 
 -- Rotate the main cursor.
-map({ "n", "v" }, "<right>", mc.nextCursor, { desc = "Make next cursor the main" })
-
-map({ "n", "v" }, "<left>", mc.prevCursor, { desc = "Make previous cursor the main" })
-
 -- Delete the main cursor.
 map({ "n", "v" }, mc_prefix .. "x", mc.deleteCursor, { desc = "Delete the main cursor" })
 
@@ -77,7 +70,7 @@ map("v", mc_prefix .. "S", mc.splitCursors, { desc = "[S]plit visual selections 
 map("v", mc_prefix .. "i", mc.insertVisual, { desc = "[i]nsert for each line of visual selections" })
 
 -- Append for each line of visual selections.
-map("v", mc_prefix .. "a", mc.appendVisual, { desc = "[a]ppend for each line of visual selections" })
+map("v", mc_prefix .. "A", mc.appendVisual, { desc = "[A]ppend for each line of visual selections" })
 
 -- Match new cursors within visual selections by regex.
 map("v", mc_prefix .. "m", mc.matchCursors, { desc = "[m]atch new cursors within visual selections by regex" })

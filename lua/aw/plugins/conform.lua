@@ -24,17 +24,28 @@ return {
         cpp = true,
         rust = true,
       }
-      local lsp_format_opt
+      -- Explicitly disable LSP formatting for markdown to ensure prettier runs
+      if vim.bo[bufnr].filetype == "markdown" then
+        return {
+          timeout_ms = 500,
+          lsp_format = false, -- Use conform formatters only (prettier)
+        }
+      end
+
+      -- Default behavior for other filetypes
+      local lsp_format_opt = "fallback"
       if disable_filetypes[vim.bo[bufnr].filetype] then
         lsp_format_opt = true -- let LSP format these files
-      else
-        lsp_format_opt = "fallback"
       end
       return {
         timeout_ms = 500,
-        lsp_format = lsp_format_opt,
+        lsp_format = lsp_format_opt, -- Use fallback for others not disabled
       }
     end,
+    -- Add global formatter configurations here
+    formatters = {
+      -- Removed biome global config, specific config will be in formatters_by_ft
+    },
     formatters_by_ft = {
       css = { "biome" },
       html = { "biome" },
@@ -49,6 +60,7 @@ return {
       typescript = { "biome" },
       typescriptreact = { "biome" },
       yaml = { "biome" },
+      markdown = { "prettier", args = { "--print-width", "120" } }, -- Use prettier with specific width
       -- Conform can also run multiple formatters sequentially
       -- python = { "isort", "black" },
       --

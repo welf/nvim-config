@@ -7,6 +7,7 @@ return {
     -- Useful for getting pretty icons, but requires a Nerd Font.
     { "nvim-tree/nvim-web-devicons", enabled = vim.g.have_nerd_font },
     { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+    { "Marskey/telescope-sg" },
   },
   -- [[ Configure Telescope ]]
   -- See `:help telescope` and `:help telescope.setup()`
@@ -80,9 +81,31 @@ return {
           n = {
             ["o"] = require("telescope.actions.layout").toggle_preview,
             ["<C-c>"] = require("telescope.actions").close,
+            ["<C-y>"] = function(prompt_bufnr)
+              local actions = require("telescope.actions")
+              local action_state = require("telescope.actions.state")
+              local selection = action_state.get_selected_entry()
+              if selection then
+                local absolute_path = selection.path or selection.filename or selection.value
+                local relative_path = vim.fn.fnamemodify(absolute_path, ":.")
+                vim.fn.setreg("+", relative_path)
+                vim.notify("Copied relative path: " .. relative_path)
+              end
+            end,
           },
           i = {
             ["<C-o>"] = require("telescope.actions.layout").toggle_preview,
+            ["<C-y>"] = function(prompt_bufnr)
+              local actions = require("telescope.actions")
+              local action_state = require("telescope.actions.state")
+              local selection = action_state.get_selected_entry()
+              if selection then
+                local absolute_path = selection.path or selection.filename or selection.value
+                local relative_path = vim.fn.fnamemodify(absolute_path, ":.")
+                vim.fn.setreg("+", relative_path)
+                vim.notify("Copied relative path: " .. relative_path)
+              end
+            end,
           },
         },
       }),
@@ -104,8 +127,17 @@ return {
         ["ui-select"] = {
           require("telescope.themes").get_dropdown(),
         },
+        ast_grep = {
+          command = {
+            "ast-grep",
+            "--json=stream",
+          }, -- must have --json=stream
+          grep_open_files = false, -- search in opened files
+          lang = nil, -- string value, specify language for ast-grep `nil` for default
+        },
       },
     })
     ts.load_extension("fzf")
+    ts.load_extension("ast_grep")
   end,
 }
