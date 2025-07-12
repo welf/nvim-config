@@ -80,6 +80,7 @@ return {
         mappings = {
           n = {
             ["o"] = require("telescope.actions.layout").toggle_preview,
+            ["d"] = require("telescope.actions").delete_buffer,
             ["<C-c>"] = require("telescope.actions").close,
             ["<C-y>"] = function(prompt_bufnr)
               local actions = require("telescope.actions")
@@ -95,6 +96,8 @@ return {
           },
           i = {
             ["<C-o>"] = require("telescope.actions.layout").toggle_preview,
+            ["<C-h>"] = "which_key",
+            ["<C-d>"] = require("telescope.actions").delete_buffer,
             ["<C-y>"] = function(prompt_bufnr)
               local actions = require("telescope.actions")
               local action_state = require("telescope.actions.state")

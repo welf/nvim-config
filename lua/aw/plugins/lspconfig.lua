@@ -185,7 +185,7 @@ return {
       --                              DOCUMENT HIGHLIGHTING
       -- ─────────────────────────────────────────────────────────────────────────────────────────────────
       -- Automatically highlight references to the symbol under the cursor
-      if client.supports_method("textDocument/documentHighlight") then
+      if client:supports_method("textDocument/documentHighlight") then
         local highlight_augroup = vim.api.nvim_create_augroup("lsp-highlight", { clear = true })
         vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
           buffer = bufnr,
@@ -213,7 +213,7 @@ return {
       --                                INLAY HINTS TOGGLE
       -- ─────────────────────────────────────────────────────────────────────────────────────────────────
       -- Enable toggle for inlay hints (type annotations, parameter names, etc.)
-      if client.supports_method("textDocument/inlayHint") then
+      if client:supports_method("textDocument/inlayHint") then
         map("<leader>th", function()
           vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }))
         end, "[T]oggle Inlay [H]ints")

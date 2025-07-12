@@ -8,9 +8,13 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   desc = "Highlight when yanking (copying) text",
   group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
   callback = function()
-    vim.highlight.on_yank()
+    vim.hl.on_yank()
   end,
 })
+
+-- Enable matching parentheses highlighting
+vim.opt.showmatch = true     -- Briefly highlight matching brackets/parentheses
+vim.opt.matchtime = 2        -- Time to show matching bracket (in tenths of a second)
 
 -- Start the LSP server for bash files
 vim.api.nvim_create_autocmd("FileType", {
@@ -91,6 +95,7 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.linebreak = true -- Wrap lines at word boundaries
     -- Also set buffer-local textwidth to guide wrapping
     vim.bo[args.buf].textwidth = 120
+    
   end,
 })
 
@@ -136,8 +141,50 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.spelllang = "en_us"
     
     -- Enhanced folding for Rust
-    vim.opt_local.foldmethod = "syntax"
+    vim.opt_local.foldmethod = "indent"
     vim.opt_local.foldlevel = 99
+    vim.opt_local.foldnestmax = 10
+    
+    -- Enhanced fold keymaps with error handling for Rust
+    vim.keymap.set('n', 'za', function()
+      local ok, _ = pcall(vim.cmd, 'normal! za')
+      if not ok then
+        vim.notify('No fold found at cursor', vim.log.levels.INFO)
+      end
+    end, { buffer = true, desc = 'Toggle fold' })
+    
+    vim.keymap.set('n', 'zA', function()
+      -- Force create folds if none exist by setting lower foldlevel
+      local current_foldlevel = vim.wo.foldlevel
+      if current_foldlevel >= 99 then
+        vim.wo.foldlevel = 0  -- Close all folds
+      else
+        vim.wo.foldlevel = 99  -- Open all folds
+      end
+    end, { buffer = true, desc = 'Toggle all folds in buffer' })
+    
+    vim.keymap.set('n', 'zc', function()
+      local ok, _ = pcall(vim.cmd, 'normal! zc')
+      if not ok then
+        vim.notify('No fold found at cursor', vim.log.levels.INFO)
+      end
+    end, { buffer = true, desc = 'Close fold' })
+    
+    vim.keymap.set('n', 'zo', function()
+      local ok, _ = pcall(vim.cmd, 'normal! zo')
+      if not ok then
+        vim.notify('No fold found at cursor', vim.log.levels.INFO)
+      end
+    end, { buffer = true, desc = 'Open fold' })
+    
+    vim.keymap.set('n', 'zC', 'zC', { buffer = true, desc = 'Close all folds' })
+    vim.keymap.set('n', 'zO', 'zO', { buffer = true, desc = 'Open all folds' })
+    vim.keymap.set('n', 'zR', function()
+      vim.wo.foldlevel = 99
+    end, { buffer = true, desc = 'Open all folds in buffer' })
+    vim.keymap.set('n', 'zM', function()
+      vim.wo.foldlevel = 0
+    end, { buffer = true, desc = 'Close all folds in buffer' })
     
     -- Set up better indentation for Rust
     vim.opt_local.shiftwidth = 4

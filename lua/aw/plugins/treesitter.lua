@@ -89,6 +89,11 @@ return {
           disable = { "python", "css", "toml" },
         },
 
+        fold = {
+          enable = true,
+          disable = {},
+        },
+
         incremental_selection = {
           enable = true,
           keymaps = {

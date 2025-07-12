@@ -149,11 +149,14 @@ map("n", "<leader>rla", wezterm_run("cargo clippy --all-targets", "Cargo clippy 
 map("n", "<leader>rff", wezterm_run("cargo fmt", "Cargo format"), { desc = "Cargo format" })
 map("n", "<leader>rfc", wezterm_run("cargo fmt --check", "Cargo format check"), { desc = "Cargo format check" })
 
--- Documentation operations
+-- Documentation operations (enhanced with more options)
 map("n", "<leader>rdd", wezterm_run("cargo doc", "Cargo doc"), { desc = "Cargo doc" })
 map("n", "<leader>rdo", wezterm_run("cargo doc --open", "Cargo doc open"), { desc = "Cargo doc open" })
 map("n", "<leader>rdp", wezterm_run("cargo doc --no-deps --open", "Cargo doc project only"), { desc = "Cargo doc project only" })
 map("n", "<leader>rdt", wezterm_run("cargo test --doc", "Cargo doc tests"), { desc = "Cargo doc tests" })
+map("n", "<leader>rdw", wezterm_run("cargo doc --document-private-items --open", "Doc with private items"), { desc = "Doc with private items" })
+map("n", "<leader>rdj", wezterm_run("cargo doc --output-format json", "JSON doc output"), { desc = "JSON doc output" })
+map("n", "<leader>rdr", wezterm_run("rustdoc --help", "Rustdoc help"), { desc = "Rustdoc help" })
 
 -- Dependency management
 map("n", "<leader>ruu", wezterm_run("cargo update", "Cargo update"), { desc = "Cargo update" })
@@ -168,16 +171,116 @@ map("n", "<leader>rBt", wezterm_run("cargo test --release", "Cargo test release"
 -- RUSTACEANVIM INTEGRATION (using <leader>rh* for hover/help actions)
 -- =============================================================================
 
-map("n", "<leader>rhh", "<cmd>RustLsp hover actions<cr>", { desc = "Rust hover actions" })
+-- Core RustLsp commands (verified to work)
 map("n", "<leader>rha", "<cmd>RustLsp codeAction<cr>", { desc = "Rust code actions" })
 map("n", "<leader>rhR", "<cmd>RustLsp runnables<cr>", { desc = "Rust runnables" })
 map("n", "<leader>rhD", "<cmd>RustLsp debuggables<cr>", { desc = "Rust debuggables" })
-map("n", "<leader>rhm", "<cmd>RustLsp expandMacro<cr>", { desc = "Expand macro" })
-map("n", "<leader>rhg", "<cmd>RustLsp crateGraph<cr>", { desc = "Crate graph" })
 map("n", "<leader>rhe", "<cmd>RustLsp explainError<cr>", { desc = "Explain error" })
-map("n", "<leader>rhw", "<cmd>RustLsp workspaceSymbol<cr>", { desc = "Workspace symbols" })
 map("n", "<leader>rhr", "<cmd>RustLsp reloadWorkspace<cr>", { desc = "Reload workspace" })
-map("n", "<leader>rhs", "<cmd>RustLsp ssr<cr>", { desc = "Structural search replace" })
+
+-- Working rustaceanvim commands  
+map("n", "<leader>rhj", "<cmd>RustLsp joinLines<cr>", { desc = "Join lines" })
+map("n", "<leader>rhc", "<cmd>RustLsp openCargo<cr>", { desc = "Open Cargo.toml" })
+map("n", "<leader>rhp", "<cmd>RustLsp parentModule<cr>", { desc = "Go to parent module" })
+
+-- Alternative implementations for missing commands
+map("n", "<leader>rhm", function()
+  -- Expand macro using rust-analyzer LSP directly
+  local params = vim.lsp.util.make_position_params()
+  local clients = vim.lsp.get_clients({ bufnr = 0 })
+  
+  for _, client in ipairs(clients) do
+    if client.name == "rust_analyzer" then
+      client.request("rust-analyzer/expandMacro", params, function(err, result)
+        if err then
+          vim.notify("Error expanding macro: " .. err.message, vim.log.levels.ERROR)
+          return
+        end
+        
+        if result then
+          -- Open result in a new buffer
+          local buf = vim.api.nvim_create_buf(false, true)
+          vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(result.expansion, "\n"))
+          vim.api.nvim_buf_set_option(buf, "filetype", "rust")
+          vim.api.nvim_buf_set_name(buf, "Macro Expansion")
+          vim.cmd("split")
+          vim.api.nvim_win_set_buf(0, buf)
+        else
+          vim.notify("No macro to expand at cursor", vim.log.levels.INFO)
+        end
+      end)
+      return
+    end
+  end
+  
+  vim.notify("rust-analyzer not found", vim.log.levels.ERROR)
+end, { desc = "Expand macro at cursor" })
+
+map("n", "<leader>rhh", function()
+  -- Enhanced hover with actions
+  vim.lsp.buf.hover()
+end, { desc = "Show hover information" })
+
+map("n", "<leader>rhw", function()
+  -- Workspace symbol search
+  vim.lsp.buf.workspace_symbol()
+end, { desc = "Search workspace symbols" })
+
+map("n", "<leader>rhs", function()
+  -- Structural search and replace
+  local query = vim.fn.input("SSR Query: ")
+  if query ~= "" then
+    local params = {
+      query = query,
+      parseOnly = false,
+    }
+    
+    local clients = vim.lsp.get_clients({ bufnr = 0 })
+    for _, client in ipairs(clients) do
+      if client.name == "rust_analyzer" then
+        client.request("experimental/ssr", params, function(err, result)
+          if err then
+            vim.notify("SSR Error: " .. err.message, vim.log.levels.ERROR)
+          elseif result then
+            vim.notify("SSR completed", vim.log.levels.INFO)
+          end
+        end)
+        return
+      end
+    end
+    vim.notify("rust-analyzer not found", vim.log.levels.ERROR)
+  end
+end, { desc = "Structural search and replace" })
+
+-- Alternative crate graph using external tools
+map("n", "<leader>rhg", function()
+  -- Check if cargo-depgraph is installed
+  if vim.fn.executable("cargo-depgraph") == 0 then
+    vim.notify("cargo-depgraph not found. Install with: cargo install cargo-depgraph", vim.log.levels.ERROR)
+    return
+  end
+  
+  -- Check if dot (graphviz) is installed
+  if vim.fn.executable("dot") == 0 then
+    vim.notify("Graphviz not found. Install with: brew install graphviz", vim.log.levels.ERROR)
+    return
+  end
+  
+  vim.cmd("split | resize 20 | terminal cargo depgraph --all-deps | dot -Tsvg > /tmp/crate_graph.svg && open /tmp/crate_graph.svg")
+  vim.cmd("startinsert")
+end, { desc = "Generate crate dependency graph" })
+
+-- Alternative: Simple text-based dependency tree
+map("n", "<leader>rhG", function()
+  vim.cmd("split | resize 20 | terminal cargo tree")
+  vim.cmd("startinsert")
+end, { desc = "Show dependency tree (text)" })
+
+-- Alternative: Cargo metadata for dependency info
+map("n", "<leader>rhd", function()
+  vim.cmd("split | resize 20 | terminal cargo metadata --format-version 1 | jq '.packages[] | {name, version, dependencies}' | head -50")
+  vim.cmd("startinsert")
+end, { desc = "Show dependency metadata" })
 
 -- =============================================================================
 -- PROJECT MANAGEMENT (using <leader>rp* for project operations)
@@ -207,20 +310,59 @@ map("n", "<leader>rfd", "<cmd>Telescope lsp_definitions<cr>", { desc = "Find def
 map("n", "<leader>rft", "<cmd>Telescope lsp_type_definitions<cr>", { desc = "Find type definitions" })
 
 -- =============================================================================
+-- ADVANCED CODE QUALITY TOOLS (using <leader>rq* for quality operations)
+-- =============================================================================
+
+-- Dependency analysis
+map("n", "<leader>rqm", wezterm_run("cargo machete", "Find unused dependencies"), { desc = "Find unused dependencies (machete)" })
+map("n", "<leader>rqd", wezterm_run("cargo deny check", "Check dependency licenses/security"), { desc = "Check dependencies (deny)" })
+map("n", "<leader>rqu", wezterm_run("cargo udeps", "Find unused dependencies"), { desc = "Find unused dependencies (udeps)" })
+
+-- Security auditing
+map("n", "<leader>rqs", wezterm_run("cargo audit", "Security audit"), { desc = "Security audit" })
+map("n", "<leader>rqv", wezterm_run("cargo audit --db /tmp/advisory-db", "Security audit (fresh DB)"), { desc = "Security audit (fresh)" })
+
+-- Code quality analysis
+map("n", "<leader>rqe", wezterm_run("cargo expand", "Expand macros"), { desc = "Expand macros" })
+map("n", "<leader>rqb", wezterm_run("cargo bloat --release", "Analyze binary size"), { desc = "Binary size analysis" })
+map("n", "<leader>rqt", wezterm_run("cargo bloat --release --time", "Analyze compile time"), { desc = "Compile time analysis" })
+
+-- Advanced linting
+map("n", "<leader>rql", wezterm_run("cargo clippy -- -W clippy::pedantic", "Pedantic clippy"), { desc = "Pedantic clippy" })
+map("n", "<leader>rqp", wezterm_run("cargo clippy -- -W clippy::nursery", "Nursery clippy"), { desc = "Nursery clippy" })
+
+-- =============================================================================
 -- COVERAGE AND PROFILING (using <leader>rC* for coverage operations)
 -- =============================================================================
 
 map("n", "<leader>rCc", wezterm_run("cargo tarpaulin --out Html", "Generate coverage report"), { desc = "Generate coverage report" })
 map("n", "<leader>rCo", "<cmd>!open tarpaulin-report.html<cr>", { desc = "Open coverage report" })
 map("n", "<leader>rCx", wezterm_run("cargo tarpaulin --out Xml", "Coverage XML"), { desc = "Coverage XML" })
+map("n", "<leader>rCl", wezterm_run("cargo llvm-cov --html", "LLVM coverage report"), { desc = "LLVM coverage report" })
+map("n", "<leader>rCC", wezterm_run("cargo llvm-cov nextest --html", "Nextest coverage"), { desc = "Nextest coverage" })
 
 -- =============================================================================
 -- PERFORMANCE AND OPTIMIZATION (using <leader>rP* for performance)
 -- =============================================================================
 
+-- Benchmarking
+map("n", "<leader>rPb", wezterm_run("cargo bench", "Run benchmarks"), { desc = "Run benchmarks" })
+map("n", "<leader>rPc", wezterm_run("cargo criterion", "Run criterion benchmarks"), { desc = "Criterion benchmarks" })
+map("n", "<leader>rPi", wezterm_run("cargo bench --bench", "Interactive benchmark selection"), { desc = "Select benchmark" })
+
+-- Profiling
 map("n", "<leader>rPf", wezterm_input_run("Binary name: ", "cargo build --release && perf record --call-graph=dwarf target/release/%s", "Profile with perf"), { desc = "Profile with perf" })
+map("n", "<leader>rPv", wezterm_run("cargo build --release && valgrind --tool=callgrind ./target/release/$(basename $(pwd))", "Profile with valgrind"), { desc = "Valgrind profiling" })
+map("n", "<leader>rPh", wezterm_run("cargo build --release && heaptrack ./target/release/$(basename $(pwd))", "Heap profiling"), { desc = "Heap profiling" })
+
+-- Flamegraphs
+map("n", "<leader>rPg", wezterm_run("cargo flamegraph", "Generate flamegraph"), { desc = "Generate flamegraph" })
+map("n", "<leader>rPG", wezterm_run("cargo flamegraph --bench", "Benchmark flamegraph"), { desc = "Benchmark flamegraph" })
+
+-- Size analysis (moved from quality section for better organization)
 map("n", "<leader>rPs", wezterm_run("cargo bloat --release", "Analyze binary size"), { desc = "Analyze binary size" })
 map("n", "<leader>rPt", wezterm_run("cargo bloat --release --time", "Analyze compile time"), { desc = "Analyze compile time" })
+map("n", "<leader>rPd", wezterm_run("cargo bloat --release --crates", "Crate size breakdown"), { desc = "Crate size breakdown" })
 
 -- =============================================================================
 -- QUICK ACTIONS (single letter shortcuts for most common operations)

@@ -3,8 +3,8 @@
 
 -- set shorter name for keymap function
 local map = vim.keymap.set
--- -- get required plugins
--- local git = require("gitsigns")
+-- get required plugins
+local git = require("gitsigns")
 
 -- NEXT/PREVIOUS NAVIGATION --
 --

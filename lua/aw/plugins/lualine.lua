@@ -315,7 +315,7 @@ return {
         lualine_y = {},
         lualine_z = {},
       },
-      extensions = { "neo-tree", "fugitive", "quickfix", "symbols-outline", "mason", "fzf", "lazy" },
+      extensions = { "neo-tree", "fugitive", "quickfix", "mason", "fzf", "lazy" },
     })
   end,
 }

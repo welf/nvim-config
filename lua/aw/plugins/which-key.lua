@@ -68,6 +68,24 @@ return {
 
       -- Performance optimization
       { "<leader>rP", group = "[P]erformance Analysis", icon = { icon = "🚀 ", hl = "Constant" } },
+
+      -- Workspace symbols and project-wide operations
+      { "<leader>rs", group = "[S]ymbols & Workspace", icon = { icon = "🔗 ", hl = "Constant" } },
+
+      -- Workspace navigation and management
+      { "<leader>rw", group = "[W]orkspace Operations", icon = { icon = "🌐 ", hl = "Constant" } },
+
+      -- AI assistant and code generation
+      { "<leader>ra", group = "[A]I Assistant & Code Gen", icon = { icon = "🤖 ", hl = "Constant" } },
+
+      -- Error handling and diagnostics
+      { "<leader>re", group = "[E]rror & Diagnostics", icon = { icon = "🚨 ", hl = "Constant" } },
+
+      -- Quick operations and shortcuts
+      { "<leader>rq", group = "[Q]uick Operations", icon = { icon = "⚡ ", hl = "Constant" } },
+
+      -- Advanced documentation tools
+      { "<leader>rD", group = "[D]ocs & Navigation", icon = { icon = "📖 ", hl = "Constant" } },
     },
   },
   keys = {
