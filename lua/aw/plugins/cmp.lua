@@ -113,6 +113,11 @@ return {
         if buftype == "prompt" then
           return false
         end
+        -- Disable completion in git commit messages
+        local filetype = vim.api.nvim_get_option_value("filetype", { buf = 0 })
+        if filetype == "gitcommit" then
+          return false
+        end
         return true
       end,
       preselect = cmp.PreselectMode.None,

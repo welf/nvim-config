@@ -11,5 +11,8 @@ return {
     -- "echasnovski/mini.pick",         -- optional
   },
   config = true,
-  opts = {},
+  opts = {
+    disable_builtin_notifications = false,
+    disable_commit_confirmation = false,
+  },
 }
