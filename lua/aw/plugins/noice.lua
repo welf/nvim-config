@@ -32,7 +32,7 @@ return {
         },
         border = {
           style = "rounded",
-          padding = { 0, 1 },
+          padding = { 0, 0 },
         },
         win_options = {
           winhighlight = { Normal = "Normal", FloatBorder = "DiagnosticInfo" },
@@ -108,7 +108,7 @@ return {
         ["vim.lsp.util.stylize_markdown"] = true,
         ["cmp.entry.get_documentation"] = true,
       },
-      hover = { enabled = false },
+      hover = { enabled = true },
       signature = { enabled = false },
       documentation = {
         opts = {

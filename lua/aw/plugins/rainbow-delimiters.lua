@@ -9,6 +9,8 @@ return {
         [""] = rainbow_delimiters.strategy["global"],
         -- Use local for lisp languages
         commonlisp = rainbow_delimiters.strategy["local"],
+        -- Disable for markdown files
+        markdown = nil,
         -- -- Pick the strategy for LaTeX dynamically based on the buffer size
         -- latex = function(bufnr)
         --     -- Disabled for very large files, global strategy for large files,

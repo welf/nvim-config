@@ -113,9 +113,9 @@ return {
         if buftype == "prompt" then
           return false
         end
-        -- Disable completion in git commit messages
+        -- Disable completion in git commit messages, markdown, and text files
         local filetype = vim.api.nvim_get_option_value("filetype", { buf = 0 })
-        if filetype == "gitcommit" then
+        if filetype == "gitcommit" or filetype == "markdown" or filetype == "text" then
           return false
         end
         return true
