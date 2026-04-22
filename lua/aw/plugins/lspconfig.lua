@@ -33,6 +33,7 @@ return {
     { "williamboman/mason.nvim", config = true }, -- Must be loaded before mason-lspconfig
     "williamboman/mason-lspconfig.nvim", -- Bridges mason.nvim with nvim-lspconfig
     { "WhoIsSethDaniel/mason-tool-installer.nvim" }, -- Ensures additional tools are installed
+    { "b0o/schemastore.nvim" }, -- JSON schemas for validation
 
     -- ═══════════════════════════════════════════════════════════════════════════════════════════════════
     --                                  UI & STATUS COMPONENTS
@@ -167,16 +168,21 @@ return {
       --                            TELESCOPE-ENHANCED LSP NAVIGATION
       -- ─────────────────────────────────────────────────────────────────────────────────────────────────
       map("gd", require("telescope.builtin").lsp_definitions, "[G]oto [D]efinition")
-      map("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
+      -- Note: gr is already defined by lsp-zero's default_keymaps, no need to redefine
       map("gI", require("telescope.builtin").lsp_implementations, "[G]oto [I]mplementation")
-      map("<leader>D", require("telescope.builtin").lsp_type_definitions, "Type [D]efinition")
+      map("<leader>td", require("telescope.builtin").lsp_type_definitions, "[t]ype [d]efinition")
       map("<leader>ds", require("telescope.builtin").lsp_document_symbols, "[D]ocument [S]ymbols")
       map("<leader>sS", require("telescope.builtin").lsp_dynamic_workspace_symbols, "[S]earch workspace [S]ymbols")
+
+      -- Call Hierarchy (rust-analyzer supports this, not type hierarchy)
+      map("<leader>Sc", vim.lsp.buf.incoming_calls, "Incoming [c]alls")
+      map("<leader>SC", vim.lsp.buf.outgoing_calls, "Outgoing [C]alls")
 
       -- ─────────────────────────────────────────────────────────────────────────────────────────────────
       --                                 CORE LSP ACTIONS
       -- ─────────────────────────────────────────────────────────────────────────────────────────────────
-      map("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")
+      -- Note: <leader>rn* is reserved for neotest commands, using <leader>cr for rename
+      map("<leader>cr", vim.lsp.buf.rename, "[c]ode [r]ename")
       map("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction", { "n", "x" }) -- Normal and visual modes
       map("K", vim.lsp.buf.hover, "Hover Documentation")
       map("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
@@ -229,7 +235,7 @@ return {
     -- ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
     --                                   MODULE REQUIREMENTS
     -- └─────────────────────────────────────────────────────────────────────────────────────────────────┘
-    local lspconfig = require("lspconfig")
+    local lspconfig = vim.lsp.config
     local mason_lspconfig = require("mason-lspconfig")
     local cmp_nvim_lsp = require("cmp_nvim_lsp")
     local lsp_zero = require("lsp-zero")
@@ -262,10 +268,11 @@ return {
       "denols", -- Deno TypeScript/JavaScript runtime
       "emmet_language_server", -- HTML/CSS abbreviation expansion
       "htmx", -- HTMX hypermedia library support
+      "jsonls", -- JSON language server
       "lexical", -- Elixir language server
       "lua_ls", -- Lua language server (Neovim configuration)
       "marksman", -- Markdown language server
-      "ruby_lsp", -- Ruby language server
+      -- "ruby_lsp", -- Ruby language server
       "taplo", -- TOML language server
       "tailwindcss", -- TailwindCSS utility-first framework
       "yamlls", -- YAML language server
@@ -357,7 +364,9 @@ return {
               "typescriptreact", -- TypeScript React
               "vue", -- Vue.js components
             },
-            root_dir = lspconfig.util.root_pattern(".git", "package.json", "biome.json", "biome.jsonc"),
+            root_dir = function(fname)
+              return vim.fs.root(fname, { ".git", "package.json", "biome.json", "biome.jsonc" })
+            end,
           })
         end,
 
@@ -371,7 +380,9 @@ return {
             on_attach = on_attach,
             cmd = { "marksman", "server" },
             filetypes = { "markdown", "markdown.mdx" },
-            root_dir = lspconfig.util.root_pattern(".marksman.toml", ".git"),
+            root_dir = function(fname)
+              return vim.fs.root(fname, { ".marksman.toml", ".git" })
+            end,
           })
         end,
 
@@ -382,7 +393,7 @@ return {
             on_attach = on_attach,
             filetypes = {
               "css",
-              "eruby",
+              -- "eruby",
               "html",
               "javascript",
               "javascriptreact",
@@ -407,7 +418,9 @@ return {
             capabilities = capabilities,
             on_attach = on_attach,
             cmd = { "deno", "lsp" },
-            root_dir = lspconfig.util.root_pattern("deno.json", "deno.jsonc", ".git"),
+            root_dir = function(fname)
+              return vim.fs.root(fname, { "deno.json", "deno.jsonc", ".git" })
+            end,
             filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx", "mdx" },
             init_options = {
               lint = true,
@@ -481,15 +494,32 @@ return {
                 validate = true,
               },
             },
-            root_dir = lspconfig.util.root_pattern(
-              "tailwind.config.js",
-              "tailwind.config.cjs",
-              "tailwind.config.mjs",
-              "tailwind.config.ts",
-              "postcss.config.js",
-              "package.json",
-              ".git"
-            ),
+            root_dir = function(fname)
+              return vim.fs.root(fname, {
+                "tailwind.config.js",
+                "tailwind.config.cjs",
+                "tailwind.config.mjs",
+                "tailwind.config.ts",
+                "postcss.config.js",
+                "package.json",
+                ".git",
+              })
+            end,
+          })
+        end,
+
+        -- Custom handler for jsonls
+        ["jsonls"] = function()
+          lspconfig.jsonls.setup({
+            capabilities = capabilities,
+            on_attach = on_attach,
+            filetypes = { "json", "jsonc" },
+            settings = {
+              json = {
+                schemas = require("schemastore").json.schemas(),
+                validate = { enable = true },
+              },
+            },
           })
         end,
 
@@ -500,7 +530,9 @@ return {
             capabilities = capabilities,
             on_attach = on_attach,
             filetypes = { "elixir", "eelixir", "heex", "surface" },
-            root_dir = lspconfig.util.root_pattern("mix.exs", ".git"),
+            root_dir = function(fname)
+              return vim.fs.root(fname, { "mix.exs", ".git" })
+            end,
           })
         end,
 
@@ -516,18 +548,69 @@ return {
     --                                 ADDITIONAL LSP SERVERS
     -- └─────────────────────────────────────────────────────────────────────────────────────────────────┘
     -- Set up additional LSP servers that are not managed by mason-lspconfig
-    
+
     -- ─────────────────────────────────────────────────────────────────────────────────────────────────
     --                                      AST-GREP
     -- ─────────────────────────────────────────────────────────────────────────────────────────────────
     -- AST-based search and code analysis tool
-    lspconfig.ast_grep.setup({
+    vim.lsp.config.ast_grep = {
+      cmd = { "ast-grep", "lsp" },
+      filetypes = { "c", "cpp", "rust", "go", "java", "python", "javascript", "typescript", "html", "css", "kotlin", "dart", "lua" },
+      root_markers = { "sgconfig.yaml", "sgconfig.yml" },
       capabilities = capabilities,
       on_attach = on_attach,
-      cmd = { 'ast-grep', 'lsp' },
-      filetypes = { "c", "cpp", "rust", "go", "java", "python", "javascript", "typescript", "html", "css", "kotlin", "dart", "lua" },
-      root_dir = lspconfig.util.root_pattern('sgconfig.yaml', 'sgconfig.yml')
+    }
+
+    -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+    --                                      SOLIDITY
+    -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+    -- Solidity language server (Nomic Foundation)
+    -- Register .sol filetype (not built-in to Neovim)
+    vim.filetype.add({ extension = { sol = "solidity" } })
+    vim.lsp.config.solidity = {
+      cmd = { "nomicfoundation-solidity-language-server", "--stdio" },
+      filetypes = { "solidity" },
+      root_markers = { ".git", "hardhat.config.js", "hardhat.config.ts", "foundry.toml", "remappings.txt" },
+      single_file_support = true,
+      capabilities = capabilities,
+      on_attach = on_attach,
+    }
+    vim.lsp.enable("solidity")
+
+    -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+    --                                   SYSTEMVERILOG (VERIBLE)
+    -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+    -- SystemVerilog/Verilog language server (installed via brew)
+    vim.filetype.add({
+      extension = {
+        sv = "systemverilog",
+        svh = "systemverilog",
+        vh = "systemverilog",
+      },
     })
+    vim.lsp.config.verible = {
+      cmd = { "verible-verilog-ls", "--indentation_spaces", "2" },
+      filetypes = { "systemverilog", "verilog" },
+      root_markers = { ".git" },
+      single_file_support = true,
+      capabilities = capabilities,
+      on_attach = on_attach,
+    }
+    vim.lsp.enable("verible")
+
+    -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+    --                                    BASEDPYRIGHT
+    -- ─────────────────────────────────────────────────────────────────────────────────────────────────
+    -- Python language server (installed via brew)
+    vim.lsp.config.basedpyright = {
+      cmd = { "/opt/homebrew/bin/basedpyright-langserver", "--stdio" },
+      filetypes = { "python" },
+      root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git" },
+      single_file_support = true,
+      capabilities = capabilities,
+      on_attach = on_attach,
+    }
+    vim.lsp.enable("basedpyright")
 
     -- ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
     --                                 RUSTACEANVIM INTEGRATION
