@@ -15,8 +15,7 @@ local diaglist = require("diaglist")
 
 -- TOGGLE, OPEN, AND CLOSE --
 --
--- Toggle symbols outline window
-map("n", toggle_prefix .. "o", "<cmd>Outline<CR>", { desc = "[t]oggle [o]utline" })
+-- Toggle symbols outline window (moved to outline.lua plugin keys)
 
 -- Toogle Navbuddy explorer
 map("n", toggle_prefix .. "N", require("nvim-navbuddy").open, { desc = "[t]oggle [N]avBuddy" })
@@ -51,6 +50,8 @@ end, { desc = "[t]oggle [c]olorizer" })
 map("n", toggle_prefix .. "m", ":RenderMarkdown toggle<CR>", { desc = "[t]oggle [m]arkdown preview" })
 
 -- Toggle code actions preview
-map({ "n", "v" }, lsp_prefix .. "p", require("actions-preview").code_actions, { desc = "[c]ode actions [p]review" })
+map({ "n", "v" }, lsp_prefix .. "p", function()
+  require("actions-preview").code_actions()
+end, { desc = "[c]ode actions [p]review" })
 
 -- Toggle terminal (<leader>tt) is defined in the TERMINAL section
