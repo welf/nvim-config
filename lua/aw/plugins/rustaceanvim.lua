@@ -6,7 +6,7 @@
 
 return {
   "mrcjkb/rustaceanvim",
-  version = "^5", -- Use stable version 5.x
+  version = "^8", -- Use stable version 8.x
   event = { "BufReadPre *.rs", "BufNewFile *.rs" },
   lazy = false, -- Plugin handles its own lazy loading
   ft = { "rust" },
@@ -18,7 +18,7 @@ return {
     -- Configure CodeLLDB debugger adapter for Rust debugging
     local mason_registry = require("mason-registry")
     local codelldb = mason_registry.get_package("codelldb")
-    
+
     -- Ensure CodeLLDB is installed via Mason
     if not codelldb:is_installed() then
       vim.notify("codelldb is not installed. Please run :MasonInstall codelldb")
@@ -41,7 +41,7 @@ return {
         test_executor = "neotest", -- Use neotest for test execution
       },
     }
-    
+
     -- Merge with user options
     vim.g.rustaceanvim = vim.tbl_deep_extend("force", {}, opts or {})
   end,
@@ -58,7 +58,7 @@ return {
 
       settings = {
         ["rust-analyzer"] = {
-          
+
           -- =========================================================================
           -- CARGO CONFIGURATION
           -- =========================================================================
@@ -68,15 +68,15 @@ return {
             },
             features = "all", -- Analyze all cargo features
           },
-          
+
           -- =========================================================================
           -- PERFORMANCE OPTIMIZATIONS
           -- =========================================================================
           cachePriming = {
-            enable = true,    -- Enable cache priming for faster startup
-            numThreads = 8,   -- Number of threads for cache priming
+            enable = true, -- Enable cache priming for faster startup
+            numThreads = 8, -- Number of threads for cache priming
           },
-          
+
           files = {
             excludeDirs = { ".direnv", "node_modules", "target/debug", "target/release" },
             watcher = "client", -- Use client-side file watching for better performance
@@ -87,9 +87,9 @@ return {
           -- =========================================================================
           check = {
             command = "clippy", -- Use clippy instead of basic check
-            features = "all",   -- Check all features
-            allTargets = true,  -- Check all targets (bins, tests, examples)
-            workspace = true,   -- Check entire workspace
+            features = "all", -- Check all features
+            allTargets = true, -- Check all targets (bins, tests, examples)
+            workspace = true, -- Check entire workspace
           },
           checkOnSave = true, -- Run checks on file save
 
@@ -97,22 +97,22 @@ return {
           -- CODE COMPLETION
           -- =========================================================================
           completion = {
-            autoimport = { enable = true },     -- Auto-import suggestions
-            autoself = { enable = true },       -- Auto-complete self parameter
+            autoimport = { enable = true }, -- Auto-import suggestions
+            autoself = { enable = true }, -- Auto-complete self parameter
             callable = {
-              snippets = "add_parentheses",     -- Add () for functions (vs fill_arguments)
+              snippets = "add_parentheses", -- Add () for functions (vs fill_arguments)
             },
             fullFunctionSignatures = { enable = true }, -- Show full function signatures
-            postfix = { enable = true },        -- Enable postfix completions (.iter(), .unwrap(), etc)
-            termSearch = { enable = true },     -- Search completion items by term
-            typing = { 
-              autoClosingAngleBrackets = { enable = true } -- Auto-close generic brackets
+            postfix = { enable = true }, -- Enable postfix completions (.iter(), .unwrap(), etc)
+            termSearch = { enable = true }, -- Search completion items by term
+            typing = {
+              autoClosingAngleBrackets = { enable = true }, -- Auto-close generic brackets
             },
             workspace = {
               symbol = {
                 search = {
                   kind = "only_types", -- Limit workspace symbol search to types
-                  limit = 256,         -- Limit number of search results for performance
+                  limit = 256, -- Limit number of search results for performance
                   scope = "workspace_and_dependencies", -- Search scope
                 },
               },
@@ -122,8 +122,8 @@ return {
           -- =========================================================================
           -- DEBUGGING
           -- =========================================================================
-          debug = { 
-            openDebugPane = true -- Automatically open debug pane when debugging
+          debug = {
+            openDebugPane = true, -- Automatically open debug pane when debugging
           },
 
           -- =========================================================================
@@ -132,14 +132,14 @@ return {
           diagnostics = {
             enable = true,
             experimental = { enable = false }, -- Disable experimental diagnostics
-            styleLints = { enable = true },    -- Enable style-related lints
+            styleLints = { enable = true }, -- Enable style-related lints
           },
 
           -- =========================================================================
           -- REFERENCES & HIGHLIGHTING
           -- =========================================================================
-          highlightRelated = { 
-            references = { enable = true } -- Highlight related references
+          highlightRelated = {
+            references = { enable = true }, -- Highlight related references
           },
 
           -- =========================================================================
@@ -150,9 +150,9 @@ return {
               enable = true,
               references = { enable = true },
               show = {
-                enumVariants = 10,    -- Show up to 10 enum variants
-                fields = 10,          -- Show up to 10 struct fields
-                traitAssocItems = 5,  -- Show up to 5 trait associated items
+                enumVariants = 10, -- Show up to 10 enum variants
+                fields = 10, -- Show up to 10 struct fields
+                traitAssocItems = 5, -- Show up to 5 trait associated items
               },
             },
           },
@@ -161,43 +161,43 @@ return {
           -- IMPORT MANAGEMENT
           -- =========================================================================
           imports = {
-            enforce = true,               -- Enforce import organization
+            enforce = true, -- Enforce import organization
             granularity = { group = "crate" }, -- Group imports by crate
-            prefix = "self",              -- Use self:: prefix for local imports
+            prefix = "self", -- Use self:: prefix for local imports
           },
 
           -- =========================================================================
           -- TEST INTERPRETATION
           -- =========================================================================
-          interpret = { 
-            tests = true -- Enable test result interpretation
+          interpret = {
+            tests = true, -- Enable test result interpretation
           },
 
           -- =========================================================================
           -- INLAY HINTS (inline type/parameter hints)
           -- =========================================================================
           inlayHints = {
-            bindingModeHints = { enable = true },           -- Show binding modes (&, &mut)
-            closureCaptureHints = { enable = false },       -- Disabled: can be noisy
+            bindingModeHints = { enable = true }, -- Show binding modes (&, &mut)
+            closureCaptureHints = { enable = false }, -- Disabled: can be noisy
             closureReturnTypeHints = { enable = "always" }, -- Always show closure return types
-            discriminantHints = { enable = "always" },      -- Show enum discriminant values
+            discriminantHints = { enable = "always" }, -- Show enum discriminant values
             expressionAdjustmentHints = { enable = "always" }, -- Show type adjustments
-            implicitDrops = { enable = false },             -- Disabled: too verbose
-            
+            implicitDrops = { enable = false }, -- Disabled: too verbose
+
             -- Lifetime hints configuration
             lifetimeElisionHints = {
-              enable = "skip_trivial",    -- Show only non-trivial lifetime hints
-              useParameterNames = true,   -- Use parameter names in hints
+              enable = "skip_trivial", -- Show only non-trivial lifetime hints
+              useParameterNames = true, -- Use parameter names in hints
             },
-            
-            rangeExclusiveHints = { enable = true },        -- Show range exclusivity hints
-            reborrowHints = { enable = "always" },          -- Show reborrow hints
-            
+
+            rangeExclusiveHints = { enable = true }, -- Show range exclusivity hints
+            reborrowHints = { enable = "always" }, -- Show reborrow hints
+
             -- Type hints configuration
             typeHints = {
               enable = true,
               hideClosureInitialization = false, -- Show closure initialization types
-              hideNamedConstructor = false,      -- Show named constructor types
+              hideNamedConstructor = false, -- Show named constructor types
             },
           },
 
@@ -205,21 +205,21 @@ return {
           -- CODE LENSES (inline actionable commands)
           -- =========================================================================
           lens = {
-            debug = { enable = true },            -- Show debug lens
-            enable = true,                        -- Enable code lenses
-            forceCustomCommands = true,           -- Use custom commands
-            implementations = { enable = true },   -- Show implementation lens
-            location = "above_name",              -- Position lenses above item names
-            
+            debug = { enable = true }, -- Show debug lens
+            enable = true, -- Enable code lenses
+            forceCustomCommands = true, -- Use custom commands
+            implementations = { enable = true }, -- Show implementation lens
+            location = "above_name", -- Position lenses above item names
+
             -- Reference lenses configuration
             references = {
-              adt = { enable = true },            -- Show references for ADTs
-              enumVariant = { enable = true },    -- Show references for enum variants
-              method = { enable = true },         -- Show references for methods
-              trait = { enable = true },          -- Show references for traits
+              adt = { enable = true }, -- Show references for ADTs
+              enumVariant = { enable = true }, -- Show references for enum variants
+              method = { enable = true }, -- Show references for methods
+              trait = { enable = true }, -- Show references for traits
             },
-            
-            run = { enable = true },              -- Show run lens for executables
+
+            run = { enable = true }, -- Show run lens for executables
           },
 
           -- =========================================================================
@@ -252,8 +252,8 @@ return {
           -- =========================================================================
           -- TYPING ASSISTANCE
           -- =========================================================================
-          typing = { 
-            autoClosingBrackets = { enable = true } -- Auto-close brackets while typing
+          typing = {
+            autoClosingBrackets = { enable = true }, -- Auto-close brackets while typing
           },
         },
       },
