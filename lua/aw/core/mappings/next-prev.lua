@@ -13,20 +13,21 @@ map("n", "]b", ":bnext<CR>", { desc = "Go to next buffer" })
 -- Go to previous buffer
 map("n", "[b", ":bprev<CR>", { desc = "Go to previous buffer" })
 -- Go to next git hunk
--- NOTE: These mappings are set by `mini.diff` plugin: `]h` (next hunk), `[h` (prev hunk)
---
--- map("n", "]h", function()
---   if vim.wo.diff then
---     vim.cmd.normal({ "]h", bang = true })
---   else
---     git.nav_hunk("next")
---   end
--- end, { desc = "Jump to next git [h]hunk" })
+
+map("n", "]h", function()
+  if vim.wo.diff then
+    vim.cmd.normal({ "]h", bang = true })
+  else
+    ---@diagnostic disable-next-line: param-type-mismatch
+    git.nav_hunk("next")
+  end
+end, { desc = "Jump to next git [h]hunk" })
 -- Go to previous git hunk
--- map("n", "[h", function()
---   if vim.wo.diff then
---     vim.cmd.normal({ "[h", bang = true })
---   else
---     git.nav_hunk("prev")
---   end
--- end, { desc = "Jump to previous git [h]hunk" })
+map("n", "[h", function()
+  if vim.wo.diff then
+    vim.cmd.normal({ "[h", bang = true })
+  else
+    ---@diagnostic disable-next-line: param-type-mismatch
+    git.nav_hunk("prev")
+  end
+end, { desc = "Jump to previous git [h]hunk" })
