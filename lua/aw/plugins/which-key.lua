@@ -24,6 +24,9 @@ return {
       { "<leader>S", group = "[S]how", icon = { icon = "🔍 ", hl = "Constant" } },
       { "<leader>Sd", group = "[S]how [d]iagnostics", icon = { icon = "🐞 ", hl = "Constant" } },
       { "<leader>x", group = "Trouble diagnostic", icon = { icon = "⚠️ ", hl = "Constant" }, mode = { "n", "v" } },
+      { "<leader>p", group = "[P]eek definitions", icon = { icon = "👀 ", hl = "Constant" } },
+      { "<leader>w", group = "S[w]ap textobjects", icon = { icon = "🔄 ", hl = "Constant" } },
+      { "<leader>f", group = "[F]ind/Files", icon = { icon = "📄 ", hl = "Constant" } },
 
       -- =============================================================================
       -- RUST DEVELOPMENT KEY GROUPS
@@ -86,6 +89,9 @@ return {
 
       -- Advanced documentation tools
       { "<leader>rD", group = "[D]ocs & Navigation", icon = { icon = "📖 ", hl = "Constant" } },
+
+      -- Neotest operations
+      { "<leader>rn", group = "[N]eotest & Testing", icon = { icon = "🧪 ", hl = "Constant" } },
     },
   },
   keys = {
