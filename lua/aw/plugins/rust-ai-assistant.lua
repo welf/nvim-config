@@ -14,22 +14,22 @@ local M = {}
 ---@return table
 local function get_rust_context()
   local context = {}
-  
+
   -- Get current file info
   local current_file = vim.fn.expand("%:p")
   local current_dir = vim.fn.expand("%:p:h")
-  
+
   -- Find Cargo.toml
   local cargo_toml = vim.fn.findfile("Cargo.toml", current_dir .. ";")
   if cargo_toml ~= "" then
     context.cargo_toml = cargo_toml
     context.project_root = vim.fn.fnamemodify(cargo_toml, ":h")
-    
+
     -- Read Cargo.toml for dependencies
     local cargo_content = vim.fn.readfile(cargo_toml)
     context.dependencies = {}
     local in_dependencies = false
-    
+
     for _, line in ipairs(cargo_content) do
       if line:match("^%[dependencies%]") then
         in_dependencies = true
@@ -43,11 +43,11 @@ local function get_rust_context()
       end
     end
   end
-  
+
   -- Get current function context
   local current_line = vim.fn.line(".")
   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-  
+
   -- Find current function
   for i = current_line, 1, -1 do
     local line = lines[i]
@@ -56,7 +56,7 @@ local function get_rust_context()
       break
     end
   end
-  
+
   -- Get current struct/impl context
   for i = current_line, 1, -1 do
     local line = lines[i]
@@ -68,7 +68,7 @@ local function get_rust_context()
       break
     end
   end
-  
+
   -- Get imports/uses
   context.imports = {}
   for _, line in ipairs(lines) do
@@ -76,7 +76,7 @@ local function get_rust_context()
       table.insert(context.imports, line:match("use%s+([^;]+)"))
     end
   end
-  
+
   return context
 end
 
@@ -85,7 +85,7 @@ end
 local function get_rust_diagnostics()
   local diagnostics = vim.diagnostic.get(0)
   local rust_diagnostics = {}
-  
+
   for _, diag in ipairs(diagnostics) do
     if diag.source == "rust-analyzer" or diag.source == "rustc" then
       table.insert(rust_diagnostics, {
@@ -97,7 +97,7 @@ local function get_rust_diagnostics()
       })
     end
   end
-  
+
   return rust_diagnostics
 end
 
@@ -110,7 +110,7 @@ local function get_current_selection()
     local start_pos = vim.fn.getpos("'<")
     local end_pos = vim.fn.getpos("'>")
     local lines = vim.api.nvim_buf_get_lines(0, start_pos[2] - 1, end_pos[2], false)
-    
+
     if #lines == 1 then
       return lines[1]:sub(start_pos[3], end_pos[3])
     else
@@ -136,36 +136,36 @@ local function generate_rust_prompt(prompt_type, user_input)
   local context = get_rust_context()
   local diagnostics = get_rust_diagnostics()
   local selection = get_current_selection()
-  
+
   local prompt_parts = {}
-  
+
   -- Add context header
   table.insert(prompt_parts, "# Rust Development Context")
-  
+
   if context.project_root then
     table.insert(prompt_parts, "**Project Root:** " .. context.project_root)
   end
-  
+
   if context.dependencies and #context.dependencies > 0 then
     table.insert(prompt_parts, "**Dependencies:** " .. table.concat(context.dependencies, ", "))
   end
-  
+
   if context.current_function then
     table.insert(prompt_parts, "**Current Function:** " .. context.current_function)
   end
-  
+
   if context.current_struct then
     table.insert(prompt_parts, "**Current Struct:** " .. context.current_struct)
   end
-  
+
   if context.current_impl then
     table.insert(prompt_parts, "**Current Impl:** " .. context.current_impl)
   end
-  
+
   if context.imports and #context.imports > 0 then
     table.insert(prompt_parts, "**Imports:** " .. table.concat(context.imports, ", "))
   end
-  
+
   -- Add diagnostics if any
   if #diagnostics > 0 then
     table.insert(prompt_parts, "\n## Current Diagnostics:")
@@ -173,7 +173,7 @@ local function generate_rust_prompt(prompt_type, user_input)
       table.insert(prompt_parts, string.format("- Line %d: %s", diag.line, diag.message))
     end
   end
-  
+
   -- Add selection if any
   if selection and selection ~= "" then
     table.insert(prompt_parts, "\n## Selected Code:")
@@ -181,10 +181,10 @@ local function generate_rust_prompt(prompt_type, user_input)
     table.insert(prompt_parts, selection)
     table.insert(prompt_parts, "```")
   end
-  
+
   -- Add prompt-specific content
   table.insert(prompt_parts, "\n## Request:")
-  
+
   if prompt_type == "error_explanation" then
     table.insert(prompt_parts, "Please explain the Rust errors/warnings above and provide solutions. Focus on:")
     table.insert(prompt_parts, "1. Root cause of each error")
@@ -217,13 +217,13 @@ local function generate_rust_prompt(prompt_type, user_input)
   else
     table.insert(prompt_parts, user_input)
   end
-  
+
   if user_input and user_input ~= "" then
     table.insert(prompt_parts, "\n**Additional Context:** " .. user_input)
   end
-  
+
   table.insert(prompt_parts, "\nPlease provide practical, actionable advice specific to Rust development.")
-  
+
   return table.concat(prompt_parts, "\n")
 end
 
@@ -236,14 +236,14 @@ end
 ---@param user_input string
 local function send_to_claude(prompt_type, user_input)
   local prompt = generate_rust_prompt(prompt_type, user_input)
-  
+
   -- Create temporary file with prompt
   local temp_file = vim.fn.tempname()
   vim.fn.writefile(vim.split(prompt, "\n"), temp_file)
-  
+
   -- Open Claude Code with the prompt
-  local claude_code = require("claude-code")
-  if claude_code then
+  local ok, claude_code = pcall(require, "claude-code")
+  if ok and claude_code then
     -- If claude-code plugin is available, use it
     vim.cmd("ClaudeCode")
     vim.defer_fn(function()
@@ -267,7 +267,7 @@ local function explain_rust_errors()
     vim.notify("No Rust errors or warnings found", vim.log.levels.INFO)
     return
   end
-  
+
   send_to_claude("error_explanation", "")
 end
 
@@ -278,7 +278,7 @@ local function rust_code_review()
     vim.notify("Please select code to review", vim.log.levels.WARN)
     return
   end
-  
+
   send_to_claude("code_review", "")
 end
 
@@ -289,7 +289,7 @@ local function rust_refactor_suggestions()
     vim.notify("Please select code to refactor", vim.log.levels.WARN)
     return
   end
-  
+
   send_to_claude("refactor", "")
 end
 
@@ -300,7 +300,7 @@ local function rust_generate_tests()
     vim.notify("Please select code to generate tests for", vim.log.levels.WARN)
     return
   end
-  
+
   send_to_claude("test_generation", "")
 end
 
@@ -311,7 +311,7 @@ local function rust_generate_docs()
     vim.notify("Please select code to document", vim.log.levels.WARN)
     return
   end
-  
+
   send_to_claude("documentation", "")
 end
 
@@ -330,27 +330,27 @@ end
 function M.setup()
   -- Create user commands
   vim.api.nvim_create_user_command("RustExplainErrors", explain_rust_errors, {
-    desc = "Explain Rust errors with AI"
+    desc = "Explain Rust errors with AI",
   })
-  
+
   vim.api.nvim_create_user_command("RustCodeReview", rust_code_review, {
-    desc = "Get AI code review for Rust code"
+    desc = "Get AI code review for Rust code",
   })
-  
+
   vim.api.nvim_create_user_command("RustRefactor", rust_refactor_suggestions, {
-    desc = "Get refactoring suggestions"
+    desc = "Get refactoring suggestions",
   })
-  
+
   vim.api.nvim_create_user_command("RustGenerateTests", rust_generate_tests, {
-    desc = "Generate tests for Rust code"
+    desc = "Generate tests for Rust code",
   })
-  
+
   vim.api.nvim_create_user_command("RustGenerateDocs", rust_generate_docs, {
-    desc = "Generate documentation for Rust code"
+    desc = "Generate documentation for Rust code",
   })
-  
+
   vim.api.nvim_create_user_command("RustAI", rust_custom_prompt, {
-    desc = "Custom Rust AI prompt with context"
+    desc = "Custom Rust AI prompt with context",
   })
 end
 
@@ -360,25 +360,26 @@ return {
   config = function()
     require("aw.plugins.rust-ai-assistant").setup()
   end,
-  
+
   -- Keymappings using <leader>ra* prefix (rust + ai)
   keys = {
     -- Error explanation
     { "<leader>rae", "<cmd>RustExplainErrors<cr>", desc = "Explain Rust errors with AI", ft = "rust" },
-    
+
     -- Code review
     { "<leader>rar", "<cmd>RustCodeReview<cr>", desc = "AI code review", ft = "rust", mode = { "n", "v" } },
-    
+
     -- Refactoring
     { "<leader>raf", "<cmd>RustRefactor<cr>", desc = "AI refactoring suggestions", ft = "rust", mode = { "n", "v" } },
-    
+
     -- Test generation
     { "<leader>rat", "<cmd>RustGenerateTests<cr>", desc = "Generate tests with AI", ft = "rust", mode = { "n", "v" } },
-    
+
     -- Documentation
     { "<leader>rad", "<cmd>RustGenerateDocs<cr>", desc = "Generate docs with AI", ft = "rust", mode = { "n", "v" } },
-    
+
     -- Custom prompt
     { "<leader>raa", "<cmd>RustAI<cr>", desc = "Custom Rust AI prompt", ft = "rust" },
   },
 }
+
