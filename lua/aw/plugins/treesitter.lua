@@ -1,179 +1,122 @@
 return {
   {
     "nvim-treesitter/nvim-treesitter",
+    branch = "main",
+    lazy = false,
     build = ":TSUpdate",
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter-textobjects",
+    },
     config = function()
-      local configs = require("nvim-treesitter.configs") -- Sets main module to use for opts
+      -- Wrap nvim_buf_set_extmark to catch out-of-range errors
+      local original_set_extmark = vim.api.nvim_buf_set_extmark
+      vim.api.nvim_buf_set_extmark = function(buffer, ns_id, line, col, opts)
+        local ok, result = pcall(original_set_extmark, buffer, ns_id, line, col, opts)
+        if
+          not ok
+          and (
+            result:match("Invalid 'end_row': out of range")
+            or result:match("Invalid 'end_col': out of range")
+            or result:match("Invalid 'col': out of range")
+          )
+        then
+          return nil
+        elseif not ok then
+          error(result)
+        end
+        return result
+      end
 
-      -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
-      configs.setup({
-        -- A list of parser names, or "all" (the listed parsers MUST always be installed)
-        ensure_installed = {
-          "bash",
-          "c",
-          "cpp",
-          "css",
-          "dockerfile",
-          "eex",
-          "elixir",
-          "graphql",
-          "heex",
-          "html",
-          "javascript",
-          "json",
-          "json5",
-          "jsonc",
-          "lua",
-          "markdown",
-          "markdown_inline",
-          "python",
-          "query",
-          "regex",
-          "ruby",
-          "rust",
-          "scss",
-          "sql",
-          "toml",
-          "tsx",
-          "typescript",
-          "vim",
-          "vimdoc",
-          "yaml",
-        },
+      local parsers = {
+        "bash",
+        "c",
+        "cpp",
+        "css",
+        "dockerfile",
+        "eex",
+        "elixir",
+        "graphql",
+        "heex",
+        "html",
+        "jinja",
+        "javascript",
+        "json",
+        "json5",
+        "lua",
+        "markdown",
+        "markdown_inline",
+        "python",
+        "query",
+        "regex",
+        "ruby",
+        "rust",
+        "scss",
+        "sql",
+        "toml",
+        "tsx",
+        "typescript",
+        "systemverilog",
+        "vim",
+        "vimdoc",
+        "yaml",
+      }
 
-        -- autotag = {
-        --   enable = true,
-        -- },
+      require("nvim-treesitter").install(parsers)
 
-        -- Install parsers synchronously (only applied to `ensure_installed`)
-        sync_install = false,
+      vim.treesitter.language.register("tsx", { "javascript", "typescript.tsx" })
+      vim.treesitter.language.register("systemverilog", { "verilog", "systemverilog" })
+      vim.treesitter.language.register("json", "jsonc")
 
-        -- Automatically install missing parsers when entering buffer
-        -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
-        auto_install = false,
+      local indent_disabled = { python = true, css = true, toml = true }
+      local max_filesize = 100 * 1024 -- 100 KB
 
-        -- List of parsers to ignore installing (or "all")
-        ignore_install = {},
+      vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("aw-treesitter-start", { clear = true }),
+        callback = function(args)
+          local buf = args.buf
+          local ft = args.match
+          local lang = vim.treesitter.language.get_lang(ft) or ft
+          if not lang or lang == "" then
+            return
+          end
 
-        ---- If you need to change the installation directory of the parsers (see -> Advanced Setup)
-        -- parser_install_dir = "/some/path/to/store/parsers", -- Remember to run vim.opt.runtimepath:append("/some/path/to/store/parsers")!
+          local ok_add = pcall(vim.treesitter.language.add, lang)
+          if not ok_add then
+            return
+          end
 
-        highlight = {
-          enable = true,
+          local ok_stat, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+          if ok_stat and stats and stats.size > max_filesize then
+            return
+          end
 
-          -- NOTE: these are the names of the parsers and not the filetype. (for example if you want to
-          -- disable highlighting for the `tex` filetype, you need to include `latex` in this list as this is
-          -- the name of the parser)
-          -- list of language that will be disabled
-          disable = {},
-          -- -- Or use a function for more flexibility, e.g. to disable slow treesitter highlight for large files
-          -- disable = function(lang, buf)
-          -- 	 local max_filesize = 100 * 1024 -- 100 KB
-          -- 	 local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
-          -- 	 if ok and stats and stats.size > max_filesize then
-          -- 		 return true
-          -- 	 end
-          -- end,
+          local ok_start = pcall(vim.treesitter.start, buf, lang)
+          if not ok_start then
+            return
+          end
 
-          -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-          -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-          -- Using this option may slow down your editor, and you may see some duplicate highlights.
-          -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
-          --  If you are experiencing weird indenting issues, add the language to
-          --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-          additional_vim_regex_highlighting = { "ruby" },
-        },
+          if indent_disabled[lang] then
+            vim.bo[buf].indentexpr = ""
+          else
+            vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          end
 
-        indent = {
-          enable = true,
-          disable = { "python", "css", "toml" },
-        },
+          vim.api.nvim_set_option_value("foldmethod", "expr", { scope = "local" })
+          vim.api.nvim_set_option_value("foldexpr", "v:lua.vim.treesitter.foldexpr()", { scope = "local" })
 
-        fold = {
-          enable = true,
-          disable = {},
-        },
-
-        incremental_selection = {
-          enable = true,
-          keymaps = {
-            init_selection = "<A-o>",
-            node_incremental = "<A-o>",
-            scope_incremental = "<A-O>",
-            node_decremental = "<A-i>",
-          },
-        },
-
-        textobjects = {
-          select = {
-            enable = true,
-            lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
-            keymaps = {
-              -- You can use the capture groups defined in textobjects.scm
-              ["aa"] = "@parameter.outer",
-              ["ia"] = "@parameter.inner",
-              ["af"] = "@function.outer",
-              ["if"] = "@function.inner",
-              ["ac"] = "@class.outer",
-              ["ic"] = "@class.inner",
-              ["ii"] = "@conditional.inner",
-              ["ai"] = "@conditional.outer",
-              ["il"] = "@loop.inner",
-              ["al"] = "@loop.outer",
-              ["at"] = "@comment.outer",
-            },
-          },
-
-          move = {
-            enable = true,
-            set_jumps = true, -- whether to set jumps in the jumplist
-            goto_next_start = {
-              ["]m"] = "@function.outer",
-              ["]]"] = "@class.outer",
-            },
-            goto_next_end = {
-              ["]M"] = "@function.outer",
-              ["]["] = "@class.outer",
-            },
-            goto_previous_start = {
-              ["[m"] = "@function.outer",
-              ["[["] = "@class.outer",
-            },
-            goto_previous_end = {
-              ["[M"] = "@function.outer",
-              ["[]"] = "@class.outer",
-            },
-            -- goto_next = {
-            --   [']i'] = "@conditional.inner",
-            -- },
-            -- goto_previous = {
-            --   ['[i'] = "@conditional.inner",
-            -- }
-          },
-
-          swap = {
-            enable = true,
-            swap_next = {
-              ["<leader>a"] = "@parameter.inner",
-            },
-            swap_previous = {
-              ["<leader>A"] = "@parameter.inner",
-            },
-          },
-        },
+          if lang == "ruby" then
+            vim.bo[buf].syntax = "ON"
+          end
+        end,
       })
-
-      local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-      parser_config.tsx.filetype_to_parsername = { "javascript", "typescript.tsx" }
     end,
   },
   {
     "windwp/nvim-ts-autotag",
     event = "BufReadPre",
     opts = {
-      enable_close = true, -- Auto close tags
-      enable_rename = true, -- Auto rename pairs of tags
-      -- enable_close_on_slash = true, -- Auto close on trailing </
+      enable_close = true,
+      enable_rename = true,
     },
     config = function()
       require("nvim-ts-autotag").setup()
