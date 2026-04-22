@@ -211,9 +211,11 @@ return {
             return nil
           end
           
-          local choice = vim.fn.inputlist(vim.tbl_map(function(p, i)
-            return i .. ". " .. p
-          end, choices))
+          local formatted_choices = {}
+          for i, p in ipairs(choices) do
+            table.insert(formatted_choices, i .. ". " .. p)
+          end
+          local choice = vim.fn.inputlist(formatted_choices)
           
           if choice > 0 and choice <= #choices then
             return tonumber(choices[choice])
@@ -240,7 +242,7 @@ return {
           
           for _, line in ipairs(lines) do
             if line:match("^{") then
-              local success, json = pcall(vim.fn.json_decode, line)
+              local success, json = pcall(vim.json.decode, line)
               if success and json.executable then
                 return json.executable
               end
