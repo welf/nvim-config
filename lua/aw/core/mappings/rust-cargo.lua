@@ -54,8 +54,8 @@ map("n", "<leader>rta", function()
 end, { desc = "Run all workspace tests (nextest)" })
 
 map("n", "<leader>rtt", function()
-  local current_file = vim.fn.expand('%:t:r') -- Get filename without extension
-  if current_file and current_file ~= '' then
+  local current_file = vim.fn.expand("%:t:r") -- Get filename without extension
+  if current_file and current_file ~= "" then
     vim.cmd("split | resize 25 | terminal cargo nextest run " .. current_file)
     vim.cmd("startinsert")
     vim.notify("Running tests for: " .. current_file, vim.log.levels.INFO)
@@ -65,8 +65,8 @@ map("n", "<leader>rtt", function()
 end, { desc = "Run current file tests (nextest)" })
 
 map("n", "<leader>rtf", function()
-  local current_file = vim.fn.expand('%:t:r')
-  if current_file and current_file ~= '' then
+  local current_file = vim.fn.expand("%:t:r")
+  if current_file and current_file ~= "" then
     vim.cmd("split | resize 25 | terminal cargo nextest run " .. current_file)
     vim.cmd("startinsert")
     vim.notify("Running file tests: " .. current_file, vim.log.levels.INFO)
@@ -82,7 +82,7 @@ map("n", "<leader>rtl", function()
 end, { desc = "Run last test (nextest)" })
 
 -- Additional test types
-map("n", "<leader>rtD", function() 
+map("n", "<leader>rtD", function()
   vim.cmd("split | resize 25 | terminal cargo test --doc --workspace")
   vim.cmd("startinsert")
   vim.notify("Running doc tests for workspace", vim.log.levels.INFO)
@@ -102,7 +102,7 @@ end, { desc = "Run tests verbose (nextest)" })
 
 map("n", "<leader>rts", function()
   local test_name = vim.fn.input("Test filter (name/pattern): ")
-  if test_name and test_name ~= '' then
+  if test_name and test_name ~= "" then
     vim.cmd("split | resize 25 | terminal cargo nextest run --workspace " .. test_name)
     vim.cmd("startinsert")
     vim.notify("Running filtered tests: " .. test_name, vim.log.levels.INFO)
@@ -111,7 +111,7 @@ end, { desc = "Run specific test (filter)" })
 
 map("n", "<leader>rtp", function()
   local package = vim.fn.input("Package name: ")
-  if package and package ~= '' then
+  if package and package ~= "" then
     vim.cmd("split | resize 25 | terminal cargo nextest run --package " .. package)
     vim.cmd("startinsert")
     vim.notify("Running tests for package: " .. package, vim.log.levels.INFO)
@@ -139,8 +139,6 @@ end, { desc = "Run tests with coverage" })
 -- Legacy cargo test commands for compatibility
 map("n", "<leader>rtb", wezterm_run("cargo test --bins", "Cargo test bins"), { desc = "Cargo test bins" })
 map("n", "<leader>rtu", wezterm_run("cargo test --lib", "Cargo test lib"), { desc = "Cargo test lib" })
-
-
 
 -- Code quality operations
 map("n", "<leader>rll", wezterm_run("cargo clippy", "Cargo clippy"), { desc = "Cargo clippy" })
@@ -178,7 +176,7 @@ map("n", "<leader>rhD", "<cmd>RustLsp debuggables<cr>", { desc = "Rust debuggabl
 map("n", "<leader>rhe", "<cmd>RustLsp explainError<cr>", { desc = "Explain error" })
 map("n", "<leader>rhr", "<cmd>RustLsp reloadWorkspace<cr>", { desc = "Reload workspace" })
 
--- Working rustaceanvim commands  
+-- Working rustaceanvim commands
 map("n", "<leader>rhj", "<cmd>RustLsp joinLines<cr>", { desc = "Join lines" })
 map("n", "<leader>rhc", "<cmd>RustLsp openCargo<cr>", { desc = "Open Cargo.toml" })
 map("n", "<leader>rhp", "<cmd>RustLsp parentModule<cr>", { desc = "Go to parent module" })
@@ -186,22 +184,22 @@ map("n", "<leader>rhp", "<cmd>RustLsp parentModule<cr>", { desc = "Go to parent 
 -- Alternative implementations for missing commands
 map("n", "<leader>rhm", function()
   -- Expand macro using rust-analyzer LSP directly
-  local params = vim.lsp.util.make_position_params()
+  local params = vim.lsp.util.make_position_params(0, "utf-16")
   local clients = vim.lsp.get_clients({ bufnr = 0 })
-  
+
   for _, client in ipairs(clients) do
     if client.name == "rust_analyzer" then
-      client.request("rust-analyzer/expandMacro", params, function(err, result)
+      vim.lsp.buf_request(0, "rust-analyzer/expandMacro", params, function(err, result)
         if err then
           vim.notify("Error expanding macro: " .. err.message, vim.log.levels.ERROR)
           return
         end
-        
+
         if result then
           -- Open result in a new buffer
           local buf = vim.api.nvim_create_buf(false, true)
           vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(result.expansion, "\n"))
-          vim.api.nvim_buf_set_option(buf, "filetype", "rust")
+          vim.bo[buf].filetype = "rust"
           vim.api.nvim_buf_set_name(buf, "Macro Expansion")
           vim.cmd("split")
           vim.api.nvim_win_set_buf(0, buf)
@@ -212,7 +210,7 @@ map("n", "<leader>rhm", function()
       return
     end
   end
-  
+
   vim.notify("rust-analyzer not found", vim.log.levels.ERROR)
 end, { desc = "Expand macro at cursor" })
 
@@ -234,11 +232,11 @@ map("n", "<leader>rhs", function()
       query = query,
       parseOnly = false,
     }
-    
+
     local clients = vim.lsp.get_clients({ bufnr = 0 })
     for _, client in ipairs(clients) do
       if client.name == "rust_analyzer" then
-        client.request("experimental/ssr", params, function(err, result)
+        vim.lsp.buf_request(0, "experimental/ssr", params, function(err, result)
           if err then
             vim.notify("SSR Error: " .. err.message, vim.log.levels.ERROR)
           elseif result then
@@ -259,13 +257,13 @@ map("n", "<leader>rhg", function()
     vim.notify("cargo-depgraph not found. Install with: cargo install cargo-depgraph", vim.log.levels.ERROR)
     return
   end
-  
+
   -- Check if dot (graphviz) is installed
   if vim.fn.executable("dot") == 0 then
     vim.notify("Graphviz not found. Install with: brew install graphviz", vim.log.levels.ERROR)
     return
   end
-  
+
   vim.cmd("split | resize 20 | terminal cargo depgraph --all-deps | dot -Tsvg > /tmp/crate_graph.svg && open /tmp/crate_graph.svg")
   vim.cmd("startinsert")
 end, { desc = "Generate crate dependency graph" })
@@ -351,8 +349,18 @@ map("n", "<leader>rPc", wezterm_run("cargo criterion", "Run criterion benchmarks
 map("n", "<leader>rPi", wezterm_run("cargo bench --bench", "Interactive benchmark selection"), { desc = "Select benchmark" })
 
 -- Profiling
-map("n", "<leader>rPf", wezterm_input_run("Binary name: ", "cargo build --release && perf record --call-graph=dwarf target/release/%s", "Profile with perf"), { desc = "Profile with perf" })
-map("n", "<leader>rPv", wezterm_run("cargo build --release && valgrind --tool=callgrind ./target/release/$(basename $(pwd))", "Profile with valgrind"), { desc = "Valgrind profiling" })
+map(
+  "n",
+  "<leader>rPf",
+  wezterm_input_run("Binary name: ", "cargo build --release && perf record --call-graph=dwarf target/release/%s", "Profile with perf"),
+  { desc = "Profile with perf" }
+)
+map(
+  "n",
+  "<leader>rPv",
+  wezterm_run("cargo build --release && valgrind --tool=callgrind ./target/release/$(basename $(pwd))", "Profile with valgrind"),
+  { desc = "Valgrind profiling" }
+)
 map("n", "<leader>rPh", wezterm_run("cargo build --release && heaptrack ./target/release/$(basename $(pwd))", "Heap profiling"), { desc = "Heap profiling" })
 
 -- Flamegraphs
@@ -369,9 +377,8 @@ map("n", "<leader>rPd", wezterm_run("cargo bloat --release --crates", "Crate siz
 -- =============================================================================
 
 -- Most commonly used commands get single-letter shortcuts
+-- Note: <leader>rB and <leader>rC are reserved for [B]enchmark and [C]overage groups
 map("n", "<leader>rR", wezterm_run("cargo run", "Quick: Cargo run"), { desc = "Quick: Cargo run" })
-map("n", "<leader>rB", wezterm_run("cargo build", "Quick: Cargo build"), { desc = "Quick: Cargo build" })
 map("n", "<leader>rT", wezterm_run("cargo test", "Quick: Cargo test"), { desc = "Quick: Cargo test" })
 map("n", "<leader>rL", wezterm_run("cargo clippy", "Quick: Cargo clippy"), { desc = "Quick: Cargo clippy" })
 map("n", "<leader>rF", wezterm_run("cargo fmt", "Quick: Cargo format"), { desc = "Quick: Cargo format" })
-map("n", "<leader>rC", wezterm_run("cargo check", "Quick: Cargo check"), { desc = "Quick: Cargo check" })

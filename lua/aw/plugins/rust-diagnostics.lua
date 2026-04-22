@@ -10,13 +10,13 @@ return {
     "nvim-tree/nvim-web-devicons",
     "https://git.sr.ht/~whynothugo/lsp_lines.nvim", -- Better error display
   },
-  
+
   config = function()
     -- =======================================================================
     -- LSP LINES SETUP (better error visualization)
     -- =======================================================================
     require("lsp_lines").setup()
-    
+
     -- Disable virtual_text since we're using lsp_lines
     vim.diagnostic.config({
       virtual_text = false,
@@ -27,27 +27,27 @@ return {
       severity_sort = true,
       float = {
         show_header = true,
-        source = "always",
+        source = true,
         border = "rounded",
         format = function(diagnostic)
           -- Enhanced formatting for Rust diagnostics
           local message = diagnostic.message
-          
+
           -- Add error code if available
           if diagnostic.code then
             message = string.format("[%s] %s", diagnostic.code, message)
           end
-          
+
           -- Add source information
           if diagnostic.source then
             message = string.format("(%s) %s", diagnostic.source, message)
           end
-          
+
           return message
         end,
       },
     })
-    
+
     -- =======================================================================
     -- TROUBLE SETUP (diagnostic list)
     -- =======================================================================
@@ -65,50 +65,50 @@ return {
       },
       icons = {
         indent = {
-          top           = "│ ",
-          middle        = "├╴",
-          last          = "└╴",
-          fold_open     = " ",
-          fold_closed   = " ",
-          ws            = "  ",
+          top = "│ ",
+          middle = "├╴",
+          last = "└╴",
+          fold_open = " ",
+          fold_closed = " ",
+          ws = "  ",
         },
-        folder_closed   = " ",
-        folder_open     = " ",
+        folder_closed = " ",
+        folder_open = " ",
         kinds = {
-          Array         = " ",
-          Boolean       = "󰨙 ",
-          Class         = " ",
-          Constant      = "󰏿 ",
-          Constructor   = " ",
-          Enum          = " ",
-          EnumMember    = " ",
-          Event         = " ",
-          Field         = " ",
-          File          = " ",
-          Function      = "󰊕 ",
-          Interface     = " ",
-          Key           = " ",
-          Method        = "󰊕 ",
-          Module        = " ",
-          Namespace     = "󰦮 ",
-          Null          = " ",
-          Number        = "󰎠 ",
-          Object        = " ",
-          Operator      = " ",
-          Package       = " ",
-          Property      = " ",
-          String        = " ",
-          Struct        = "󰆼 ",
+          Array = " ",
+          Boolean = "󰨙 ",
+          Class = " ",
+          Constant = "󰏿 ",
+          Constructor = " ",
+          Enum = " ",
+          EnumMember = " ",
+          Event = " ",
+          Field = " ",
+          File = " ",
+          Function = "󰊕 ",
+          Interface = " ",
+          Key = " ",
+          Method = "󰊕 ",
+          Module = " ",
+          Namespace = "󰦮 ",
+          Null = " ",
+          Number = "󰎠 ",
+          Object = " ",
+          Operator = " ",
+          Package = " ",
+          Property = " ",
+          String = " ",
+          Struct = "󰆼 ",
           TypeParameter = " ",
-          Variable      = "󰀫 ",
+          Variable = "󰀫 ",
         },
       },
     })
-    
+
     -- =======================================================================
     -- RUST-SPECIFIC DIAGNOSTIC ENHANCEMENTS
     -- =======================================================================
-    
+
     -- Enhanced diagnostic signs for Rust
     local signs = {
       Error = "󰅚 ",
@@ -116,38 +116,45 @@ return {
       Hint = "󰌶 ",
       Info = " ",
     }
-    
-    for type, icon in pairs(signs) do
-      local hl = "DiagnosticSign" .. type
-      vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-    end
-    
+
+    -- Use modern diagnostic sign configuration
+    vim.diagnostic.config({
+      signs = {
+        text = {
+          [vim.diagnostic.severity.ERROR] = signs.Error,
+          [vim.diagnostic.severity.WARN] = signs.Warn,
+          [vim.diagnostic.severity.HINT] = signs.Hint,
+          [vim.diagnostic.severity.INFO] = signs.Info,
+        },
+      },
+    })
+
     -- =======================================================================
     -- RUST ERROR EXPLANATION SYSTEM
     -- =======================================================================
-    
+
     local function explain_rust_error()
       local line = vim.fn.line(".")
       local diagnostics = vim.diagnostic.get(0, { lnum = line - 1 })
-      
+
       if #diagnostics == 0 then
         vim.notify("No diagnostics on current line", vim.log.levels.INFO)
         return
       end
-      
+
       local diagnostic = diagnostics[1]
       local error_code = diagnostic.code
-      
+
       if error_code and error_code:match("^E%d+") then
         -- Open rustc error explanation
         vim.cmd("split | resize 20 | terminal rustc --explain " .. error_code)
         vim.cmd("startinsert")
       elseif diagnostic.source == "rust-analyzer" then
         -- For rust-analyzer diagnostics, show detailed info
-        vim.diagnostic.open_float(0, {
+        vim.diagnostic.open_float({
           scope = "line",
           close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
-          source = "always",
+          source = true,
           prefix = " ",
           header = "Rust Analyzer Diagnostic:",
         })
@@ -156,49 +163,53 @@ return {
         vim.diagnostic.open_float()
       end
     end
-    
+
     -- =======================================================================
     -- QUICK FIX SYSTEM
     -- =======================================================================
-    
+
     local function apply_rust_quick_fix()
       local line = vim.fn.line(".")
       local col = vim.fn.col(".")
-      
+
       -- Get LSP clients
       local clients = vim.lsp.get_clients({ bufnr = 0 })
       local rust_analyzer = nil
-      
+
       for _, client in ipairs(clients) do
         if client.name == "rust_analyzer" then
           rust_analyzer = client
           break
         end
       end
-      
+
       if not rust_analyzer then
         vim.notify("Rust analyzer not attached", vim.log.levels.WARN)
         return
       end
-      
+
       -- Request code actions
-      local params = vim.lsp.util.make_range_params()
-      params.context = {
-        diagnostics = vim.diagnostic.get(0, { lnum = line - 1 }),
-        only = { "quickfix" }
+      local range_params = vim.lsp.util.make_range_params(0, "utf-16")
+      local params = {
+        textDocument = range_params.textDocument,
+        range = range_params.range,
+        context = {
+          diagnostics = vim.diagnostic.get(0, { lnum = line - 1 }),
+          only = { "quickfix" },
+        }
       }
-      
-      rust_analyzer.request("textDocument/codeAction", params, function(err, result)
+
+      vim.lsp.buf_request(0, "textDocument/codeAction", params, function(err, result)
         if err then
           vim.notify("Error getting code actions: " .. err.message, vim.log.levels.ERROR)
           return
         end
-        
+
         if not result or #result == 0 then
           vim.notify("No quick fixes available", vim.log.levels.INFO)
           return
         end
-        
+
         -- If only one action, apply it directly
         if #result == 1 then
           local action = result[1]
@@ -228,11 +239,11 @@ return {
         end
       end)
     end
-    
+
     -- =======================================================================
     -- DIAGNOSTIC NAVIGATION
     -- =======================================================================
-    
+
     local function goto_next_error()
       vim.diagnostic.goto_next({
         severity = vim.diagnostic.severity.ERROR,
@@ -240,7 +251,7 @@ return {
         float = true,
       })
     end
-    
+
     local function goto_prev_error()
       vim.diagnostic.goto_prev({
         severity = vim.diagnostic.severity.ERROR,
@@ -248,7 +259,7 @@ return {
         float = true,
       })
     end
-    
+
     local function goto_next_warning()
       vim.diagnostic.goto_next({
         severity = vim.diagnostic.severity.WARN,
@@ -256,7 +267,7 @@ return {
         float = true,
       })
     end
-    
+
     local function goto_prev_warning()
       vim.diagnostic.goto_prev({
         severity = vim.diagnostic.severity.WARN,
@@ -264,13 +275,13 @@ return {
         float = true,
       })
     end
-    
+
     -- =======================================================================
     -- KEYMAPPINGS
     -- =======================================================================
-    
+
     local map = vim.keymap.set
-    
+
     -- Diagnostic navigation
     map("n", "]d", vim.diagnostic.goto_next, { desc = "Next diagnostic" })
     map("n", "[d", vim.diagnostic.goto_prev, { desc = "Previous diagnostic" })
@@ -278,7 +289,7 @@ return {
     map("n", "[e", goto_prev_error, { desc = "Previous error" })
     map("n", "]w", goto_next_warning, { desc = "Next warning" })
     map("n", "[w", goto_prev_warning, { desc = "Previous warning" })
-    
+
     -- Diagnostic display
     map("n", "<leader>de", vim.diagnostic.open_float, { desc = "Show line diagnostics" })
     map("n", "<leader>dq", vim.diagnostic.setloclist, { desc = "Add diagnostics to loclist" })
@@ -288,18 +299,18 @@ return {
     map("n", "<leader>dd", function()
       require("trouble").toggle("document_diagnostics")
     end, { desc = "Document diagnostics" })
-    
+
     -- LSP lines toggle (global)
     map("n", "<leader>rel", function()
       require("lsp_lines").toggle()
     end, { desc = "Toggle LSP lines" })
-    
+
     -- =======================================================================
     -- AUTOCOMMANDS
     -- =======================================================================
-    
+
     local augroup = vim.api.nvim_create_augroup("RustDiagnostics", { clear = true })
-    
+
     -- Set up Rust-specific keymaps
     vim.api.nvim_create_autocmd("FileType", {
       group = augroup,
@@ -313,7 +324,7 @@ return {
         end, vim.tbl_extend("force", opts, { desc = "Toggle diagnostics panel" }))
       end,
     })
-    
+
     -- Auto-open trouble on Rust errors
     vim.api.nvim_create_autocmd("DiagnosticChanged", {
       group = augroup,
@@ -328,7 +339,7 @@ return {
         end
       end,
     })
-    
+
     -- Enhanced diagnostic display for Rust files
     vim.api.nvim_create_autocmd("FileType", {
       group = augroup,
@@ -342,7 +353,7 @@ return {
           },
           float = {
             show_header = true,
-            source = "always",
+            source = true,
             border = "rounded",
             max_width = 120,
             max_height = 20,
@@ -351,7 +362,7 @@ return {
       end,
     })
   end,
-  
+
   -- Keymapping definitions for lazy loading
   keys = {
     { "<leader>de", desc = "Show line diagnostics" },
