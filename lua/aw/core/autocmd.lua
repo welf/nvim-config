@@ -1,3 +1,18 @@
+-- Filetype detection for Jinja/MiniJinja templates and SystemVerilog
+vim.filetype.add({
+  extension = {
+    j2 = "jinja",
+    jinja = "jinja",
+    jinja2 = "jinja",
+    sv = "systemverilog",
+    svh = "systemverilog",
+  },
+  pattern = {
+    [".*%.sv%.j2"] = "jinja",
+    [".*%.svh%.j2"] = "jinja",
+  },
+})
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -200,6 +215,38 @@ vim.api.nvim_create_autocmd("BufWritePost", {
   desc = "Reload rust-analyzer workspace when Cargo.toml changes",
   callback = function()
     vim.notify("Cargo.toml updated - reloading workspace...", vim.log.levels.INFO)
-    vim.cmd("RustLsp reloadWorkspace")
+    -- Check if RustLsp command exists before executing
+    if vim.fn.exists(":RustLsp") > 0 then
+      vim.cmd("RustLsp reloadWorkspace")
+    else
+      vim.notify("RustLsp not available - workspace reload skipped", vim.log.levels.WARN)
+    end
   end,
 })
+
+-- Close outline, quickfix, and trouble on quit all
+vim.api.nvim_create_autocmd("VimLeavePre", {
+  desc = "Close outline, quickfix, and trouble before quitting",
+  callback = function()
+    -- Only close windows if there are multiple windows to avoid "Cannot close last window" error
+    local win_count = #vim.api.nvim_list_wins()
+    
+    if win_count > 1 then
+      -- Close outline
+      local ok, outline = pcall(require, "outline")
+      if ok and outline.is_open() then
+        pcall(outline.close)
+      end
+      
+      -- Close trouble
+      local ok_trouble, trouble = pcall(require, "trouble")
+      if ok_trouble then
+        pcall(trouble.close)
+      end
+      
+      -- Close quickfix
+      pcall(vim.cmd, "cclose")
+    end
+  end,
+})
+
