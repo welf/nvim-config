@@ -13,6 +13,14 @@ vim.filetype.add({
   },
 })
 
+-- vim-liquid's ftdetect retags any .md starting with `---` as liquid.markdown,
+-- which crashes the markdown ftplugin (no liquid treesitter parser installed).
+pcall(vim.api.nvim_clear_autocmds, {
+  group = "filetypedetect",
+  event = { "BufNewFile", "BufRead", "BufReadPost" },
+  pattern = { "*.md", "*.markdown", "*.mkd", "*.mkdn" },
+})
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
