@@ -13,8 +13,8 @@ require("aw.lazy")
 -- Setup autocommands and mappings
 require("aw.core")
 
--- Set neovim language to en_US
-vim.api.nvim_exec2("language en_US", {})
+-- Set neovim language to en_US.UTF-8
+vim.api.nvim_exec2("language en_US.UTF-8", {})
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
@@ -104,8 +104,8 @@ vim.g.markdown_fenced_languages = {
 vim.opt.laststatus = 3
 
 -- Force neo-tree toggle mapping (load last to override any conflicts)
-vim.keymap.set("n", "<leader>e", ":Neotree toggle<CR>", { 
-  desc = "Toggle NeoTree Explorer", 
-  silent = true, 
-  noremap = true 
+vim.keymap.set("n", "<leader>e", ":Neotree toggle<CR>", {
+  desc = "Toggle NeoTree Explorer",
+  silent = true,
+  noremap = true,
 })
