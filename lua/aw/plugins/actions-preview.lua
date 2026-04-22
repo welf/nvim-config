@@ -23,22 +23,18 @@ return {
     backend = { "telescope", "nui" },
 
     -- options related to telescope.nvim
-    telescope = vim.tbl_extend(
-      "force",
-      -- telescope theme: https://github.com/nvim-telescope/telescope.nvim#themes
-      require("telescope.themes").get_dropdown(),
+    telescope = {
+      -- telescope theme will be set in config function
       -- a table for customizing content
-      {
-        -- a function to make a table containing the values to be displayed.
-        -- fun(action: Action): { title: string, client_name: string|nil }
-        make_value = nil,
+      -- a function to make a table containing the values to be displayed.
+      -- fun(action: Action): { title: string, client_name: string|nil }
+      make_value = nil,
 
-        -- a function to make a function to be used in `display` of a entry.
-        -- see also `:h telescope.make_entry` and `:h telescope.pickers.entry_display`.
-        -- fun(values: { index: integer, action: Action, title: string, client_name: string }[]): function
-        make_make_display = nil,
-      }
-    ),
+      -- a function to make a function to be used in `display` of a entry.
+      -- see also `:h telescope.make_entry` and `:h telescope.pickers.entry_display`.
+      -- fun(values: { index: integer, action: Action, title: string, client_name: string }[]): function
+      make_make_display = nil,
+    },
 
     -- options for nui.nvim components
     nui = {
@@ -76,20 +72,25 @@ return {
     },
   },
   config = function()
+    local telescope_themes = require("telescope.themes")
     require("actions-preview").setup({
-      telescope = {
-        sorting_strategy = "ascending",
-        layout_strategy = "vertical",
-        layout_config = {
-          width = 0.8,
-          height = 0.9,
-          prompt_position = "top",
-          preview_cutoff = 20,
-          preview_height = function(_, _, max_lines)
-            return max_lines - 15
-          end,
-        },
-      },
+      telescope = vim.tbl_extend(
+        "force",
+        telescope_themes.get_dropdown(),
+        {
+          sorting_strategy = "ascending",
+          layout_strategy = "vertical",
+          layout_config = {
+            width = 0.8,
+            height = 0.9,
+            prompt_position = "top",
+            preview_cutoff = 20,
+            preview_height = function(_, _, max_lines)
+              return max_lines - 15
+            end,
+          },
+        }
+      ),
     })
   end,
 }
