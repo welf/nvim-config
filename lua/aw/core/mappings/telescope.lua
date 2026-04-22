@@ -23,7 +23,7 @@ map("n", "<leader>sd", builtin.diagnostics, { desc = "[s]earch [d]iagnostics" })
 map("n", "<leader>sr", builtin.lsp_references, { desc = "[s]earch [r]eferences" })
 map("n", "<leader>s.", builtin.oldfiles, { desc = "[s]earch recent files (\".\" for repeat)" })
 map("n", "<leader>sR", builtin.resume, { desc = "[s]earch [R]esume last" })
-map("n", "<leader><space>", builtin.buffers, { desc = "Show open buffers" })
+map("n", "mm", builtin.buffers, { desc = "Search buffers" })
 -- Slightly advanced example of overriding default behavior and theme
 map("n", "<leader>/", function()
   -- You can pass additional configuration to Telescope to change the theme, layout, etc.
@@ -45,7 +45,25 @@ map("n", "<leader>sn", function()
   builtin.find_files({ cwd = vim.fn.stdpath("config") })
 end, { desc = "[s]earch [n]eovim files" })
 
+-- Search in specific directory
+map("n", "<leader>sD", function()
+  local path = vim.fn.input("Search in directory (partial path ok): ", "", "dir")
+  if path and path ~= "" then
+    -- If path doesn't start with / or ./, treat as partial and use glob
+    if not path:match("^[/.]") then
+      path = "**/" .. path
+    end
+    builtin.live_grep({ search_dirs = {path} })
+  end
+end, { desc = "[s]earch in [D]irectory" })
+
 -- AST grep search
 map("n", "<leader>sa", function()
   require("telescope").extensions.ast_grep.ast_grep()
 end, { desc = "[s]earch [a]st grep" })
+
+-- TODO comments
+map("n", "<leader>St", "<cmd>TodoTelescope<cr>", { desc = "[S]how [t]odos" })
+map("n", "<leader>ST", "<cmd>TodoTrouble<cr>", { desc = "[S]how [T]odos (Trouble)" })
+map("n", "<leader>Sf", "<cmd>TodoQuickFix<cr>", { desc = "[S]how todos quick[f]ix" })
+map("n", "<leader>Sl", "<cmd>TodoLocList<cr>", { desc = "[S]how todos [l]ocation list" })

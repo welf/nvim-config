@@ -13,6 +13,10 @@ return {
   -- See `:help telescope` and `:help telescope.setup()`
   config = function()
     local ts = require("telescope")
+    local actions = require("telescope.actions")
+    local open_with_trouble = require("trouble.sources.telescope").open
+    local add_to_trouble = require("trouble.sources.telescope").add
+
     local h_pct = 0.90
     local w_pct = 0.99
     local w_limit = 99
@@ -79,9 +83,43 @@ return {
         path_display = { "filename_first" },
         mappings = {
           n = {
+            ["<c-t>"] = open_with_trouble,
             ["o"] = require("telescope.actions.layout").toggle_preview,
             ["d"] = require("telescope.actions").delete_buffer,
             ["<C-c>"] = require("telescope.actions").close,
+            ["<CR>"] = function(prompt_bufnr)
+              -- Custom action to handle winfixbuf and LSP symbols
+              local actions = require("telescope.actions")
+              local action_state = require("telescope.actions.state")
+              local selection = action_state.get_selected_entry()
+              if selection then
+                -- Check if this is an LSP symbol (has lnum indicating a position)
+                -- LSP symbols include document symbols and workspace symbols
+                if selection.lnum then
+                  -- For LSP symbols, use the default action which handles position jumping
+                  actions.select_default(prompt_bufnr)
+                  return
+                end
+
+                local filepath = selection.path or selection.filename or selection.value
+                -- Ensure filepath is a string
+                if type(filepath) == "string" and vim.fn.filereadable(filepath) == 1 then
+                  actions.close(prompt_bufnr)
+                  -- Temporarily disable winfixbuf if enabled
+                  local was_winfixbuf = vim.wo.winfixbuf
+                  if was_winfixbuf then
+                    vim.wo.winfixbuf = false
+                  end
+                  vim.cmd("edit " .. vim.fn.fnameescape(filepath))
+                  if was_winfixbuf then
+                    vim.wo.winfixbuf = true
+                  end
+                else
+                  -- Fall back to default action for other cases
+                  actions.select_default(prompt_bufnr)
+                end
+              end
+            end,
             ["<C-y>"] = function(prompt_bufnr)
               local actions = require("telescope.actions")
               local action_state = require("telescope.actions.state")
@@ -95,9 +133,43 @@ return {
             end,
           },
           i = {
+            ["<c-t>"] = open_with_trouble,
             ["<C-o>"] = require("telescope.actions.layout").toggle_preview,
             ["<C-h>"] = "which_key",
             ["<C-d>"] = require("telescope.actions").delete_buffer,
+            ["<CR>"] = function(prompt_bufnr)
+              -- Custom action to handle winfixbuf and LSP symbols in insert mode
+              local actions = require("telescope.actions")
+              local action_state = require("telescope.actions.state")
+              local selection = action_state.get_selected_entry()
+              if selection then
+                -- Check if this is an LSP symbol (has lnum indicating a position)
+                -- LSP symbols include document symbols and workspace symbols
+                if selection.lnum then
+                  -- For LSP symbols, use the default action which handles position jumping
+                  actions.select_default(prompt_bufnr)
+                  return
+                end
+
+                local filepath = selection.path or selection.filename or selection.value
+                -- Ensure filepath is a string
+                if type(filepath) == "string" and vim.fn.filereadable(filepath) == 1 then
+                  actions.close(prompt_bufnr)
+                  -- Temporarily disable winfixbuf if enabled
+                  local was_winfixbuf = vim.wo.winfixbuf
+                  if was_winfixbuf then
+                    vim.wo.winfixbuf = false
+                  end
+                  vim.cmd("edit " .. vim.fn.fnameescape(filepath))
+                  if was_winfixbuf then
+                    vim.wo.winfixbuf = true
+                  end
+                else
+                  -- Fall back to default action for other cases
+                  actions.select_default(prompt_bufnr)
+                end
+              end
+            end,
             ["<C-y>"] = function(prompt_bufnr)
               local actions = require("telescope.actions")
               local action_state = require("telescope.actions.state")
