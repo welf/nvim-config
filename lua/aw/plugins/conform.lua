@@ -16,6 +16,13 @@ return {
   opts = {
     notify_on_error = false,
     format_on_save = function(bufnr)
+      local filename = vim.api.nvim_buf_get_name(bufnr)
+      
+      -- Skip formatting for .claude/agents files to preserve YAML structure
+      if filename:match("%.claude/agents/") then
+        return false
+      end
+      
       -- Disable "format_on_save lsp_fallback" for languages that don't
       -- have a well standardized coding style. You can add additional
       -- languages here or re-enable it for the disabled ones.
@@ -24,11 +31,11 @@ return {
         cpp = true,
         rust = true,
       }
-      -- Explicitly disable LSP formatting for markdown to ensure prettier runs
+      -- Use prettier for markdown formatting with LSP fallback
       if vim.bo[bufnr].filetype == "markdown" then
         return {
           timeout_ms = 500,
-          lsp_format = false, -- Use conform formatters only (prettier)
+          lsp_format = "fallback", -- Use prettier first, LSP as fallback
         }
       end
 
@@ -44,7 +51,9 @@ return {
     end,
     -- Add global formatter configurations here
     formatters = {
-      -- Removed biome global config, specific config will be in formatters_by_ft
+      prettier = {
+        prepend_args = { "--prose-wrap", "always", "--print-width", "120" },
+      },
     },
     formatters_by_ft = {
       css = { "biome" },
@@ -60,7 +69,7 @@ return {
       typescript = { "biome" },
       typescriptreact = { "biome" },
       yaml = { "biome" },
-      markdown = { "prettier", args = { "--print-width", "120" } }, -- Use prettier with specific width
+      markdown = { "prettier" }, -- Use prettier with 120 width (configured in formatters section)
       -- Conform can also run multiple formatters sequentially
       -- python = { "isort", "black" },
       --
