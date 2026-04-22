@@ -24,7 +24,7 @@ return {
       -- ADAPTERS CONFIGURATION
       -- =======================================================================
       adapters = {
-        require("neotest-rust") {
+        require("neotest-rust")({
           -- Use cargo-nextest if available, fallback to cargo test
           args = function()
             local has_nextest = vim.fn.executable("cargo-nextest") == 1
@@ -44,7 +44,7 @@ return {
                     vim.fn.search("#\\[test\\]", "nw") > 0 or
                     vim.fn.search("#\\[cfg(test)\\]", "nw") > 0)
           end,
-        },
+        }),
       },
       
       -- =======================================================================
