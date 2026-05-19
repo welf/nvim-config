@@ -48,13 +48,32 @@ end, { desc = "[s]earch [n]eovim files" })
 -- Search in specific directory
 map("n", "<leader>sD", function()
   local path = vim.fn.input("Search in directory (partial path ok): ", "", "dir")
-  if path and path ~= "" then
-    -- If path doesn't start with / or ./, treat as partial and use glob
-    if not path:match("^[/.]") then
-      path = "**/" .. path
-    end
-    builtin.live_grep({ search_dirs = {path} })
+  if not path or path == "" then
+    return
   end
+
+  local dirs = {}
+  local expanded = vim.fn.expand(path)
+  if vim.fn.isdirectory(expanded) == 1 then
+    table.insert(dirs, expanded)
+  else
+    -- Partial path: glob recursively to find matching directories
+    for _, m in ipairs(vim.fn.glob("**/" .. path, false, true)) do
+      if vim.fn.isdirectory(m) == 1 then
+        table.insert(dirs, m)
+      end
+    end
+  end
+
+  if #dirs == 0 then
+    vim.notify("No matching directory: " .. path, vim.log.levels.WARN)
+    return
+  end
+
+  builtin.live_grep({
+    search_dirs = dirs,
+    prompt_title = "Grep in " .. path,
+  })
 end, { desc = "[s]earch in [D]irectory" })
 
 -- AST grep search
