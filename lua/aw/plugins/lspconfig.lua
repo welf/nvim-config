@@ -279,6 +279,15 @@ return {
     }
 
     -- ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+    --                            MASON-TOOL-INSTALLER (non-LSP tools)
+    -- └─────────────────────────────────────────────────────────────────────────────────────────────────┘
+    -- mason-lspconfig only installs LSP servers; formatters/linters go here so
+    -- a fresh clone has them. dprint is the markdown formatter (see conform.lua).
+    require("mason-tool-installer").setup({
+      ensure_installed = { "dprint" },
+    })
+
+    -- ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
     --                               MASON-LSPCONFIG SETUP
     -- └─────────────────────────────────────────────────────────────────────────────────────────────────┘
     mason_lspconfig.setup({

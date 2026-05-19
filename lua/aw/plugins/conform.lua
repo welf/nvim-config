@@ -31,11 +31,13 @@ return {
         cpp = true,
         rust = true,
       }
-      -- Use prettier for markdown formatting with LSP fallback
+      -- Use dprint + table compactor for markdown formatting with LSP fallback.
+      -- Higher timeout: on a fresh machine dprint downloads/compiles its
+      -- markdown wasm plugin on first run (cached afterwards).
       if vim.bo[bufnr].filetype == "markdown" then
         return {
-          timeout_ms = 500,
-          lsp_format = "fallback", -- Use prettier first, LSP as fallback
+          timeout_ms = 5000,
+          lsp_format = "fallback",
         }
       end
 
@@ -54,6 +56,29 @@ return {
       prettier = {
         prepend_args = { "--prose-wrap", "always", "--print-width", "120" },
       },
+      -- Use the in-repo dprint config so a fresh clone formats markdown
+      -- identically with no external setup. A bare "md" extension is passed
+      -- to --stdin (the buffer file may not exist on disk yet, e.g. the
+      -- first save of a brand-new file).
+      dprint = {
+        args = {
+          "fmt",
+          "--stdin",
+          "md",
+          "--config",
+          vim.fn.stdpath("config") .. "/dprint.json",
+        },
+      },
+      -- Post-formatting step: rewrite GFM tables with single-space cell
+      -- padding so one wide cell can't blow up the whole column (and its
+      -- separator dashes). Runs as a plain Lua script via `nvim -l`, so it
+      -- needs no runtime beyond Neovim itself. Must come after dprint in the
+      -- markdown chain so its compact output is what gets written.
+      compact_tables = {
+        command = vim.v.progpath,
+        args = { "-l", vim.fn.stdpath("config") .. "/scripts/compact-md-tables.lua" },
+        stdin = true,
+      },
     },
     formatters_by_ft = {
       css = { "biome" },
@@ -69,7 +94,7 @@ return {
       typescript = { "biome" },
       typescriptreact = { "biome" },
       yaml = { "biome" },
-      markdown = { "prettier" }, -- Use prettier with 120 width (configured in formatters section)
+      markdown = { "dprint", "compact_tables" }, -- dprint formats, then tables are compacted (see formatters section)
       -- Conform can also run multiple formatters sequentially
       -- python = { "isort", "black" },
       --
