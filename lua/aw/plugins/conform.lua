@@ -81,14 +81,14 @@ return {
       },
     },
     formatters_by_ft = {
-      css = { "biome" },
-      html = { "biome" },
+      css = { "prettier" },
+      html = { "prettier" }, -- biome's HTML formatter is experimental/disabled by default; prettier handles HTML out of the box
       javascript = { "biome" },
       javascriptreact = { "biome" },
       json = { "biome" },
       jsx = { "biome" },
       lua = { "stylua" },
-      scss = { "biome" }, -- You can also customize some of the format options for the filetype
+      scss = { "prettier" }, -- You can also customize some of the format options for the filetype
       -- rust = { "rustfmt", lsp_format = "fallback" },
       tsx = { "biome" },
       typescript = { "biome" },
