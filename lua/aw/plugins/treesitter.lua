@@ -27,6 +27,22 @@ return {
         return result
       end
 
+      -- Wrap nvim_buf_get_text to catch out-of-bounds errors raised during
+      -- treesitter injection parsing. nvim-ts-autotag calls parser:parse(true)
+      -- unguarded (e.g. rename_tag on InsertLeave), which can hit a stale
+      -- injection range on Neovim 0.12+ and throw "Index out of bounds".
+      -- Must return {} (not nil) so get_node_text's table.concat stays safe.
+      local original_get_text = vim.api.nvim_buf_get_text
+      vim.api.nvim_buf_get_text = function(buffer, start_row, start_col, end_row, end_col, opts)
+        local ok, result = pcall(original_get_text, buffer, start_row, start_col, end_row, end_col, opts)
+        if not ok and (result:match("Index out of bounds") or result:match("out of range")) then
+          return {}
+        elseif not ok then
+          error(result)
+        end
+        return result
+      end
+
       local parsers = {
         "bash",
         "c",
